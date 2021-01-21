@@ -15,3 +15,13 @@ Should make output as `/bin/COMP371_*.cpp`.
 ## Build (Others)
 
 You'll need to install OpenGL. Then cmake should work...
+
+Make sure to:
+
+```bash
+mkdir build
+cd build
+cmake ..
+```
+
+And not running cmake from root!

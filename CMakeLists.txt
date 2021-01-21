@@ -35,3 +35,5 @@ include(BuildGLM)
 add_subdirectory(src)
 
 add_subdirectory(drivers)
+
+file(COPY shaders DESTINATION ${PROJECT_SOURCE_DIR}/bin)
