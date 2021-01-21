@@ -1,54 +1,28 @@
-//
-// COMP 371 Assignment Framework
-//
-// Created by Nicolas Bergeron on 20/06/2019.
-//
-// Inspired by the following tutorials:
-// - https://learnopengl.com/Getting-started/Hello-Window
-// - https://learnopengl.com/Getting-started/Hello-Triangle
 #include <iostream>
 
-// This allows linking with Static Library on Windows, without DLL
 #define GLEW_STATIC 1 
 
-// Include GLEW - OpenGL Extension Wrangler
 #include <GL/glew.h>  
-
-// GLFW provides a cross-platform interface for creating a graphical context,
-// initializing OpenGL and binding inputs
 #include <GLFW/glfw3.h> 
-
-// GLM is an optimized math library with syntax to similar to OpenGL Shading Language
 #include <glm/glm.hpp>
 
-const char *getVertexShaderSource()
-{
-    // TODO - Insert Vertex Shaders here ...
-    // For now, you use a string for your shader code, in the assignment, shaders will be stored in .glsl files
+const char *getVertexShaderSource() {
+    // TODO: Load vert shader.
     return "need to return vertex shader source code here...";
 }
 
-const char *getFragmentShaderSource()
-{
-    // TODO - Insert Fragment Shaders here ...
+const char *getFragmentShaderSource() {
+    // TODO: Load frag shader.
     return "need to return fragment shader source code here...";
 }
 
-int compileAndLinkShaders()
-{
-    // TODO
-    // compile and link shader program
-    // return shader program id
-    // ------------------------------------
-
+int compileAndLinkShaders() {
+    // TODO: Compile + link shaders.
     return -1;
 }
 
-int createVertexArrayObject()
-{
-    // TODO
-    // Upload geometry to GPU and return the Vertex Buffer Object ID
-
+int createVertexArrayObject() {
+    // TODO: Upload geometry to GPU and return the Vertex Buffer Object ID
     return -1;
 }
 
@@ -74,17 +48,20 @@ int main(int argc, char *argv[])
 #endif
 
     // Create Window and rendering context using GLFW, resolution is 800x600
-    GLFWwindow *window = glfwCreateWindow(800, 600, "Comp371 - Lab 01", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(800, 600, "Comp371 - Project", NULL, NULL);
+    
     if (window == NULL)
     {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
     }
+
     glfwMakeContextCurrent(window);
 
     // Initialize GLEW
     glewExperimental = true; // Needed for core profile
+
     if (glewInit() != GLEW_OK)
     {
         std::cerr << "Failed to create GLEW" << std::endl;
