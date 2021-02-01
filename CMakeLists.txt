@@ -1,10 +1,8 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.11)
 
 set(CMAKE_BUILD_TYPE Debug)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
-
-set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib)
 
 project(COMP371)
 
@@ -20,20 +18,18 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 find_package(OpenGL REQUIRED COMPONENTS OpenGL)
 
-if (NIXOS)
-    find_package(GLEW REQUIRED)
-
-    find_package(glfw3 REQUIRED)
-else()
-    include(BuildGLEW)
-    
-    include(BuildGLFW)
-endif()
-
+include(BuildGLEW)
+include(BuildGLFW)
 include(BuildGLM)
 
-add_subdirectory(src)
+set(EXEC main)
 
-add_subdirectory(drivers)
+file(GLOB SRC src/*.cpp)
 
-file(COPY shaders DESTINATION ${PROJECT_SOURCE_DIR}/bin)
+add_executable(${EXEC} ${SRC})
+
+target_link_libraries(${EXEC} OpenGL::GL glew_s glfw glm)
+
+list(APPEND BIN ${EXEC})
+
+install(TARGETS ${BIN} DESTINATION ${CMAKE_INSTALL_PREFIX})

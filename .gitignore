@@ -39,3 +39,4 @@ Makefile
 .vscode
 bin
 lib
+_deps
