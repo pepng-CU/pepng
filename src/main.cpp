@@ -3,7 +3,7 @@
  * 
  * Thank you for the template creator: Nicolas Bergeron on 20/06/2019
  * 
- * @author Alexandre Lavoie (40129457)
+ * @author Alexandre Lavoie (40129457), Antoine Poulin (#), Rhys Rosenberg (#), Arman (#)
  */
 
 #include <iostream>
