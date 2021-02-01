@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.11)
 
+set (CMAKE_CXX_STANDARD 20)
+
 set(CMAKE_BUILD_TYPE Debug)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
