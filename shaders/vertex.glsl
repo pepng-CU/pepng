@@ -1,10 +1,12 @@
-attribute vec3 a_position;
+#version 330
+
+in vec3 a_position;
 
 uniform mat4 u_projection;
 uniform mat4 u_world;
 uniform mat4 u_view;
 
-varying vec3 color_factor;
+out vec3 color_factor;
 
 void main(void) {
     color_factor = a_position;

@@ -1,6 +1,8 @@
-varying vec3 color_factor;
+#version 330
+
+out vec4 color;
+in vec3 color_factor;
 
 void main(void) {
-    // gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-    gl_FragColor = vec4(color_factor.xyz, 1.0);
+    color = vec4(color_factor.xyz, 1.0);
 }
