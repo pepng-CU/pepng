@@ -35,9 +35,3 @@ target_link_libraries(${EXEC} OpenGL::GL glew_s glfw glm)
 list(APPEND BIN ${EXEC})
 
 install(TARGETS ${BIN} DESTINATION ${CMAKE_INSTALL_PREFIX})
-
-if(WIN32)
-    file(COPY shaders DESTINATION ${PROJECT_SOURCE_DIR}/bin)
-
-    file(COPY models DESTINATION ${PROJECT_SOURCE_DIR}/bin)
-endif()
