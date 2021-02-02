@@ -111,6 +111,9 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    // Binds to refresh rate.
+    glfwSwapInterval(1);
+
     /**
      * Debugging message handler.
      */
