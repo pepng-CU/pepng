@@ -88,12 +88,14 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(const char* path) {
         ss >> target;
 
         if (target == "o") {
-            if (name != "") {
-                models.push_back(Model::fromVectors(verticies, faces));
-            }
-
             ss >> name;
         } else if (target == "v") {
+            if (faces.size() != 0) {
+                models.push_back(Model::fromVectors(verticies, faces));
+
+                faces.clear();
+            }
+
             float x, y, z;
 
             ss >> x >> y >> z;
@@ -130,7 +132,7 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(const char* path) {
 
     in.close();
 
-    if (name != "") {
+    if (faces.size() != 0) {
         models.push_back(Model::fromVectors(verticies, faces));
     }
 

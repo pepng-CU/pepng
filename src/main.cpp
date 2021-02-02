@@ -30,9 +30,9 @@ MessageCallback( GLenum source,
                  GLsizei length,
                  const GLchar* message,
                  const void* userParam ) {
-    fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
-            ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
-                type, severity, message );
+    // fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+    //         ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
+    //             type, severity, message );
 }
 
 std::vector<glm::vec3> CUBE_VERTICIES {
@@ -111,8 +111,6 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
     /**
      * Debugging message handler.
      */
@@ -148,7 +146,7 @@ int main(int argc, char *argv[]) {
     // auto models = std::vector<std::shared_ptr<Model>>{Model::fromVectors(CUBE_VERTICIES, CUBE_FACES)};
 
     // Gets objects from obj file.
-    auto models = Model::fromOBJ("../models/scene.obj");
+    auto models = Model::fromOBJ("../models/sponza.obj");
 
     /**
      * Matrix creation.
@@ -160,7 +158,6 @@ int main(int argc, char *argv[]) {
     worldMatrix = glm::rotate(worldMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
     worldMatrix = glm::translate(worldMatrix, glm::vec3(0.0f, 0.0f, -2.0f));
     
-
     // Sets background color.
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -173,7 +170,7 @@ int main(int argc, char *argv[]) {
     glm::vec3 cameraRotation = glm::vec3(0.0f, 0.0f, 0.0f);
     glm::vec3 cameraPosition = glm::vec3(0.0f, 2.0f, 1.0f);
 
-    glfwSetCursorPos(window, 1024.0f / 2.0f, 768.0f / 2.0f);
+    glm::vec2 clickPosition = glm::vec2();
 
     // Program loop.
     while (!glfwWindowShouldClose(window)) {
@@ -185,16 +182,6 @@ int main(int argc, char *argv[]) {
 
         // Activates shader program.
         glUseProgram(shaderProgram);
-
-        double mouseX, mouseY;
-
-        glfwGetCursorPos(window, &mouseX, &mouseY);
-
-        glfwSetCursorPos(window, 1024.0f / 2.0f, 768.0f / 2.0f);
-
-        glm::vec3 rotationDelta = glm::vec3(((float) mouseX - 1024.0f / 2.0f), 0.0f, ((float) mouseY - 768.0f / 2.0f)) / 10.0f;
-
-        cameraRotation += rotationDelta;
 
         auto rotationMatrix = glm::mat4(1.0f);
         rotationMatrix = glm::rotate(rotationMatrix, glm::radians(cameraRotation[2]), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -235,28 +222,61 @@ int main(int argc, char *argv[]) {
         /**
          * Input.
          */
+        double mouseX, mouseY;
+
+        glfwGetCursorPos(window, &mouseX, &mouseY);
+
+        bool leftClicked = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+        bool middleClicked = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
+        bool rightClicked = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
+
+        glm::vec3 cameraForward = -glm::vec3(rotationMatrix[0][2], rotationMatrix[1][2], rotationMatrix[2][2]);
+        glm::vec3 cameraRight = glm::vec3(rotationMatrix[0][0], rotationMatrix[1][0], rotationMatrix[2][0]);
+        glm::vec3 cameraUp = glm::vec3(rotationMatrix[0][1], rotationMatrix[1][1], rotationMatrix[2][1]);
+
+        if (leftClicked || rightClicked || middleClicked) {
+            if (clickPosition.x == 0 && clickPosition.y == 0) {
+                clickPosition = glm::vec2((float) mouseX, (float) mouseY);
+            }
+        } else {
+            clickPosition = glm::vec2();
+        }
+
+        float mouseDx = std::clamp(((float) mouseX - clickPosition.x) / 40.0f, -3.0f, 3.0f);
+        float mouseDy = std::clamp(((float) mouseY - clickPosition.y) / 40.0f, -3.0f, 3.0f);
+
+        if (leftClicked) {
+            cameraPosition -= cameraForward * mouseDy / 10.0f;
+        }
+
+        if (middleClicked) {
+            cameraPosition += -cameraUp * mouseDy / 10.0f + cameraRight * mouseDx / 10.0f;
+        }
+
+        if (rightClicked) {
+            glm::vec3 rotationDelta = glm::vec3(
+                mouseDx, 
+                0.0f, 
+                mouseDy
+            );
+
+            cameraRotation += rotationDelta;
+        }
+
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-            cameraPosition -= glm::vec3(rotationMatrix[0][2], 0.0f, rotationMatrix[2][2]) / 10.0f;
+            cameraPosition += cameraForward / 10.0f;
         } 
         
         if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-            cameraPosition += glm::vec3(rotationMatrix[0][2], 0.0f, rotationMatrix[2][2]) / 10.0f;
+            cameraPosition -= cameraForward / 10.0f;
         }
 
         if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-            cameraPosition -= glm::vec3(rotationMatrix[0][0], 0.0f, rotationMatrix[2][0]) / 10.0f;
+            cameraPosition -= cameraRight / 10.0f;
         }
 
         if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-            cameraPosition += glm::vec3(rotationMatrix[0][0], 0.0f, rotationMatrix[2][0]) / 10.0f;
-        }
-
-        if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-            cameraPosition.y += 0.1f;
-        }
-
-        if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-            cameraPosition.y -= 0.1f;
+            cameraPosition += cameraRight / 10.0f;
         }
 
         /**
