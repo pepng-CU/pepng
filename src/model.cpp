@@ -62,10 +62,9 @@ std::shared_ptr<Model> Model::fromVectors(std::vector<glm::vec3> vertexArray, st
     );
 }
 
-std::vector<std::shared_ptr<Model>> Model::fromOBJ(const char* path) {
-    std::filesystem::path file(path);
+std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepath) {
 
-    std::ifstream in(std::filesystem::current_path() / file);
+    std::ifstream in(filepath);
 
     if(!in.is_open()) {
         throw "Unable to open obj file.";

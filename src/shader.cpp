@@ -1,11 +1,8 @@
 #include "shader.hpp"
 #include <sstream>
 
-const std::string readShader(const char* path) {
-    std::filesystem::path file(path);
-    std::filesystem::path fullPath = std::filesystem::current_path() / file;
-
-    std::ifstream in(fullPath);
+const std::string readShader(std::filesystem::path filepath) {
+    std::ifstream in(filepath);
     
     std::string contents((std::istreambuf_iterator<char>(in)), 
         std::istreambuf_iterator<char>());

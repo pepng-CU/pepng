@@ -25,7 +25,7 @@ class Model {
          * Reads models from OBJ file.
          * @param program Relative path to OBJ file.
          */
-        static std::vector<std::shared_ptr<Model>> fromOBJ(const char* path);
+        static std::vector<std::shared_ptr<Model>> fromOBJ(std::filesystem::path filepath);
 
         /**
          * Model from vector params.

@@ -13,7 +13,7 @@
  * 
  * @param path File path to read (relative to runtime).
  */
-const std::string readShader(const char* path);
+const std::string readShader(std::filesystem::path filepath);
 
 /**
  * Compiles shader source to shader GL instance.

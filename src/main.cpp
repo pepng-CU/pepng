@@ -17,11 +17,13 @@
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <algorithm>
+#include <filesystem>
 
 // Internal includes
 #include "shader.hpp"
 #include "model.hpp"
 
+namespace fs = std::filesystem;
 void GLAPIENTRY
 MessageCallback( GLenum source,
                  GLenum type,
@@ -120,14 +122,22 @@ int main(int argc, char *argv[]) {
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(MessageCallback, 0);
 
+    // Find the shaders directory
+    
+    auto shaderpath = fs::current_path();
+    while (!fs::exists(shaderpath / "shaders")) {
+        shaderpath = shaderpath.parent_path();
+    }
+    shaderpath /= "shaders";
+
     /**
      * Shader binding
      */
-    std::string vertexSource = readShader("../shaders/vertex.glsl");
+    std::string vertexSource = readShader(shaderpath / "vertex.glsl");
 
     GLuint vertexShader = compileShader(vertexSource, GL_VERTEX_SHADER);
 
-    std::string fragmentSource = readShader("../shaders/fragment.glsl");
+    std::string fragmentSource = readShader(shaderpath / "fragment.glsl");
 
     GLuint fragmentShader = compileShader(fragmentSource, GL_FRAGMENT_SHADER);
 
@@ -148,8 +158,14 @@ int main(int argc, char *argv[]) {
     // Render basic cube with inline vectors.
     // auto models = std::vector<std::shared_ptr<Model>>{Model::fromVectors(CUBE_VERTICIES, CUBE_FACES)};
 
+    // find model path
+    auto modelpath = fs::current_path();
+    while (!fs::exists(modelpath / "models")) {
+        modelpath = modelpath.parent_path();
+    }
+    modelpath /= "models";
     // Gets objects from obj file.
-    auto models = Model::fromOBJ("../models/sponza.obj");
+    auto models = Model::fromOBJ(modelpath / "suzanne.obj");
 
     /**
      * Matrix creation.
