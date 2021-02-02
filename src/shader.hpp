@@ -7,6 +7,7 @@
 #include <string>
 #include <filesystem>
 #include <cstring>
+#include <vector>
 
 /**
  * Reads GLSL file during runtime.
@@ -22,10 +23,11 @@ const std::string readShader(std::filesystem::path filepath);
  */
 GLuint compileShader(const std::string shader, GLenum shaderType);
 
-/**
- * Compiles vertex + fragment shader to GL program.
- * 
- * @param vertex Vertex shader.
- * @param fragment Fragment shader.
- */
-GLuint linkProgram(GLuint vertex, GLuint fragment);
+class ShaderBuilder {
+    std::vector<GLuint> shaders;
+    GLuint shaderProgram;
+public:
+    ShaderBuilder(); // Create a shader program
+    ShaderBuilder& operator<<(GLuint shader); // Add a shader to the shaders list
+    GLuint finish(); // Attach and link all shaders
+};

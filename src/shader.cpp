@@ -35,30 +35,33 @@ GLuint compileShader(const std::string shaderSource, GLenum shaderType) {
     return shader;
 }
 
-GLuint linkProgram(GLuint vertex, GLuint fragment) {
-    GLuint program = glCreateProgram();
+/* Every creation of ShaderBuilder will create a new shader program in opengl.
+This is not a problem now but might become one */
+ShaderBuilder::ShaderBuilder() {
+    shaderProgram = glCreateProgram();
+}
 
-    glAttachShader(program, vertex);
-    glAttachShader(program, fragment);
-    glLinkProgram(program);
+ShaderBuilder& ShaderBuilder::operator<<(GLuint shader) {
+    shaders.push_back(shader);
+    return *this;
+}
 
-    int success;
+GLuint ShaderBuilder::finish() {
+    for (GLuint shader : shaders) {
+        glAttachShader(shaderProgram, shader);
+    }
+    glLinkProgram(shaderProgram);
+    GLint success;
     char infoLog[512];
 
-    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
 
     if(!success) {
-        glGetProgramInfoLog(program, 512, NULL, infoLog);
-
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
         std::stringstream ss;
-
         ss << "ERROR::PROGRAM::LINKING_FAILED" << std::endl << infoLog << std::endl;
-
+        std::cout << ss.str() << std::endl; // Doesn't render on terminal if not
         throw std::runtime_error(ss.str());
     }
-
-    glDeleteShader(vertex);
-    glDeleteShader(fragment);
-
-    return program;
+    return shaderProgram;
 }
