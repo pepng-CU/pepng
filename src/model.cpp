@@ -1,4 +1,5 @@
 #include "model.hpp"
+#include <sstream>
 
 Model::Model(int count, GLuint vertexBuffer, GLuint faceBuffer) : count(count), vertexBuffer(vertexBuffer), faceBuffer(faceBuffer) {}
 
