@@ -8,5 +8,5 @@ varying vec3 color_factor;
 
 void main(void) {
     color_factor = a_position;
-    gl_Position = u_projection * u_world * u_view * vec4(a_position, 1.0);
+    gl_Position = u_projection * u_view * u_world * vec4(a_position, 1.0);
 }

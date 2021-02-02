@@ -20,21 +20,12 @@ void Model::render(GLuint program) {
 
     glEnableVertexAttribArray(vertexPosition);
 
-    GLenum err;
-    while((err = glGetError()) != GL_NO_ERROR) {
-        std::cout << "MODEL ATTRIB ERROR: " << err << std::endl;
-    }
-
     glDrawElements(
         GL_TRIANGLES,
         this->count,
         GL_UNSIGNED_INT,
         0
     );
-
-    while((err = glGetError()) != GL_NO_ERROR) {
-        std::cout << "MODEL ELEMENT ERROR: " << err << std::endl;
-    }
 }
 
 GLuint bufferFromFloatVector(std::vector<glm::vec3> vectors, GLenum target) {

@@ -16,6 +16,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <algorithm>
 
 // Internal includes
 #include "shader.hpp"
@@ -110,6 +111,11 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    /**
+     * Debugging message handler.
+     */
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(MessageCallback, 0);
 
@@ -142,22 +148,18 @@ int main(int argc, char *argv[]) {
     // auto models = std::vector<std::shared_ptr<Model>>{Model::fromVectors(CUBE_VERTICIES, CUBE_FACES)};
 
     // Gets objects from obj file.
-    auto models = Model::fromOBJ("../models/alex.obj");
+    auto models = Model::fromOBJ("../models/scene.obj");
 
     /**
      * Matrix creation.
      */
-    auto projectionMatrix = glm::perspective(glm::radians(45.0f), 1024.0f / 768.0f, 0.01f, 1000.0f);
+    auto projectionMatrix = glm::perspective(glm::radians(60.0f), 1024.0f / 768.0f, 0.01f, 1000.0f);
 
-    auto viewMatrix = 
-        glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)) *
-        glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 1.0f, 0.0f)) *
-        glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-
-    auto worldMatrix = 
-        glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -4.0f)) *
-        glm::rotate(glm::mat4(1.0f), 0.0f, glm::vec3(0.0f, 1.0f, 0.0f)) *
-        glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+    auto worldMatrix = glm::mat4(1.0f);
+    worldMatrix = glm::scale(worldMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+    worldMatrix = glm::rotate(worldMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+    worldMatrix = glm::translate(worldMatrix, glm::vec3(0.0f, 0.0f, -2.0f));
+    
 
     // Sets background color.
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -165,7 +167,13 @@ int main(int argc, char *argv[]) {
     // Enables Z buffer.
     glEnable(GL_DEPTH_TEST);
 
-    float rotation = 0.0f;
+    // Culling
+    glEnable(GL_CULL_FACE);
+
+    glm::vec3 cameraRotation = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 cameraPosition = glm::vec3(0.0f, 2.0f, 1.0f);
+
+    glfwSetCursorPos(window, 1024.0f / 2.0f, 768.0f / 2.0f);
 
     // Program loop.
     while (!glfwWindowShouldClose(window)) {
@@ -178,13 +186,22 @@ int main(int argc, char *argv[]) {
         // Activates shader program.
         glUseProgram(shaderProgram);
 
-        // Sets object rotation.
-        worldMatrix = 
-            glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -4.0f)) *
-            glm::rotate(glm::mat4(1.0f), rotation, glm::vec3(1.0f, 1.0f, 0.0f)) *
-            glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+        double mouseX, mouseY;
 
-        rotation += 0.01f;
+        glfwGetCursorPos(window, &mouseX, &mouseY);
+
+        glfwSetCursorPos(window, 1024.0f / 2.0f, 768.0f / 2.0f);
+
+        glm::vec3 rotationDelta = glm::vec3(((float) mouseX - 1024.0f / 2.0f), 0.0f, ((float) mouseY - 768.0f / 2.0f)) / 10.0f;
+
+        cameraRotation += rotationDelta;
+
+        auto rotationMatrix = glm::mat4(1.0f);
+        rotationMatrix = glm::rotate(rotationMatrix, glm::radians(cameraRotation[2]), glm::vec3(1.0f, 0.0f, 0.0f));
+        rotationMatrix = glm::rotate(rotationMatrix, glm::radians(cameraRotation[0]), glm::vec3(0.0f, 1.0f, 0.0f));
+        rotationMatrix = glm::rotate(rotationMatrix, glm::radians(cameraRotation[1]), glm::vec3(0.0f, 0.0f, 1.0f));
+
+        auto viewMatrix = glm::translate(rotationMatrix, -cameraPosition);
 
         /**
          * Uniform matrix binding.
@@ -216,13 +233,41 @@ int main(int argc, char *argv[]) {
         }
 
         /**
+         * Input.
+         */
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+            cameraPosition -= glm::vec3(rotationMatrix[0][2], 0.0f, rotationMatrix[2][2]) / 10.0f;
+        } 
+        
+        if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+            cameraPosition += glm::vec3(rotationMatrix[0][2], 0.0f, rotationMatrix[2][2]) / 10.0f;
+        }
+
+        if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+            cameraPosition -= glm::vec3(rotationMatrix[0][0], 0.0f, rotationMatrix[2][0]) / 10.0f;
+        }
+
+        if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+            cameraPosition += glm::vec3(rotationMatrix[0][0], 0.0f, rotationMatrix[2][0]) / 10.0f;
+        }
+
+        if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+            cameraPosition.y += 0.1f;
+        }
+
+        if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+            cameraPosition.y -= 0.1f;
+        }
+
+        /**
          * GLFW events.
          */
         glfwSwapBuffers(window);
         glfwPollEvents();
 
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, true);
+        }
     }
 
     glfwTerminate();
