@@ -1,4 +1,5 @@
 #include "shader.hpp"
+#include <sstream>
 
 const std::string readShader(const char* path) {
     std::filesystem::path file(path);
