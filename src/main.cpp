@@ -134,14 +134,14 @@ int main(int argc, char *argv[]) {
      * Shader binding
      */
     std::string vertexSource = readShader(shaderpath / "vertex.glsl");
-
     GLuint vertexShader = compileShader(vertexSource, GL_VERTEX_SHADER);
 
     std::string fragmentSource = readShader(shaderpath / "fragment.glsl");
-
     GLuint fragmentShader = compileShader(fragmentSource, GL_FRAGMENT_SHADER);
 
-    GLuint shaderProgram = linkProgram(vertexShader, fragmentShader);
+    ShaderBuilder sb;
+    sb << vertexShader << fragmentShader;
+    GLuint shaderProgram = sb.finish();
 
     /**
      * VAO enable
