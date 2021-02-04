@@ -1,5 +1,4 @@
 #include "shader.hpp"
-#include <sstream>
 
 const std::string readShader(std::filesystem::path filepath) {
     std::ifstream in(filepath);
@@ -43,6 +42,7 @@ ShaderBuilder::ShaderBuilder() {
 
 ShaderBuilder& ShaderBuilder::operator<<(GLuint shader) {
     shaders.push_back(shader);
+    
     return *this;
 }
 
@@ -50,7 +50,9 @@ GLuint ShaderBuilder::finish() {
     for (GLuint shader : shaders) {
         glAttachShader(shaderProgram, shader);
     }
+
     glLinkProgram(shaderProgram);
+
     GLint success;
     char infoLog[512];
 
@@ -63,5 +65,6 @@ GLuint ShaderBuilder::finish() {
         std::cout << ss.str() << std::endl; // Doesn't render on terminal if not
         throw std::runtime_error(ss.str());
     }
+
     return shaderProgram;
 }

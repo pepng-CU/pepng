@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <cstring>
 #include <vector>
+#include <sstream>
 
 /**
  * Reads GLSL file during runtime.

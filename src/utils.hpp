@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <filesystem>
 
 namespace utils {
     /**
@@ -17,4 +18,9 @@ namespace utils {
      * @param delim
      */
     std::vector<int> splitInt(const std::string& line, const std::string& delim = " ");
+
+    /**
+     * Searches filesystem to find folder.
+     */
+    std::filesystem::path getPath(std::filesystem::path relativePath);
 }

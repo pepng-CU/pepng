@@ -31,3 +31,13 @@ std::vector<int> utils::splitInt(const std::string& line, const std::string& del
 
     return ints;
 }
+
+std::filesystem::path utils::getPath(std::filesystem::path relativePath) {
+    auto finalPath = std::filesystem::current_path();
+
+    while (!std::filesystem::exists(finalPath / relativePath)) {
+        finalPath = finalPath.parent_path();
+    }
+
+    return finalPath / relativePath;
+}

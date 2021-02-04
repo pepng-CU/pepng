@@ -1,72 +1,36 @@
 #include "model.hpp"
-#include <sstream>
 
-Model::Model(int count, GLuint vertexBuffer, GLuint faceBuffer) : count(count) {
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+Model::Model(int count, GLuint vao) : count(count), vao(vao) {}
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, faceBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-
-    glVertexAttribPointer(
-        0, 
-        3, 
-        GL_FLOAT, 
-        GL_FALSE, 
-        0, 
-        0
-    );
-
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
-}
-
-void Model::render(GLuint program) {
+void Model::render(GLuint program, GLenum mode) {
     glBindVertexArray(vao);
     
     glDrawElements(
-        GL_TRIANGLES,
+        mode,
         this->count,
         GL_UNSIGNED_INT,
         0
     );
 }
 
-GLuint bufferFromFloatVector(std::vector<glm::vec3> vectors, GLenum target) {
-    GLuint buffer;
+std::shared_ptr<Model> Model::fromVectors(std::vector<glm::vec3> vertexArray, std::vector<glm::vec2> textureArray, std::vector<unsigned int> faceArray) {
+    GLuint vao;
 
-    glGenBuffers(1, &buffer);
-    glBindBuffer(target, buffer);
-    glBufferData(target, vectors.size() * sizeof(glm::vec3), glm::value_ptr(vectors[0]), GL_STATIC_DRAW);
-    glBindBuffer(target, 0);
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
 
-    return buffer;
-}
-
-GLuint bufferFromIntVector(std::vector<unsigned int> vector, GLenum target) {
-    GLuint buffer;
-
-    glGenBuffers(1, &buffer);
-    glBindBuffer(target, buffer);
-    glBufferData(target, vector.size() * sizeof(unsigned int), &vector[0], GL_STATIC_DRAW);
-    glBindBuffer(target, 0);
-
-    return buffer;
-}
-
-std::shared_ptr<Model> Model::fromVectors(std::vector<glm::vec3> vertexArray, std::vector<unsigned int> faceArray) {
-    auto vertexBuffer = bufferFromFloatVector(vertexArray, GL_ARRAY_BUFFER);
-    auto faceBuffer = bufferFromIntVector(faceArray, GL_ELEMENT_ARRAY_BUFFER);
+    bufferFromVector(vertexArray, GL_ARRAY_BUFFER, 0);
+    bufferFromVector(textureArray, GL_ARRAY_BUFFER, 1);
+    
+    bufferFromVector(faceArray, GL_ELEMENT_ARRAY_BUFFER);
 
     return std::make_shared<Model>(
         faceArray.size(),
-        vertexBuffer, 
-        faceBuffer
+        vao
     );
 }
 
 std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepath) {
-
     std::ifstream in(filepath);
 
     if(!in.is_open()) {
@@ -94,7 +58,7 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
             ss >> name;
         } else if (target == "v") {
             if (faces.size() != 0) {
-                models.push_back(Model::fromVectors(verticies, faces));
+                models.push_back(Model::fromVectors(verticies, textures, faces));
 
                 faces.clear();
             }
@@ -136,7 +100,7 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
     in.close();
 
     if (faces.size() != 0) {
-        models.push_back(Model::fromVectors(verticies, faces));
+        models.push_back(Model::fromVectors(verticies, textures, faces));
     }
 
     return models;

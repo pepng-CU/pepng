@@ -22,8 +22,8 @@
 // Internal includes
 #include "shader.hpp"
 #include "model.hpp"
+#include "utils.hpp"
 
-namespace fs = std::filesystem;
 void GLAPIENTRY
 MessageCallback( GLenum source,
                  GLenum type,
@@ -36,54 +36,6 @@ MessageCallback( GLenum source,
     //         ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
     //             type, severity, message );
 }
-
-std::vector<glm::vec3> CUBE_VERTICIES {
-    // Front face
-    glm::vec3(-1.0, -1.0, 1.0),
-    glm::vec3(1.0, -1.0, 1.0),
-    glm::vec3(1.0, 1.0, 1.0),
-    glm::vec3(-1.0, 1.0, 1.0),
-    // Back face
-    glm::vec3(-1.0, -1.0, -1.0),
-    glm::vec3(-1.0, 1.0, -1.0),
-    glm::vec3(1.0, 1.0, -1.0),
-    glm::vec3(1.0, -1.0, -1.0),
-    // Top face
-    glm::vec3(-1.0, 1.0, -1.0),
-    glm::vec3(-1.0, 1.0, 1.0),
-    glm::vec3(1.0, 1.0, 1.0),
-    glm::vec3(1.0, 1.0, -1.0),
-    // Bottom face
-    glm::vec3(-1.0, -1.0, -1.0),
-    glm::vec3(1.0, -1.0, -1.0),
-    glm::vec3(1.0, -1.0, 1.0),
-    glm::vec3(-1.0, -1.0, 1.0),
-    // Right face
-    glm::vec3(1.0, -1.0, -1.0),
-    glm::vec3(1.0, 1.0, -1.0),
-    glm::vec3(1.0, 1.0, 1.0),
-    glm::vec3(1.0, -1.0, 1.0),
-    // Left face
-    glm::vec3(-1.0, -1.0, -1.0),
-    glm::vec3(-1.0, -1.0, 1.0),
-    glm::vec3(-1.0, 1.0, 1.0),
-    glm::vec3(-1.0, 1.0, -1.0)
-};
-
-std::vector<unsigned int> CUBE_FACES {
-    // Front face
-    0, 1, 2, 0, 2, 3,
-    // Back face
-    4, 5, 6, 4, 6, 7,
-    // Top face
-    8, 9, 10, 8, 10, 11,
-    // Bottom face
-    12, 13, 14, 12, 14, 15,
-    // Right face
-    16, 17, 18, 16, 18, 19,
-    // Left face
-    20, 21, 22, 20, 22, 23
-};
 
 int main(int argc, char *argv[]) {
     glfwInit();
@@ -123,12 +75,7 @@ int main(int argc, char *argv[]) {
     glDebugMessageCallback(MessageCallback, 0);
 
     // Find the shaders directory
-    
-    auto shaderpath = fs::current_path();
-    while (!fs::exists(shaderpath / "shaders")) {
-        shaderpath = shaderpath.parent_path();
-    }
-    shaderpath /= "shaders";
+    auto shaderpath = utils::getPath("shaders");
 
     /**
      * Shader binding
@@ -140,32 +87,19 @@ int main(int argc, char *argv[]) {
     GLuint fragmentShader = compileShader(fragmentSource, GL_FRAGMENT_SHADER);
 
     ShaderBuilder sb;
+
     sb << vertexShader << fragmentShader;
+
     GLuint shaderProgram = sb.finish();
-
-    /**
-     * VAO enable
-     */
-    GLuint VAO;
-
-    glGenVertexArrays(1, &VAO);
-
-    glBindVertexArray(VAO);
 
     /**
      * Model creation.
      */
-    // Render basic cube with inline vectors.
-    // auto models = std::vector<std::shared_ptr<Model>>{Model::fromVectors(CUBE_VERTICIES, CUBE_FACES)};
+    // Find model path
+    auto modelpath = utils::getPath("models");
 
-    // find model path
-    auto modelpath = fs::current_path();
-    while (!fs::exists(modelpath / "models")) {
-        modelpath = modelpath.parent_path();
-    }
-    modelpath /= "models";
     // Gets objects from obj file.
-    auto models = Model::fromOBJ(modelpath / "suzanne.obj");
+    auto models = Model::fromOBJ(modelpath / "scene.obj");
 
     /**
      * Matrix creation.
@@ -193,16 +127,14 @@ int main(int argc, char *argv[]) {
 
     // Program loop.
     while (!glfwWindowShouldClose(window)) {
-        // Clears depth buffer.
-        glClear(GL_DEPTH_BUFFER_BIT);
-
-        // Clears background with buffer color.
-        glClear(GL_COLOR_BUFFER_BIT);
+        // Clears depth + color buffer.
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
         // Activates shader program.
         glUseProgram(shaderProgram);
 
         auto rotationMatrix = glm::mat4(1.0f);
+        
         rotationMatrix = glm::rotate(rotationMatrix, glm::radians(cameraRotation[2]), glm::vec3(1.0f, 0.0f, 0.0f));
         rotationMatrix = glm::rotate(rotationMatrix, glm::radians(cameraRotation[0]), glm::vec3(0.0f, 1.0f, 0.0f));
         rotationMatrix = glm::rotate(rotationMatrix, glm::radians(cameraRotation[1]), glm::vec3(0.0f, 0.0f, 1.0f));
