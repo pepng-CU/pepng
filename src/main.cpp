@@ -23,6 +23,7 @@
 #include "shader.hpp"
 #include "model.hpp"
 #include "utils.hpp"
+#include "transform.hpp"
 
 void GLAPIENTRY
 MessageCallback( GLenum source,
@@ -105,11 +106,6 @@ int main(int argc, char *argv[]) {
      * Matrix creation.
      */
     auto projectionMatrix = glm::perspective(glm::radians(60.0f), 1024.0f / 768.0f, 0.01f, 1000.0f);
-
-    auto worldMatrix = glm::mat4(1.0f);
-    worldMatrix = glm::scale(worldMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
-    worldMatrix = glm::rotate(worldMatrix, 0.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-    worldMatrix = glm::translate(worldMatrix, glm::vec3(0.0f, 0.0f, -2.0f));
     
     // Sets background color.
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -120,8 +116,17 @@ int main(int argc, char *argv[]) {
     // Culling
     glEnable(GL_CULL_FACE);
 
-    glm::vec3 cameraRotation = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 cameraPosition = glm::vec3(0.0f, 2.0f, 1.0f);
+    Transform objectTransform = Transform {
+        glm::vec3(0.0f, 0.0f, -2.0f),
+        glm::vec3(0.0f),
+        glm::vec3(1.0f)
+    };
+
+    Transform cameraTransform = Transform {
+        glm::vec3(0.0f, 2.0f, 0.0f),
+        glm::vec3(0.0f),
+        glm::vec3(1.0f)
+    };
 
     glm::vec2 clickPosition = glm::vec2();
 
@@ -132,14 +137,6 @@ int main(int argc, char *argv[]) {
 
         // Activates shader program.
         glUseProgram(shaderProgram);
-
-        auto rotationMatrix = glm::mat4(1.0f);
-        
-        rotationMatrix = glm::rotate(rotationMatrix, glm::radians(cameraRotation[2]), glm::vec3(1.0f, 0.0f, 0.0f));
-        rotationMatrix = glm::rotate(rotationMatrix, glm::radians(cameraRotation[0]), glm::vec3(0.0f, 1.0f, 0.0f));
-        rotationMatrix = glm::rotate(rotationMatrix, glm::radians(cameraRotation[1]), glm::vec3(0.0f, 0.0f, 1.0f));
-
-        auto viewMatrix = glm::translate(rotationMatrix, -cameraPosition);
 
         /**
          * Uniform matrix binding.
@@ -155,14 +152,14 @@ int main(int argc, char *argv[]) {
             glGetUniformLocation(shaderProgram, "u_view"),
             1,
             GL_FALSE,
-            glm::value_ptr(viewMatrix)
+            glm::value_ptr(cameraTransform.getViewMatrix())
         );
 
         glUniformMatrix4fv(
             glGetUniformLocation(shaderProgram, "u_world"),
             1,
             GL_FALSE,
-            glm::value_ptr(worldMatrix)
+            glm::value_ptr(objectTransform.getWorldMatrix())
         );
 
         // Renders all models from OBJ file.
@@ -181,9 +178,9 @@ int main(int argc, char *argv[]) {
         bool middleClicked = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
         bool rightClicked = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
 
-        glm::vec3 cameraForward = -glm::vec3(rotationMatrix[0][2], rotationMatrix[1][2], rotationMatrix[2][2]);
-        glm::vec3 cameraRight = glm::vec3(rotationMatrix[0][0], rotationMatrix[1][0], rotationMatrix[2][0]);
-        glm::vec3 cameraUp = glm::vec3(rotationMatrix[0][1], rotationMatrix[1][1], rotationMatrix[2][1]);
+        glm::vec3 cameraForward = cameraTransform.getForward();
+        glm::vec3 cameraRight = cameraTransform.getRight();
+        glm::vec3 cameraUp = cameraTransform.getUp();
 
         if (leftClicked || rightClicked || middleClicked) {
             if (clickPosition.x == 0 && clickPosition.y == 0) {
@@ -197,37 +194,31 @@ int main(int argc, char *argv[]) {
         float mouseDy = std::clamp(((float) mouseY - clickPosition.y) / 40.0f, -3.0f, 3.0f);
 
         if (leftClicked) {
-            cameraPosition -= cameraForward * mouseDy / 10.0f;
+            cameraTransform.position -= cameraForward * mouseDy / 10.0f;
         }
 
         if (middleClicked) {
-            cameraPosition += -cameraUp * mouseDy / 10.0f + cameraRight * mouseDx / 10.0f;
+            cameraTransform.position += cameraUp * mouseDy / 10.0f + cameraRight * mouseDx / 10.0f;
         }
 
         if (rightClicked) {
-            glm::vec3 rotationDelta = glm::vec3(
-                mouseDx, 
-                0.0f, 
-                mouseDy
-            );
-
-            cameraRotation += rotationDelta;
+            cameraTransform.deltaRotate(mouseDx, mouseDy);
         }
 
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-            cameraPosition += cameraForward / 10.0f;
+            cameraTransform.position += cameraForward / 10.0f;
         } 
         
         if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-            cameraPosition -= cameraForward / 10.0f;
+            cameraTransform.position -= cameraForward / 10.0f;
         }
 
         if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-            cameraPosition -= cameraRight / 10.0f;
+            cameraTransform.position -= cameraRight / 10.0f;
         }
 
         if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-            cameraPosition += cameraRight / 10.0f;
+            cameraTransform.position += cameraRight / 10.0f;
         }
 
         /**
