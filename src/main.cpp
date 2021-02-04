@@ -23,6 +23,7 @@
 #include "shader.hpp"
 #include "model.hpp"
 #include "utils.hpp"
+#include "camera.hpp"
 #include "transform.hpp"
 
 void GLAPIENTRY
@@ -101,11 +102,6 @@ int main(int argc, char *argv[]) {
 
     // Gets objects from obj file.
     auto models = Model::fromOBJ(modelpath / "scene.obj");
-
-    /**
-     * Matrix creation.
-     */
-    auto projectionMatrix = glm::perspective(glm::radians(60.0f), 1024.0f / 768.0f, 0.01f, 1000.0f);
     
     // Sets background color.
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -122,10 +118,17 @@ int main(int argc, char *argv[]) {
         glm::vec3(1.0f)
     };
 
-    Transform cameraTransform = Transform {
-        glm::vec3(0.0f, 2.0f, 0.0f),
-        glm::vec3(0.0f),
-        glm::vec3(1.0f)
+    Camera camera = Camera {
+        Transform {
+            glm::vec3(0.0f, 2.0f, 0.0f),
+            glm::vec3(0.0f),
+            glm::vec3(1.0f)
+        },
+        Viewport {
+            glm::vec2(0.0f),
+            glm::vec2(1024.0f, 768.0f)
+        },
+        glm::perspective(glm::radians(60.0f), 1024.0f / 768.0f, 0.01f, 1000.0f)
     };
 
     glm::vec2 clickPosition = glm::vec2();
@@ -141,19 +144,7 @@ int main(int argc, char *argv[]) {
         /**
          * Uniform matrix binding.
          */
-        glUniformMatrix4fv(
-            glGetUniformLocation(shaderProgram, "u_projection"),
-            1,
-            GL_FALSE,
-            glm::value_ptr(projectionMatrix)
-        );
-
-        glUniformMatrix4fv(
-            glGetUniformLocation(shaderProgram, "u_view"),
-            1,
-            GL_FALSE,
-            glm::value_ptr(cameraTransform.getViewMatrix())
-        );
+        camera.render(shaderProgram);
 
         glUniformMatrix4fv(
             glGetUniformLocation(shaderProgram, "u_world"),
@@ -178,9 +169,9 @@ int main(int argc, char *argv[]) {
         bool middleClicked = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
         bool rightClicked = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
 
-        glm::vec3 cameraForward = cameraTransform.getForward();
-        glm::vec3 cameraRight = cameraTransform.getRight();
-        glm::vec3 cameraUp = cameraTransform.getUp();
+        glm::vec3 cameraForward = camera.transform.getForward();
+        glm::vec3 cameraRight = camera.transform.getRight();
+        glm::vec3 cameraUp = camera.transform.getUp();
 
         if (leftClicked || rightClicked || middleClicked) {
             if (clickPosition.x == 0 && clickPosition.y == 0) {
@@ -194,31 +185,31 @@ int main(int argc, char *argv[]) {
         float mouseDy = std::clamp(((float) mouseY - clickPosition.y) / 40.0f, -3.0f, 3.0f);
 
         if (leftClicked) {
-            cameraTransform.position -= cameraForward * mouseDy / 10.0f;
+            camera.transform.position -= cameraForward * mouseDy / 10.0f;
         }
 
         if (middleClicked) {
-            cameraTransform.position += cameraUp * mouseDy / 10.0f + cameraRight * mouseDx / 10.0f;
+            camera.transform.position += cameraUp * mouseDy / 10.0f + cameraRight * mouseDx / 10.0f;
         }
 
         if (rightClicked) {
-            cameraTransform.deltaRotate(mouseDx, mouseDy);
+            camera.transform.deltaRotate(mouseDx, mouseDy);
         }
 
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-            cameraTransform.position += cameraForward / 10.0f;
+            camera.transform.position += cameraForward / 10.0f;
         } 
         
         if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-            cameraTransform.position -= cameraForward / 10.0f;
+            camera.transform.position -= cameraForward / 10.0f;
         }
 
         if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-            cameraTransform.position -= cameraRight / 10.0f;
+            camera.transform.position -= cameraRight / 10.0f;
         }
 
         if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-            cameraTransform.position += cameraRight / 10.0f;
+            camera.transform.position += cameraRight / 10.0f;
         }
 
         /**
