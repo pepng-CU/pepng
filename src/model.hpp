@@ -35,9 +35,6 @@ class Model {
         // Keeps count of the number of faces.
         int count;
 
-        // Buffer reference for verticies.
-        GLuint vertexBuffer;
-        
-        // Buffer reference for faces.
-        GLuint faceBuffer;
+        // Vertex array object that is used for drawing this model
+        GLuint vao;
 };

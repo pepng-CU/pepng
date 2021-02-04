@@ -1,17 +1,15 @@
 #include "model.hpp"
 #include <sstream>
 
-Model::Model(int count, GLuint vertexBuffer, GLuint faceBuffer) : count(count), vertexBuffer(vertexBuffer), faceBuffer(faceBuffer) {}
+Model::Model(int count, GLuint vertexBuffer, GLuint faceBuffer) : count(count) {
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
 
-void Model::render(GLuint program) {
-    GLuint vertexPosition = glGetAttribLocation(program, "a_position");
-    
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->faceBuffer);
-
-    glBindBuffer(GL_ARRAY_BUFFER, this->vertexBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, faceBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 
     glVertexAttribPointer(
-        vertexPosition, 
+        0, 
         3, 
         GL_FLOAT, 
         GL_FALSE, 
@@ -19,8 +17,13 @@ void Model::render(GLuint program) {
         0
     );
 
-    glEnableVertexAttribArray(vertexPosition);
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(0);
+}
 
+void Model::render(GLuint program) {
+    glBindVertexArray(vao);
+    
     glDrawElements(
         GL_TRIANGLES,
         this->count,

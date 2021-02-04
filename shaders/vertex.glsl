@@ -1,6 +1,6 @@
 #version 330
 
-in vec3 a_position;
+layout(location=0) in vec3 a_position;
 
 uniform mat4 u_projection;
 uniform mat4 u_world;
