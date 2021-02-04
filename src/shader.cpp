@@ -28,7 +28,7 @@ GLuint compileShader(const std::string shaderSource, GLenum shaderType) {
         std::stringstream ss;
 
         ss << "ERROR::SHADER::COMPILATION_FAILED" << std::endl << infoLog << std::endl;
-
+        std::cout << ss.str() << std::endl;
         throw std::runtime_error(ss.str());
     }
 
