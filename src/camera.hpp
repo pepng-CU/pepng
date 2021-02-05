@@ -32,4 +32,6 @@ class Camera : public Transform {
         virtual glm::vec3 getUp() override;
 
         virtual glm::vec3 getRight() override;
+
+        virtual glm::quat getRotation() override;
 };

@@ -8,7 +8,6 @@
 class Transform {
     public:
         glm::vec3 position;
-        glm::quat rotation;
         glm::vec3 scale;
 
         Transform();
@@ -17,7 +16,13 @@ class Transform {
 
         Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
 
-        Transform(glm::vec3 position, glm::quat rotation, glm::vec3 scale);
+        Transform(
+            glm::vec3 position, 
+            glm::quat rotationX, 
+            glm::quat rotationY,
+            glm::quat rotationZ, 
+            glm::vec3 scale
+        );
 
         glm::highp_mat4 getScaleMatrix(glm::highp_mat4 &matrix);
 
@@ -40,10 +45,9 @@ class Transform {
         /**
          * Rotates using euler degree rotation relative to current rotation.
          * 
-         * @param deltaYaw Rotation on X axis.
-         * @param deltaPitch Rotation on Y axis.
+         * @param degDelta Rotation on XYZ axis.
          */
-        void deltaRotate(float deltaYaw, float deltaPitch);
+        void deltaRotate(glm::vec3 degDelta);
 
         /**
          * Delta translates relative to the local up, forward, right.
@@ -51,6 +55,12 @@ class Transform {
          * @param delta The delta translation to apply.
          */
         void relativeTranslate(glm::vec3 delta);
+
+        void setRotation(glm::vec3 rotation);
+
+        void setRotation(const Transform& transform);
+
+        virtual glm::quat getRotation();
 
         /**
          * Gets the forward vector relative to current rotation.
@@ -66,16 +76,8 @@ class Transform {
          * Gets the right vector relative to current rotation.
          */
         virtual glm::vec3 getRight();
-
-        Transform operator+(const Transform &transform) {
-            Transform ct = Transform(*this);
-
-            ct.position += transform.position;
-            ct.rotation *= transform.rotation;
-            ct.scale.x *= transform.scale.x;
-            ct.scale.y *= transform.scale.y;
-            ct.scale.z *= transform.scale.z;
-
-            return ct;
-        }
+    protected:
+        glm::quat rotationX;
+        glm::quat rotationY;
+        glm::quat rotationZ;
 };

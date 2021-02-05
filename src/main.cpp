@@ -206,7 +206,7 @@ int main(int argc, char *argv[]) {
         // Clears depth + color buffer.
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-        lines.at(0)->rotation = objects.at(0)->rotation;
+        lines.at(0)->setRotation(*objects.at(0));
 
         /**
          * Rendering.
@@ -267,7 +267,7 @@ int main(int argc, char *argv[]) {
                 object = objects.at(0)->children.at(selectedObject - 1);
             }
 
-            object->deltaRotate(1.0f, 0.0f);
+            object->deltaRotate(glm::vec3(0.0f, -1.0f, 0.0f));
         }
 
         if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
@@ -280,7 +280,7 @@ int main(int argc, char *argv[]) {
                 object = objects.at(0)->children.at(selectedObject - 1);
             }
 
-            object->deltaRotate(-1.0f, 0.0f);
+            object->deltaRotate(glm::vec3(0.0f, 1.0f, 0.0f));
         }
 
         if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
@@ -293,7 +293,7 @@ int main(int argc, char *argv[]) {
                 object = objects.at(0)->children.at(selectedObject - 1);
             }
 
-            object->deltaRotate(0.0f, -1.0f);
+            object->deltaRotate(glm::vec3(1.0f, 0.0f, 0.0f));
         }
 
         if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
@@ -306,7 +306,7 @@ int main(int argc, char *argv[]) {
                 object = objects.at(0)->children.at(selectedObject - 1);
             }
 
-            object->deltaRotate(0.0f, 1.0f);
+            object->deltaRotate(glm::vec3(-1.0f, 0.0f, 0.0f));
         }
 
         if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS) {
@@ -320,7 +320,7 @@ int main(int argc, char *argv[]) {
             }
 
             object->position = glm::vec3(0.0f);
-            object->rotation = glm::quat(glm::vec3(0.0f));
+            object->setRotation(glm::vec3(0.0f));
         }
 
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
@@ -403,7 +403,7 @@ int main(int argc, char *argv[]) {
             }
 
             if (rightClicked) {
-                camera->deltaRotate(mouseDx, mouseDy);
+                camera->deltaRotate(glm::vec3(mouseDy, mouseDx, 0.0f));
             }
         }
 

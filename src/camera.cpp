@@ -41,3 +41,7 @@ glm::vec3 Camera::getForward() {
 
     return glm::vec3(rotationMatrix[0][2], rotationMatrix[1][2], rotationMatrix[2][2]);
 }
+
+glm::quat Camera::getRotation() {
+    return this->rotationX * this->rotationY * this->rotationZ;
+}
