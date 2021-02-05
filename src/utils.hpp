@@ -44,7 +44,7 @@ namespace utils {
      * Creates and binds a GL buffer.
      */
     template <typename T>
-    GLuint bufferFromVector(std::vector<T> vectors, GLenum type, int index) {
+    GLuint bufferFromVector(std::vector<T> vectors, GLenum type, int index, int size) {
         GLuint buffer;
 
         glGenBuffers(1, &buffer);
@@ -53,7 +53,7 @@ namespace utils {
 
         glVertexAttribPointer(
             index, 
-            3, 
+            size, 
             GL_FLOAT, 
             GL_FALSE, 
             0, 

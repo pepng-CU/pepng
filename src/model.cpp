@@ -23,14 +23,15 @@ void Model::render(GLuint program, GLenum mode) {
     );
 }
 
-std::shared_ptr<Model> Model::fromVectors(std::vector<glm::vec3> vertexArray, std::vector<glm::vec2> textureArray, std::vector<unsigned int> faceArray) {
+std::shared_ptr<Model> Model::fromVectors(std::vector<glm::vec3> vertexArray, std::vector<glm::vec3> normalArray, std::vector<glm::vec2> textureArray, std::vector<unsigned int> faceArray) {
     GLuint vao;
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    utils::bufferFromVector(vertexArray, GL_ARRAY_BUFFER, 0);
-    utils::bufferFromVector(textureArray, GL_ARRAY_BUFFER, 1);
+    utils::bufferFromVector(vertexArray, GL_ARRAY_BUFFER, 0, 3);
+    utils::bufferFromVector(normalArray, GL_ARRAY_BUFFER, 1, 3);
+    utils::bufferFromVector(textureArray, GL_ARRAY_BUFFER, 2, 2);
 
     utils::bufferFromVector(faceArray, GL_ELEMENT_ARRAY_BUFFER);
 
@@ -96,7 +97,7 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
             ss >> name;
         } else if (target == "v") {
             if (faces.size() != 0) {
-                models.push_back(Model::fromVectors(verticies, textures, faces));
+                models.push_back(Model::fromVectors(verticies, normals, textures, faces));
 
                 faces.clear();
             }
@@ -138,7 +139,7 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
     in.close();
 
     if (faces.size() != 0) {
-        models.push_back(Model::fromVectors(verticies, textures, faces));
+        models.push_back(Model::fromVectors(verticies, normals, textures, faces));
     }
 
     return models;

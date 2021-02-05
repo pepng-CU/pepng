@@ -47,7 +47,8 @@ class Model {
          * Model from vector params.
          */
         static std::shared_ptr<Model> fromVectors(
-            std::vector<glm::vec3> vertexArray, 
+            std::vector<glm::vec3> vertexArray,
+            std::vector<glm::vec3> normalArray, 
             std::vector<glm::vec2> textureArray, 
             std::vector<unsigned int> faceArray
         );
