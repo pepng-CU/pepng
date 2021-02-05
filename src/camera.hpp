@@ -11,7 +11,11 @@ class Viewport {
         glm::vec2 position;
         glm::vec2 scale;
 
-        void render();
+        /**
+         * Attempts to render the viewport.
+         * Returns if the viewport is visible or not.
+         */
+        bool render();
 };
 
 class Camera {

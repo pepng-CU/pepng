@@ -18,6 +18,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <algorithm>
 #include <filesystem>
+#include <stdlib.h>
+#include <time.h>
 
 // Internal includes
 #include "shader.hpp"
@@ -25,6 +27,7 @@
 #include "utils.hpp"
 #include "camera.hpp"
 #include "transform.hpp"
+#include "object.hpp"
 
 void GLAPIENTRY
 MessageCallback( GLenum source,
@@ -40,6 +43,8 @@ MessageCallback( GLenum source,
 }
 
 int main(int argc, char *argv[]) {
+    srand (time(NULL));
+
     glfwInit();
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -100,9 +105,43 @@ int main(int argc, char *argv[]) {
     // Find model path
     auto modelpath = utils::getPath("models");
 
-    // Gets objects from obj file.
-    auto models = Model::fromOBJ(modelpath / "scene.obj");
-    
+    std::vector<std::shared_ptr<Object>> objects {
+        Object::fromOBJ(modelpath / "scene.obj", shaderProgram, Transform {
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(0.0f),
+            glm::vec3(1.0f)
+        })
+    };
+
+    std::vector<std::shared_ptr<Camera>> cameras {
+        std::make_shared<Camera>(
+            Transform {
+                glm::vec3(0.0f, 2.0f, 10.0f),
+                glm::vec3(0.0f),
+                glm::vec3(1.0f)
+            },
+            Viewport {
+                glm::vec2(0.0f, 0.0f),
+                glm::vec2(1024.0f, 768.0f)
+            },
+            glm::perspective(glm::radians(60.0f), 1024.0f / 768.0f, 0.01f, 1000.0f)
+        ),
+        std::make_shared<Camera>(
+            Transform {
+                glm::vec3(0.0f),
+                glm::vec3(0.0f),
+                glm::vec3(1.0f)
+            },
+            Viewport {
+                glm::vec2(0.0f, 0.0f),
+                glm::vec2(1024.0f / 4.0f, 768.0f / 4.0f)
+            },
+            glm::perspective(glm::radians(60.0f), 1024.0f / 768.0f, 0.01f, 1000.0f)
+        )
+    };
+
+    glm::vec2 clickPosition = glm::vec2();
+
     // Sets background color.
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -112,54 +151,179 @@ int main(int argc, char *argv[]) {
     // Culling
     glEnable(GL_CULL_FACE);
 
-    Transform objectTransform = Transform {
-        glm::vec3(0.0f, 0.0f, -2.0f),
-        glm::vec3(0.0f),
-        glm::vec3(1.0f)
-    };
+    /**
+     * Loop variables.
+     */
+    // Selects which object to act upon. 0 is reserved for world, 1-5 for objects.
+    int selectedObject = 0;
 
-    Camera camera = Camera {
-        Transform {
-            glm::vec3(0.0f, 2.0f, 0.0f),
-            glm::vec3(0.0f),
-            glm::vec3(1.0f)
-        },
-        Viewport {
-            glm::vec2(0.0f),
-            glm::vec2(1024.0f, 768.0f)
-        },
-        glm::perspective(glm::radians(60.0f), 1024.0f / 768.0f, 0.01f, 1000.0f)
-    };
-
-    glm::vec2 clickPosition = glm::vec2();
+    GLenum renderMode = GL_TRIANGLES;
 
     // Program loop.
     while (!glfwWindowShouldClose(window)) {
         // Clears depth + color buffer.
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-        // Activates shader program.
-        glUseProgram(shaderProgram);
-
         /**
-         * Uniform matrix binding.
+         * Rendering.
          */
-        camera.render(shaderProgram);
-
-        glUniformMatrix4fv(
-            glGetUniformLocation(shaderProgram, "u_world"),
-            1,
-            GL_FALSE,
-            glm::value_ptr(objectTransform.getWorldMatrix())
-        );
-
-        // Renders all models from OBJ file.
-        for(auto model : models) {
-            model->render(shaderProgram);
+        // Render each camera.
+        for(auto camera : cameras) {
+            // Binds the viewport.
+            if(camera->viewport.render()) {
+                // Render each object.
+                for(auto object : objects) {
+                    // Bind object render to camera.
+                    object->render(camera, renderMode);
+                }
+            }
         }
 
         /**
-         * Input.
+         * Transform hierarchy input.
+         */
+        if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS) {
+            selectedObject = 0;
+        } else if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
+            selectedObject = 1;
+        } else if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
+            selectedObject = 2;
+        } else if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
+            selectedObject = 3;
+        } else if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS) {
+            selectedObject = 4;
+        } else if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS) {
+            selectedObject = 5;
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+            renderMode = GL_TRIANGLES;
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+            renderMode = GL_LINES;
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+            renderMode = GL_POINTS;
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+            std::shared_ptr<Object> object;
+
+            if (selectedObject == 0) {
+                object = objects.at(0);
+                
+            } else {
+                object = objects.at(0)->children.at(selectedObject - 1);
+            }
+
+            object->transform.deltaRotate(1.0f, 0.0f);
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+            std::shared_ptr<Object> object;
+            
+            if (selectedObject == 0) {
+                object = objects.at(0);
+                
+            } else {
+                object = objects.at(0)->children.at(selectedObject - 1);
+            }
+
+            object->transform.deltaRotate(-1.0f, 0.0f);
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+            std::shared_ptr<Object> object;
+            
+            if (selectedObject == 0) {
+                object = objects.at(0);
+                
+            } else {
+                object = objects.at(0)->children.at(selectedObject - 1);
+            }
+
+            object->transform.deltaRotate(0.0f, -1.0f);
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+            std::shared_ptr<Object> object;
+            
+            if (selectedObject == 0) {
+                object = objects.at(0);
+                
+            } else {
+                object = objects.at(0)->children.at(selectedObject - 1);
+            }
+
+            object->transform.deltaRotate(0.0f, 1.0f);
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS) {
+            std::shared_ptr<Object> object;
+            
+            if (selectedObject == 0) {
+                object = objects.at(0);
+                
+            } else {
+                object = objects.at(0)->children.at(selectedObject - 1);
+            }
+
+            object->transform.position = glm::vec3(0.0f);
+            object->transform.rotation = glm::quat(glm::vec3(0.0f));
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+            std::shared_ptr<Object> object;
+            
+            if (selectedObject == 0) {
+                object = objects.at(0);
+            } else {
+                object = objects.at(0)->children.at(selectedObject - 1);
+            }
+
+            object->transform.position += object->transform.getForward() / 10.0f;
+        } 
+
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+            std::shared_ptr<Object> object;
+            
+            if (selectedObject == 0) {
+                object = objects.at(0);
+            } else {
+                object = objects.at(0)->children.at(selectedObject - 1);
+            }
+
+            object->transform.position -= object->transform.getForward() / 10.0f;
+        } 
+
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+            std::shared_ptr<Object> object;
+            
+            if (selectedObject == 0) {
+                object = objects.at(0);
+            } else {
+                object = objects.at(0)->children.at(selectedObject - 1);
+            }
+
+            object->transform.position -= object->transform.getRight() / 10.0f;
+        } 
+
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+            std::shared_ptr<Object> object;
+            
+            if (selectedObject == 0) {
+                object = objects.at(0);
+            } else {
+                object = objects.at(0)->children.at(selectedObject - 1);
+            }
+
+            object->transform.position += object->transform.getRight() / 10.0f;
+        } 
+
+        /**
+         * FPS Input.
          */
         double mouseX, mouseY;
 
@@ -169,47 +333,33 @@ int main(int argc, char *argv[]) {
         bool middleClicked = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
         bool rightClicked = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
 
-        glm::vec3 cameraForward = camera.transform.getForward();
-        glm::vec3 cameraRight = camera.transform.getRight();
-        glm::vec3 cameraUp = camera.transform.getUp();
+        for(auto camera : cameras) {
+            glm::vec3 cameraForward = camera->transform.getForward();
+            glm::vec3 cameraRight = camera->transform.getRight();
+            glm::vec3 cameraUp = camera->transform.getUp();
 
-        if (leftClicked || rightClicked || middleClicked) {
-            if (clickPosition.x == 0 && clickPosition.y == 0) {
-                clickPosition = glm::vec2((float) mouseX, (float) mouseY);
+            if (leftClicked || rightClicked || middleClicked) {
+                if (clickPosition.x == 0 && clickPosition.y == 0) {
+                    clickPosition = glm::vec2((float) mouseX, (float) mouseY);
+                }
+            } else {
+                clickPosition = glm::vec2();
             }
-        } else {
-            clickPosition = glm::vec2();
-        }
 
-        float mouseDx = std::clamp(((float) mouseX - clickPosition.x) / 40.0f, -3.0f, 3.0f);
-        float mouseDy = std::clamp(((float) mouseY - clickPosition.y) / 40.0f, -3.0f, 3.0f);
+            float mouseDx = std::clamp(((float) mouseX - clickPosition.x) / 40.0f, -3.0f, 3.0f);
+            float mouseDy = std::clamp(((float) mouseY - clickPosition.y) / 40.0f, -3.0f, 3.0f);
 
-        if (leftClicked) {
-            camera.transform.position -= cameraForward * mouseDy / 10.0f;
-        }
+            if (leftClicked) {
+                camera->transform.position += cameraForward * mouseDy / 10.0f;
+            }
 
-        if (middleClicked) {
-            camera.transform.position += cameraUp * mouseDy / 10.0f + cameraRight * mouseDx / 10.0f;
-        }
+            if (middleClicked) {
+                camera->transform.position += cameraUp * mouseDy / 10.0f + cameraRight * mouseDx / 10.0f;
+            }
 
-        if (rightClicked) {
-            camera.transform.deltaRotate(mouseDx, mouseDy);
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-            camera.transform.position += cameraForward / 10.0f;
-        } 
-        
-        if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-            camera.transform.position -= cameraForward / 10.0f;
-        }
-
-        if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-            camera.transform.position -= cameraRight / 10.0f;
-        }
-
-        if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-            camera.transform.position += cameraRight / 10.0f;
+            if (rightClicked) {
+                camera->transform.deltaRotate(mouseDx, mouseDy);
+            }
         }
 
         /**

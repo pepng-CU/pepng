@@ -1,6 +1,8 @@
 #include "model.hpp"
 
-Model::Model(int count, GLuint vao) : count(count), vao(vao) {}
+Model::Model(int count, GLuint vao) : Model(count, vao, glm::vec3(0.0f)) {}
+
+Model::Model(int count, GLuint vao, glm::vec3 pivot) : count(count), vao(vao), offset(pivot) {}
 
 void Model::render(GLuint program, GLenum mode) {
     glBindVertexArray(vao);
@@ -21,13 +23,41 @@ std::shared_ptr<Model> Model::fromVectors(std::vector<glm::vec3> vertexArray, st
 
     bufferFromVector(vertexArray, GL_ARRAY_BUFFER, 0);
     bufferFromVector(textureArray, GL_ARRAY_BUFFER, 1);
-    
+
     bufferFromVector(faceArray, GL_ELEMENT_ARRAY_BUFFER);
+
+    // Calculates the pivot since OBJ don't have any... Assumes average position.
+    int count = 0;
+    glm::vec3 offset = glm::vec3(0.0f);
+    std::unordered_set<unsigned int> seenPoints;
+
+    for(auto faceIndex : faceArray) {
+        if(seenPoints.find(faceIndex) != seenPoints.end()) {
+            continue;
+        }
+
+        seenPoints.insert(faceIndex);
+        offset += vertexArray[faceIndex];
+        count++;
+    }
+
+    if(count > 0) {
+        offset /= count;
+    }
 
     return std::make_shared<Model>(
         faceArray.size(),
-        vao
+        vao,
+        offset
     );
+}
+
+glm::mat4 Model::getOffsetMatrix() {
+    return glm::translate(glm::mat4(1.0f), this->offset);
+}
+
+glm::mat4 Model::getNegativeOffsetMatrix() {
+    return glm::translate(glm::mat4(1.0f), -this->offset);
 }
 
 std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepath) {

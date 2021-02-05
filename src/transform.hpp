@@ -13,6 +13,8 @@ class Transform {
 
         Transform();
 
+        Transform(const Transform &transform);
+
         Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
 
         Transform(glm::vec3 position, glm::quat rotation, glm::vec3 scale);
@@ -64,4 +66,16 @@ class Transform {
          * Gets the right vector relative to current rotation.
          */
         glm::vec3 getRight();
+
+        Transform operator+(const Transform &transform) {
+            Transform ct = Transform(*this);
+
+            ct.position += transform.position;
+            ct.rotation *= transform.rotation;
+            ct.scale.x *= transform.scale.x;
+            ct.scale.y *= transform.scale.y;
+            ct.scale.z *= transform.scale.z;
+
+            return ct;
+        }
 };

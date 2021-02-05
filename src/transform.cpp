@@ -1,6 +1,8 @@
 #include "transform.hpp"
 
-Transform::Transform() : Transform(glm::vec3(0.0f), glm::quat(), glm::vec3(1.0f)) {}
+Transform::Transform() : Transform(glm::vec3(0.0f), glm::quat(glm::vec3(0.0f)), glm::vec3(1.0f)) {}
+
+Transform::Transform(const Transform &transform) : Transform(glm::vec3(transform.position), glm::quat(transform.rotation), glm::vec3(transform.scale)) {}
 
 Transform::Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) : 
     Transform(
@@ -26,9 +28,9 @@ glm::highp_mat4 Transform::getRotationMatrix() {
 glm::highp_mat4 Transform::getWorldMatrix() {
     auto matrix = glm::mat4(1.0f);
 
-    matrix = this->getScaleMatrix(matrix);
-    matrix = this->getRotationMatrix() * matrix;
     matrix = this->getTranslateMatrix(matrix);
+    matrix *= this->getRotationMatrix();
+    matrix = this->getScaleMatrix(matrix);
 
     return matrix;
 }
@@ -36,9 +38,8 @@ glm::highp_mat4 Transform::getWorldMatrix() {
 glm::highp_mat4 Transform::getViewMatrix() {
     auto matrix = glm::mat4(1.0f);
 
-    matrix = this->getScaleMatrix(matrix);
-    matrix = this->getRotationMatrix() * matrix;
     matrix = glm::translate(matrix, -this->position);
+    matrix = this->getRotationMatrix() * matrix;
 
     return matrix;
 }
@@ -58,7 +59,7 @@ glm::vec3 Transform::getUp() {
 glm::vec3 Transform::getForward() {
     auto rotationMatrix = this->getRotationMatrix();
 
-    return -glm::vec3(rotationMatrix[0][2], rotationMatrix[1][2], rotationMatrix[2][2]);
+    return glm::vec3(rotationMatrix[0][2], rotationMatrix[1][2], rotationMatrix[2][2]);
 }
 
 void Transform::deltaRotate(float deltaYaw, float deltaPitch) {
