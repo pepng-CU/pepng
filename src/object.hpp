@@ -11,9 +11,8 @@
 #include "model.hpp"
 #include "camera.hpp"
 
-class Object {
+class Object : public Transform {
     public:
-        Transform transform;
         std::shared_ptr<Model> model;
         GLuint shaderProgram;
         std::vector<std::shared_ptr<Object>> children;

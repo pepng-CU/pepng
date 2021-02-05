@@ -6,9 +6,9 @@ Object::Object(Transform transform) : Object(transform, -1) {}
 
 Object::Object(Transform transform, GLuint shaderProgram) : Object(transform, std::make_shared<Model>(), shaderProgram) {}
 
-Object::Object(Transform transform, std::shared_ptr<Model> model, GLuint shaderProgram) : transform(transform), model(model), shaderProgram(shaderProgram) {}
+Object::Object(Transform transform, std::shared_ptr<Model> model, GLuint shaderProgram) : Transform(transform), model(model), shaderProgram(shaderProgram) {}
 
-Object::Object(const Object& object) : Object(Transform(object.transform), std::make_shared<Model>(*object.model), object.shaderProgram) {
+Object::Object(const Object& object) : Object(Transform(object), std::make_shared<Model>(*object.model), object.shaderProgram) {
     std::vector<std::shared_ptr<Object>> children;
 
     for(auto child : object.children) {
@@ -35,7 +35,7 @@ std::shared_ptr<Object> Object::fromOBJ(std::filesystem::path filepath, GLuint s
 }
 
 void Object::render(std::shared_ptr<Camera> camera, GLenum mode, glm::mat4 parentMatrix) {
-    auto worldMatrix = this->transform.getWorldMatrix();
+    auto worldMatrix = this->getWorldMatrix();
 
     if (this->model->count != -1) {
         glUseProgram(this->shaderProgram);

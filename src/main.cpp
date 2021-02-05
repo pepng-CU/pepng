@@ -206,6 +206,8 @@ int main(int argc, char *argv[]) {
         // Clears depth + color buffer.
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
+        lines.at(0)->rotation = objects.at(0)->rotation;
+
         /**
          * Rendering.
          */
@@ -265,7 +267,7 @@ int main(int argc, char *argv[]) {
                 object = objects.at(0)->children.at(selectedObject - 1);
             }
 
-            object->transform.deltaRotate(1.0f, 0.0f);
+            object->deltaRotate(1.0f, 0.0f);
         }
 
         if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
@@ -278,7 +280,7 @@ int main(int argc, char *argv[]) {
                 object = objects.at(0)->children.at(selectedObject - 1);
             }
 
-            object->transform.deltaRotate(-1.0f, 0.0f);
+            object->deltaRotate(-1.0f, 0.0f);
         }
 
         if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
@@ -291,7 +293,7 @@ int main(int argc, char *argv[]) {
                 object = objects.at(0)->children.at(selectedObject - 1);
             }
 
-            object->transform.deltaRotate(0.0f, -1.0f);
+            object->deltaRotate(0.0f, -1.0f);
         }
 
         if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
@@ -304,7 +306,7 @@ int main(int argc, char *argv[]) {
                 object = objects.at(0)->children.at(selectedObject - 1);
             }
 
-            object->transform.deltaRotate(0.0f, 1.0f);
+            object->deltaRotate(0.0f, 1.0f);
         }
 
         if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS) {
@@ -317,8 +319,8 @@ int main(int argc, char *argv[]) {
                 object = objects.at(0)->children.at(selectedObject - 1);
             }
 
-            object->transform.position = glm::vec3(0.0f);
-            object->transform.rotation = glm::quat(glm::vec3(0.0f));
+            object->position = glm::vec3(0.0f);
+            object->rotation = glm::quat(glm::vec3(0.0f));
         }
 
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
@@ -330,7 +332,7 @@ int main(int argc, char *argv[]) {
                 object = objects.at(0)->children.at(selectedObject - 1);
             }
 
-            object->transform.position += object->transform.getForward() / 10.0f;
+            object->position += object->getForward() / 10.0f;
         } 
 
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
@@ -342,7 +344,7 @@ int main(int argc, char *argv[]) {
                 object = objects.at(0)->children.at(selectedObject - 1);
             }
 
-            object->transform.position -= object->transform.getForward() / 10.0f;
+            object->position -= object->getForward() / 10.0f;
         } 
 
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
@@ -354,7 +356,7 @@ int main(int argc, char *argv[]) {
                 object = objects.at(0)->children.at(selectedObject - 1);
             }
 
-            object->transform.position -= object->transform.getRight() / 10.0f;
+            object->position -= object->getRight() / 10.0f;
         } 
 
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
@@ -366,7 +368,7 @@ int main(int argc, char *argv[]) {
                 object = objects.at(0)->children.at(selectedObject - 1);
             }
 
-            object->transform.position += object->transform.getRight() / 10.0f;
+            object->position += object->getRight() / 10.0f;
         } 
 
         /**
@@ -381,10 +383,6 @@ int main(int argc, char *argv[]) {
         bool rightClicked = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
 
         for(auto camera : cameras) {
-            glm::vec3 cameraForward = camera->transform.getForward();
-            glm::vec3 cameraRight = camera->transform.getRight();
-            glm::vec3 cameraUp = camera->transform.getUp();
-
             if (leftClicked || rightClicked || middleClicked) {
                 if (clickPosition.x == 0 && clickPosition.y == 0) {
                     clickPosition = glm::vec2((float) mouseX, (float) mouseY);
@@ -397,15 +395,15 @@ int main(int argc, char *argv[]) {
             float mouseDy = std::clamp(((float) mouseY - clickPosition.y) / 40.0f, -3.0f, 3.0f);
 
             if (leftClicked) {
-                camera->transform.position += cameraForward * mouseDy / 10.0f;
+                camera->position += camera->getForward() * mouseDy / 10.0f;
             }
 
             if (middleClicked) {
-                camera->transform.position += cameraUp * mouseDy / 10.0f + cameraRight * mouseDx / 10.0f;
+                camera->position += camera->getUp() * mouseDy / 10.0f + camera->getRight() * mouseDx / 10.0f;
             }
 
             if (rightClicked) {
-                camera->transform.deltaRotate(mouseDx, mouseDy);
+                camera->deltaRotate(mouseDx, mouseDy);
             }
         }
 

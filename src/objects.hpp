@@ -8,7 +8,7 @@ class Axes : public Object {
 
         Axes(Transform transform, GLuint shaderProgram);
 
-        virtual void render(std::shared_ptr<Camera> camera, GLenum mode = GL_TRIANGLES, glm::mat4 parentMatrix = glm::mat4(1.0f));
+        virtual void render(std::shared_ptr<Camera> camera, GLenum mode = GL_TRIANGLES, glm::mat4 parentMatrix = glm::mat4(1.0f)) override;
 };
 
 class Grid : public Object {

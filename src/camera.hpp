@@ -18,13 +18,18 @@ class Viewport {
         bool render();
 };
 
-class Camera {
+class Camera : public Transform {
     public:
-        Transform transform;
         Viewport viewport;
         glm::mat4 projection;
 
         Camera(Transform transform, Viewport viewport, glm::mat4 projection);
 
         void render(GLuint shaderProgram);
+
+        virtual glm::vec3 getForward() override;
+
+        virtual glm::vec3 getUp() override;
+
+        virtual glm::vec3 getRight() override;
 };

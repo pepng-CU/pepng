@@ -55,17 +55,17 @@ class Transform {
         /**
          * Gets the forward vector relative to current rotation.
          */
-        glm::vec3 getForward();
+        virtual glm::vec3 getForward();
 
         /**
          * Gets the up vector relative to current rotation.
          */
-        glm::vec3 getUp();
+        virtual glm::vec3 getUp();
 
         /**
          * Gets the right vector relative to current rotation.
          */
-        glm::vec3 getRight();
+        virtual glm::vec3 getRight();
 
         Transform operator+(const Transform &transform) {
             Transform ct = Transform(*this);

@@ -45,7 +45,7 @@ glm::highp_mat4 Transform::getViewMatrix() {
 }
 
 glm::vec3 Transform::getRight() {
-    return this->rotation * glm::vec3(1.0f, 0.0f, 0.0f);
+    return this->rotation * glm::vec3(-1.0f, 0.0f, 0.0f);
 }
 
 glm::vec3 Transform::getUp() {
