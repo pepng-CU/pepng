@@ -1,41 +1,21 @@
 #include "model.hpp"
 
-Model::Model() : Model(-1, -1, glm::vec3(0.0f)) {}
-
-Model::Model(const Model& model) : Model(model.count, model.vao, glm::vec3(model.offset)) {}
-
-Model::Model(int count, GLuint vao) : Model(count, vao, glm::vec3(0.0f)) {}
-
-Model::Model(int count, GLuint vao, glm::vec3 offset) : count(count), vao(vao), offset(offset) {}
-
-void Model::render(GLuint program, GLenum mode) {
-    if (this->vao == -1) {
-        return;
-    }
-
-    glBindVertexArray(this->vao);
-    
-    glDrawElements(
-        mode,
-        this->count,
-        GL_UNSIGNED_INT,
-        0
-    );
-}
-
-std::shared_ptr<Model> Model::fromVectors(std::vector<glm::vec3> vertexArray, std::vector<glm::vec3> normalArray, std::vector<glm::vec2> textureArray, std::vector<unsigned int> faceArray) {
+ModelBuilder::ModelBuilder() : model(std::make_shared<Model>()) {
     GLuint vao;
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    utils::bufferFromVector(vertexArray, GL_ARRAY_BUFFER, 0, 3);
-    utils::bufferFromVector(normalArray, GL_ARRAY_BUFFER, 1, 3);
-    utils::bufferFromVector(textureArray, GL_ARRAY_BUFFER, 2, 2);
+    this->model->vao = vao;
+}
 
-    utils::bufferFromVector(faceArray, GL_ELEMENT_ARRAY_BUFFER);
+ModelBuilder* ModelBuilder::setName(std::string name) {
+    this->model->name = name;
 
-    // Calculates the pivot since OBJ don't have any... Assumes average position.
+    return this;
+}
+
+ModelBuilder* ModelBuilder::calculateOffset(std::vector<glm::vec3> vertexArray, std::vector<unsigned int> faceArray) {
     int count = 0;
     glm::vec3 offset = glm::vec3(0.0f);
     std::unordered_set<unsigned int> seenPoints;
@@ -54,10 +34,31 @@ std::shared_ptr<Model> Model::fromVectors(std::vector<glm::vec3> vertexArray, st
         offset /= count;
     }
 
-    return std::make_shared<Model>(
-        faceArray.size(),
-        vao,
-        offset
+    this->model->offset = offset;
+
+    return this;
+}
+
+std::shared_ptr<Model> ModelBuilder::build() {
+    return this->model;
+}
+
+Model::Model() : count(-1), vao(-1), offset(glm::vec3(0.0f)) {}
+
+Model::Model(const Model& model) : count(model.count), vao(model.vao), offset(glm::vec3(model.offset)) {}
+
+void Model::render(GLuint program, GLenum mode) {
+    if (this->vao == -1) {
+        return;
+    }
+
+    glBindVertexArray(this->vao);
+    
+    glDrawElements(
+        mode,
+        this->count,
+        GL_UNSIGNED_INT,
+        0
     );
 }
 
@@ -86,22 +87,40 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
 
     std::string line;
 
-    while (std::getline(in, line)) {
+    while (true) {
+        bool hasLine = !in.eof();
+
+        if (hasLine) {
+            std::getline(in, line);
+        }
+
         std::stringstream ss(line);
-
         std::string target;
-
+        
         ss >> target;
+
+        if((target == "v" && faces.size() != 0) || !hasLine) {
+            models.push_back(
+                std::make_shared<ModelBuilder>()
+                    ->setName(name)
+                    ->attachBuffer(verticies, GL_ARRAY_BUFFER, 0, 3)
+                    ->attachBuffer(normals, GL_ARRAY_BUFFER, 1, 3)
+                    ->attachBuffer(textures, GL_ARRAY_BUFFER, 2, 2)
+                    ->attachBuffer(faces, GL_ELEMENT_ARRAY_BUFFER, true)
+                    ->calculateOffset(verticies, faces)
+                    ->build()
+            );
+
+            faces.clear();
+        }
+
+        if (!hasLine) {
+            break;
+        }
 
         if (target == "o") {
             ss >> name;
         } else if (target == "v") {
-            if (faces.size() != 0) {
-                models.push_back(Model::fromVectors(verticies, normals, textures, faces));
-
-                faces.clear();
-            }
-
             float x, y, z;
 
             ss >> x >> y >> z;
@@ -137,10 +156,6 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
     }
 
     in.close();
-
-    if (faces.size() != 0) {
-        models.push_back(Model::fromVectors(verticies, normals, textures, faces));
-    }
 
     return models;
 }

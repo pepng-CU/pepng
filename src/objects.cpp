@@ -3,35 +3,43 @@
 Axes::Axes() : Object() {}
 
 Axes::Axes(Transform transform, GLuint shaderProgram) : Object(transform, shaderProgram) {
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    utils::bufferFromVector(std::vector { 
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(1.0f, 0.0f, 0.0f), 
-        glm::vec3(0.0f, 0.0f, 0.0f), 
-        glm::vec3(0.0f, 1.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f), 
-        glm::vec3(0.0f, 0.0f, 1.0f)
-    }, GL_ARRAY_BUFFER, 0, 3);
-
-    utils::bufferFromVector(std::vector { 
-        glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 
-        glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 
-        glm::vec4(0.0f, 1.0f, 0.0f, 1.0f),
-        glm::vec4(0.0f, 1.0f, 0.0f, 1.0f),
-        glm::vec4(0.0f, 0.0f, 1.0f, 1.0f),
-        glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)
-    }, GL_ARRAY_BUFFER, 1, 4);
-
-    utils::bufferFromVector(std::vector {
-        0, 1, 
-        2, 3, 
-        4, 5,
-    }, GL_ELEMENT_ARRAY_BUFFER);
-
-    this->model = std::make_shared<Model>(6, vao);
+    this->model = std::make_shared<ModelBuilder>()
+        ->attachBuffer(
+            std::vector { 
+                glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(1.0f, 0.0f, 0.0f), 
+                glm::vec3(0.0f, 0.0f, 0.0f), 
+                glm::vec3(0.0f, 1.0f, 0.0f),
+                glm::vec3(0.0f, 0.0f, 0.0f), 
+                glm::vec3(0.0f, 0.0f, 1.0f)
+            },
+            GL_ARRAY_BUFFER, 
+            0, 
+            3
+        )
+        ->attachBuffer(
+            std::vector { 
+                glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 
+                glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 
+                glm::vec4(0.0f, 1.0f, 0.0f, 1.0f),
+                glm::vec4(0.0f, 1.0f, 0.0f, 1.0f),
+                glm::vec4(0.0f, 0.0f, 1.0f, 1.0f),
+                glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)
+            }, 
+            GL_ARRAY_BUFFER, 
+            1, 
+            4
+        )
+        ->attachBuffer(
+            std::vector {
+                0, 1, 
+                2, 3, 
+                4, 5,
+            }, 
+            GL_ELEMENT_ARRAY_BUFFER,
+            true
+        )
+        ->build();
 }
 
 void Axes::render(std::shared_ptr<Camera> camera, GLenum mode, glm::mat4 parentMatrix) {
@@ -50,11 +58,6 @@ Grid::Grid(Transform transform, GLuint shaderProgram, int count, glm::vec4 color
     }
 
     float spacing = 1.0f / (float) (count - 1);
-
-    GLuint vao;
-
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
 
     std::vector<glm::vec3> verticies;
     std::vector<glm::vec4> colors;
@@ -75,9 +78,23 @@ Grid::Grid(Transform transform, GLuint shaderProgram, int count, glm::vec4 color
         colors.push_back(color);
     }
 
-    utils::bufferFromVector(verticies, GL_ARRAY_BUFFER, 0, 3);
-    utils::bufferFromVector(colors, GL_ARRAY_BUFFER, 1, 4);
-    utils::bufferFromVector(indicies, GL_ELEMENT_ARRAY_BUFFER);
-
-    this->model = std::make_shared<Model>(indicies.size(), vao);
+    this->model = std::make_shared<ModelBuilder>()
+        ->attachBuffer(
+            verticies,
+            GL_ARRAY_BUFFER,
+            0,
+            3
+        )
+        ->attachBuffer(
+            colors,
+            GL_ARRAY_BUFFER,
+            1,
+            4
+        )
+        ->attachBuffer(
+            indicies,
+            GL_ELEMENT_ARRAY_BUFFER,
+            true
+        )
+        ->build();
 }

@@ -10,6 +10,7 @@
 #include <vector>
 #include <memory>
 #include <sstream>
+#include <string>
 
 #include "utils.hpp"
 
@@ -18,10 +19,6 @@ class Model {
         Model();
 
         Model(const Model& model);
-
-        Model(int count, GLuint vao);
-
-        Model(int count, GLuint vao, glm::vec3 pivot);
 
         /**
          * Renders model using shader program.
@@ -42,17 +39,7 @@ class Model {
          * @param program Relative path to OBJ file.
          */
         static std::vector<std::shared_ptr<Model>> fromOBJ(std::filesystem::path filepath);
-
-        /**
-         * Model from vector params.
-         */
-        static std::shared_ptr<Model> fromVectors(
-            std::vector<glm::vec3> vertexArray,
-            std::vector<glm::vec3> normalArray, 
-            std::vector<glm::vec2> textureArray, 
-            std::vector<unsigned int> faceArray
-        );
-    //private:
+    // private:
         // Keeps count of the number of faces.
         int count;
 
@@ -64,4 +51,65 @@ class Model {
          * Not sure if this should be here or moved to the object?
          */
         glm::vec3 offset;
+
+        /**
+         * The model name.
+         */
+        std::string name;
+};
+
+class ModelBuilder {
+    public:
+        ModelBuilder();
+
+        std::shared_ptr<Model> build();
+
+        ModelBuilder* setName(std::string name);
+
+        ModelBuilder* calculateOffset(std::vector<glm::vec3> vertexArray, std::vector<unsigned int> faceArray);
+        
+        /**
+         * Creates and binds a GL buffer.
+         */
+        template <typename T>
+        ModelBuilder* attachBuffer(std::vector<T> vectors, GLenum type, bool isCount = false) {
+            GLuint buffer;
+
+            glGenBuffers(1, &buffer);
+            glBindBuffer(type, buffer);
+            glBufferData(type, vectors.size() * sizeof(T), &vectors[0], GL_STATIC_DRAW);
+
+            if(isCount) {
+                this->model->count = vectors.size();
+            }
+
+            return this;
+        }
+
+        /**
+         * Creates and binds a GL buffer.
+         */
+        template <typename T>
+        ModelBuilder* attachBuffer(std::vector<T> vectors, GLenum type, int index, int size) {
+            GLuint buffer;
+
+            glGenBuffers(1, &buffer);
+            glBindBuffer(type, buffer);
+            glBufferData(type, vectors.size() * sizeof(T), &vectors[0], GL_STATIC_DRAW);
+
+            glVertexAttribPointer(
+                index, 
+                size, 
+                GL_FLOAT, 
+                GL_FALSE, 
+                0, 
+                0
+            );
+
+            glEnableVertexAttribArray(index);
+
+            return this;
+        }
+    private:
+        std::shared_ptr<Model> model;
 };
