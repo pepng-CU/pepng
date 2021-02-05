@@ -15,6 +15,10 @@
 
 class Model {
     public:
+        Model();
+
+        Model(const Model& model);
+
         Model(int count, GLuint vao);
 
         Model(int count, GLuint vao, glm::vec3 pivot);
@@ -60,36 +64,3 @@ class Model {
          */
         glm::vec3 offset;
 };
-
-template <typename T>
-GLuint bufferFromVector(std::vector<T> vectors, GLenum type) {
-    GLuint buffer;
-
-    glGenBuffers(1, &buffer);
-    glBindBuffer(type, buffer);
-    glBufferData(type, vectors.size() * sizeof(T), &vectors[0], GL_STATIC_DRAW);
-
-    return buffer;
-}
-
-template <typename T>
-GLuint bufferFromVector(std::vector<T> vectors, GLenum type, int index) {
-    GLuint buffer;
-
-    glGenBuffers(1, &buffer);
-    glBindBuffer(type, buffer);
-    glBufferData(type, vectors.size() * sizeof(T), &vectors[0], GL_STATIC_DRAW);
-
-    glVertexAttribPointer(
-        index, 
-        3, 
-        GL_FLOAT, 
-        GL_FALSE, 
-        0, 
-        0
-    );
-
-    glEnableVertexAttribArray(index);
-
-    return buffer;
-}

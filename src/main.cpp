@@ -28,6 +28,7 @@
 #include "camera.hpp"
 #include "transform.hpp"
 #include "object.hpp"
+#include "objects.hpp"
 
 void GLAPIENTRY
 MessageCallback( GLenum source,
@@ -85,7 +86,7 @@ int main(int argc, char *argv[]) {
     auto shaderpath = utils::getPath("shaders");
 
     /**
-     * Shader binding
+     * Object Shader
      */
     std::string vertexSource = readShader(shaderpath / "vertex.glsl");
     GLuint vertexShader = compileShader(vertexSource, GL_VERTEX_SHADER);
@@ -100,7 +101,22 @@ int main(int argc, char *argv[]) {
     GLuint shaderProgram = sb.finish();
 
     /**
-     * Model creation.
+     * Line Shader
+     */
+    vertexSource = readShader(shaderpath / "lineVertex.glsl");
+    vertexShader = compileShader(vertexSource, GL_VERTEX_SHADER);
+
+    fragmentSource = readShader(shaderpath / "lineFragment.glsl");
+    fragmentShader = compileShader(fragmentSource, GL_FRAGMENT_SHADER);
+
+    sb = ShaderBuilder();
+
+    sb << vertexShader << fragmentShader;
+
+    GLuint lineShaderProgram = sb.finish();
+
+    /**
+     * Models
      */
     // Find model path
     auto modelpath = utils::getPath("models");
@@ -110,9 +126,12 @@ int main(int argc, char *argv[]) {
             glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec3(0.0f),
             glm::vec3(1.0f)
-        })
+        }),
     };
 
+    /**
+     * Cameras
+     */
     std::vector<std::shared_ptr<Camera>> cameras {
         std::make_shared<Camera>(
             Transform {
@@ -140,7 +159,25 @@ int main(int argc, char *argv[]) {
         )
     };
 
-    glm::vec2 clickPosition = glm::vec2();
+    /**
+     * Lines
+     */
+    std::vector<std::shared_ptr<Object>> lines {
+        std::static_pointer_cast<Object>(
+            std::make_shared<Axes>(Transform {
+                glm::vec3(0.0f),
+                glm::vec3(0.0f),
+                glm::vec3(7.0f)
+            }, lineShaderProgram)
+        ),
+        std::static_pointer_cast<Object>(
+            std::make_shared<Grid>(Transform {
+                glm::vec3(0.0f),
+                glm::vec3(0.0f),
+                glm::vec3(128.0f)
+            }, lineShaderProgram, 129)
+        )
+    };
 
     // Sets background color.
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -148,8 +185,11 @@ int main(int argc, char *argv[]) {
     // Enables Z buffer.
     glEnable(GL_DEPTH_TEST);
 
-    // Culling
+    // Culling.
     glEnable(GL_CULL_FACE);
+
+    // For drawing thicker lines.
+    glEnable(GL_LINE_WIDTH);
 
     /**
      * Loop variables.
@@ -158,6 +198,8 @@ int main(int argc, char *argv[]) {
     int selectedObject = 0;
 
     GLenum renderMode = GL_TRIANGLES;
+
+    glm::vec2 clickPosition = glm::vec2();
 
     // Program loop.
     while (!glfwWindowShouldClose(window)) {
@@ -171,6 +213,11 @@ int main(int argc, char *argv[]) {
         for(auto camera : cameras) {
             // Binds the viewport.
             if(camera->viewport.render()) {
+                // Render lines.
+                for(auto line: lines) {
+                    line->render(camera, GL_LINES);
+                }
+
                 // Render each object.
                 for(auto object : objects) {
                     // Bind object render to camera.

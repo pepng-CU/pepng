@@ -1,11 +1,19 @@
 #include "model.hpp"
 
+Model::Model() : Model(-1, -1, glm::vec3(0.0f)) {}
+
+Model::Model(const Model& model) : Model(model.count, model.vao, glm::vec3(model.offset)) {}
+
 Model::Model(int count, GLuint vao) : Model(count, vao, glm::vec3(0.0f)) {}
 
-Model::Model(int count, GLuint vao, glm::vec3 pivot) : count(count), vao(vao), offset(pivot) {}
+Model::Model(int count, GLuint vao, glm::vec3 offset) : count(count), vao(vao), offset(offset) {}
 
 void Model::render(GLuint program, GLenum mode) {
-    glBindVertexArray(vao);
+    if (this->vao == -1) {
+        return;
+    }
+
+    glBindVertexArray(this->vao);
     
     glDrawElements(
         mode,
@@ -21,10 +29,10 @@ std::shared_ptr<Model> Model::fromVectors(std::vector<glm::vec3> vertexArray, st
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    bufferFromVector(vertexArray, GL_ARRAY_BUFFER, 0);
-    bufferFromVector(textureArray, GL_ARRAY_BUFFER, 1);
+    utils::bufferFromVector(vertexArray, GL_ARRAY_BUFFER, 0);
+    utils::bufferFromVector(textureArray, GL_ARRAY_BUFFER, 1);
 
-    bufferFromVector(faceArray, GL_ELEMENT_ARRAY_BUFFER);
+    utils::bufferFromVector(faceArray, GL_ELEMENT_ARRAY_BUFFER);
 
     // Calculates the pivot since OBJ don't have any... Assumes average position.
     int count = 0;
@@ -64,7 +72,7 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
     std::ifstream in(filepath);
 
     if(!in.is_open()) {
-        throw "Unable to open obj file.";
+        throw std::runtime_error("Unable to open obj file.");
     }
 
     std::vector<std::shared_ptr<Model>> models;

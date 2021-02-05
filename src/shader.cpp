@@ -42,7 +42,7 @@ ShaderBuilder::ShaderBuilder() {
 
 ShaderBuilder& ShaderBuilder::operator<<(GLuint shader) {
     shaders.push_back(shader);
-    
+
     return *this;
 }
 
@@ -62,7 +62,8 @@ GLuint ShaderBuilder::finish() {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
         std::stringstream ss;
         ss << "ERROR::PROGRAM::LINKING_FAILED" << std::endl << infoLog << std::endl;
-        std::cout << ss.str() << std::endl; // Doesn't render on terminal if not
+        // Doesn't render on terminal if not
+        std::cout << ss.str() << std::endl; 
         throw std::runtime_error(ss.str());
     }
 

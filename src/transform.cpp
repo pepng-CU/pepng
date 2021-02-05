@@ -45,21 +45,15 @@ glm::highp_mat4 Transform::getViewMatrix() {
 }
 
 glm::vec3 Transform::getRight() {
-    auto rotationMatrix = this->getRotationMatrix();
-
-    return glm::vec3(rotationMatrix[0][0], rotationMatrix[1][0], rotationMatrix[2][0]);
+    return this->rotation * glm::vec3(1.0f, 0.0f, 0.0f);
 }
 
 glm::vec3 Transform::getUp() {
-    auto rotationMatrix = this->getRotationMatrix();
-
-    return -glm::vec3(rotationMatrix[0][1], rotationMatrix[1][1], rotationMatrix[2][1]);
+    return this->rotation * glm::vec3(0.0f, -1.0f, 0.0f);
 }
 
 glm::vec3 Transform::getForward() {
-    auto rotationMatrix = this->getRotationMatrix();
-
-    return glm::vec3(rotationMatrix[0][2], rotationMatrix[1][2], rotationMatrix[2][2]);
+    return this->rotation * glm::vec3(0.0f, 0.0f, 1.0f);
 }
 
 void Transform::deltaRotate(float deltaYaw, float deltaPitch) {
