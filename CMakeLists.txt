@@ -30,6 +30,10 @@ file(GLOB SRC src/*.cpp)
 
 add_executable(${EXEC} ${SRC})
 
+include_directories(${CMAKE_SOURCE_DIR}/thirdparty/stb)
+
+link_directories(${EXEC} ${CMAKE_SOURCE_DIR}/thirdparty/stb) 
+
 target_link_libraries(${EXEC} OpenGL::GL glew_s glfw glm)
 
 list(APPEND BIN ${EXEC})

@@ -1,8 +1,11 @@
 #version 330
 
 out vec4 color;
-in vec3 color_factor;
+in vec2 tex_coord;
+in float light;
+
+uniform sampler2D u_texture;
 
 void main(void) {
-    color = vec4(color_factor.xyz, 1.0);
+    color = texture(u_texture, tex_coord) * light;
 }

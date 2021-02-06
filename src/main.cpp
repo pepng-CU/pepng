@@ -7,6 +7,7 @@
  */
 
 #define GLEW_STATIC 1
+#define STB_IMAGE_IMPLEMENTATION
 
 // External includes
 #include <iostream>
@@ -44,7 +45,7 @@ MessageCallback( GLenum source,
 }
 
 int main(int argc, char *argv[]) {
-    srand (time(NULL));
+    srand(time(NULL));
 
     glfwInit();
 
@@ -82,12 +83,21 @@ int main(int argc, char *argv[]) {
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(MessageCallback, 0);
 
+    /**
+     * Texture loading
+     */
+    // Find the textures directory
+    auto texturespath = utils::getPath("textures");
+
+    createTexture(texturespath / "honeycomb.jpg");
+
+    /**
+     * Shader loading
+     */
     // Find the shaders directory
     auto shaderpath = utils::getPath("shaders");
 
-    /**
-     * Object Shader
-     */
+    // Object shader
     std::string vertexSource = readShader(shaderpath / "vertex.glsl");
     GLuint vertexShader = compileShader(vertexSource, GL_VERTEX_SHADER);
 
@@ -100,9 +110,7 @@ int main(int argc, char *argv[]) {
 
     GLuint shaderProgram = sb.finish();
 
-    /**
-     * Line Shader
-     */
+    // Line shader
     vertexSource = readShader(shaderpath / "lineVertex.glsl");
     vertexShader = compileShader(vertexSource, GL_VERTEX_SHADER);
 
@@ -126,7 +134,7 @@ int main(int argc, char *argv[]) {
             glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec3(0.0f),
             glm::vec3(1.0f)
-        }),
+        })
     };
 
     /**
@@ -142,18 +150,6 @@ int main(int argc, char *argv[]) {
             Viewport {
                 glm::vec2(0.0f, 0.0f),
                 glm::vec2(1024.0f, 768.0f)
-            },
-            glm::perspective(glm::radians(60.0f), 1024.0f / 768.0f, 0.01f, 1000.0f)
-        ),
-        std::make_shared<Camera>(
-            Transform {
-                glm::vec3(0.0f),
-                glm::vec3(0.0f),
-                glm::vec3(1.0f)
-            },
-            Viewport {
-                glm::vec2(0.0f, 0.0f),
-                glm::vec2(1024.0f / 4.0f, 768.0f / 4.0f)
             },
             glm::perspective(glm::radians(60.0f), 1024.0f / 768.0f, 0.01f, 1000.0f)
         )
@@ -205,8 +201,6 @@ int main(int argc, char *argv[]) {
     while (!glfwWindowShouldClose(window)) {
         // Clears depth + color buffer.
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-        lines.at(0)->setRotation(*objects.at(0));
 
         /**
          * Rendering.

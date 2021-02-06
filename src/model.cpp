@@ -9,6 +9,12 @@ ModelBuilder::ModelBuilder() : model(std::make_shared<Model>()) {
     this->model->vao = vao;
 }
 
+ModelBuilder* ModelBuilder::setCount(unsigned int count) {
+    this->model->count = count;
+
+    return this;
+}
+
 ModelBuilder* ModelBuilder::setName(std::string name) {
     this->model->name = name;
 
@@ -43,9 +49,9 @@ std::shared_ptr<Model> ModelBuilder::build() {
     return this->model;
 }
 
-Model::Model() : count(-1), vao(-1), offset(glm::vec3(0.0f)) {}
+Model::Model() : count(-1), vao(-1), offset(glm::vec3(0.0f)), hasElementArray(false) {}
 
-Model::Model(const Model& model) : count(model.count), vao(model.vao), offset(glm::vec3(model.offset)) {}
+Model::Model(const Model& model) : count(model.count), vao(model.vao), offset(glm::vec3(model.offset)), hasElementArray(model.hasElementArray) {}
 
 void Model::render(GLuint program, GLenum mode) {
     if (this->vao == -1) {
@@ -53,13 +59,21 @@ void Model::render(GLuint program, GLenum mode) {
     }
 
     glBindVertexArray(this->vao);
-    
-    glDrawElements(
-        mode,
-        this->count,
-        GL_UNSIGNED_INT,
-        0
-    );
+
+    if(this->hasElementArray) {
+        glDrawElements(
+            mode,
+            this->count,
+            GL_UNSIGNED_INT,
+            0
+        );
+    } else {
+        glDrawArrays(
+            mode,
+            0,
+            this->count
+        );
+    }
 }
 
 glm::mat4 Model::getOffsetMatrix() {
@@ -81,9 +95,11 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
 
     std::string name = "";
     std::vector<glm::vec3> verticies;
-    std::vector<glm::vec3> normals;
     std::vector<glm::vec2> textures;
-    std::vector<unsigned int> faces;
+    std::vector<glm::vec3> normals;
+    std::vector<unsigned int> vertexIndex;
+    std::vector<unsigned int> textureIndex;
+    std::vector<unsigned int> normalIndex;
 
     std::string line;
 
@@ -99,19 +115,36 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
         
         ss >> target;
 
-        if((target == "v" && faces.size() != 0) || !hasLine) {
+        if((target == "v" && vertexIndex.size() != 0) || !hasLine) {
+            std::vector<glm::vec3> mapVertex;
+            for(auto index : vertexIndex) {
+                mapVertex.push_back(verticies.at(index));
+            }
+
+            std::vector<glm::vec3> mapNormal;
+            for(auto index : normalIndex) {
+                mapNormal.push_back(normals.at(index));
+            }
+
+            std::vector<glm::vec2> mapTexture;
+            for(auto index : textureIndex) {
+                mapTexture.push_back(textures.at(index));
+            }
+
             models.push_back(
                 std::make_shared<ModelBuilder>()
                     ->setName(name)
-                    ->attachBuffer(verticies, GL_ARRAY_BUFFER, 0, 3)
-                    ->attachBuffer(normals, GL_ARRAY_BUFFER, 1, 3)
-                    ->attachBuffer(textures, GL_ARRAY_BUFFER, 2, 2)
-                    ->attachBuffer(faces, GL_ELEMENT_ARRAY_BUFFER, true)
-                    ->calculateOffset(verticies, faces)
+                    ->attachBuffer(mapVertex, GL_ARRAY_BUFFER, 0, 3)
+                    ->attachBuffer(mapNormal, GL_ARRAY_BUFFER, 1, 3)
+                    ->attachBuffer(mapTexture, GL_ARRAY_BUFFER, 2, 2)
+                    ->setCount(mapVertex.size())
+                    ->calculateOffset(verticies, vertexIndex)
                     ->build()
             );
 
-            faces.clear();
+            vertexIndex.clear();
+            textureIndex.clear();
+            normalIndex.clear();
         }
 
         if (!hasLine) {
@@ -139,23 +172,44 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
 
             normals.push_back(glm::vec3(x, y, z));
         } else if (target == "f") {
-            std::string f1, f2, f3;
+            std::string faceIndex[3];
 
-            ss >> f1 >> f2 >> f3;
+            ss >> faceIndex[0] >> faceIndex[1] >> faceIndex[2];
 
-            std::vector<int> fa1, fa2, fa3;
+            for(auto f : faceIndex) {
+                auto fa = utils::splitInt(f, "/");
 
-            fa1 = utils::splitInt(f1, "/");
-            fa2 = utils::splitInt(f2, "/");
-            fa3 = utils::splitInt(f3, "/");
-
-            faces.push_back(fa1[0] - 1);
-            faces.push_back(fa2[0] - 1);
-            faces.push_back(fa3[0] - 1);
+                vertexIndex.push_back(fa[0] - 1);
+                textureIndex.push_back(fa[1] - 1);
+                normalIndex.push_back(fa[2] - 1);
+            }
         }
     }
 
     in.close();
 
     return models;
+}
+
+GLuint createTexture(std::filesystem::path filePath) {
+    int width, height, numComponents;
+
+    unsigned char* image = stbi_load(filePath.c_str(), &width, &height, &numComponents, STBI_rgb);
+
+    if (image == NULL)
+        throw std::runtime_error("Cannot load texture");
+
+    GLuint texture;
+
+    glGenTextures(1, &texture);
+
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+
+    stbi_image_free(image);
+
+    return texture;
 }

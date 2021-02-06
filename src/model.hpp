@@ -11,6 +11,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <stb_image.h>
 
 #include "utils.hpp"
 
@@ -56,6 +57,11 @@ class Model {
          * The model name.
          */
         std::string name;
+
+        /**
+         * Variable to check if using element array.
+         */
+        bool hasElementArray;
 };
 
 class ModelBuilder {
@@ -65,6 +71,8 @@ class ModelBuilder {
         std::shared_ptr<Model> build();
 
         ModelBuilder* setName(std::string name);
+
+        ModelBuilder* setCount(unsigned int count);
 
         ModelBuilder* calculateOffset(std::vector<glm::vec3> vertexArray, std::vector<unsigned int> faceArray);
         
@@ -82,6 +90,9 @@ class ModelBuilder {
             if(isCount) {
                 this->model->count = vectors.size();
             }
+
+            // TODO: better check for this...
+            this->model->hasElementArray = true;
 
             return this;
         }
@@ -113,3 +124,10 @@ class ModelBuilder {
     private:
         std::shared_ptr<Model> model;
 };
+
+/**
+ * Creates and binds texture.
+ * 
+ * TODO: definitely clean this up!
+ */
+GLuint createTexture(std::filesystem::path filePath);
