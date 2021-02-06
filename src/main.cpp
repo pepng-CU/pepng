@@ -132,8 +132,8 @@ int main(int argc, char *argv[]) {
     std::vector<std::shared_ptr<Object>> objects {
         Object::fromOBJ(modelpath / "scene.obj", shaderProgram, Transform {
             glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f),
-            glm::vec3(1.0f)
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(1.0f, 1.0f, 1.0f)
         })
     };
 
@@ -144,8 +144,8 @@ int main(int argc, char *argv[]) {
         std::make_shared<Camera>(
             Transform {
                 glm::vec3(0.0f, 2.0f, 10.0f),
-                glm::vec3(0.0f),
-                glm::vec3(1.0f)
+                glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(1.0f, 1.0f, 1.0f)
             },
             Viewport {
                 glm::vec2(0.0f, 0.0f),
@@ -161,16 +161,16 @@ int main(int argc, char *argv[]) {
     std::vector<std::shared_ptr<Object>> lines {
         std::static_pointer_cast<Object>(
             std::make_shared<Axes>(Transform {
-                glm::vec3(0.0f),
-                glm::vec3(0.0f),
-                glm::vec3(7.0f)
+                glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(7.0f, 7.0f, 7.0f)
             }, lineShaderProgram)
         ),
         std::static_pointer_cast<Object>(
             std::make_shared<Grid>(Transform {
-                glm::vec3(0.0f),
-                glm::vec3(0.0f),
-                glm::vec3(128.0f)
+                glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(128.0f, 128.0f, 128.0f)
             }, lineShaderProgram, 129)
         )
     };

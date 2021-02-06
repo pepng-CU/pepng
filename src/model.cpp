@@ -23,7 +23,7 @@ ModelBuilder* ModelBuilder::setName(std::string name) {
 
 ModelBuilder* ModelBuilder::calculateOffset(std::vector<glm::vec3> vertexArray, std::vector<unsigned int> faceArray) {
     int count = 0;
-    glm::vec3 offset = glm::vec3(0.0f);
+    glm::vec3 offset = glm::vec3(0.0f, 0.0f, 0.0f);
     std::unordered_set<unsigned int> seenPoints;
 
     for(auto faceIndex : faceArray) {
@@ -49,7 +49,7 @@ std::shared_ptr<Model> ModelBuilder::build() {
     return this->model;
 }
 
-Model::Model() : count(-1), vao(-1), offset(glm::vec3(0.0f)), hasElementArray(false) {}
+Model::Model() : count(-1), vao(-1), offset(glm::vec3(0.0f, 0.0f, 0.0f)), hasElementArray(false) {}
 
 Model::Model(const Model& model) : count(model.count), vao(model.vao), offset(glm::vec3(model.offset)), hasElementArray(model.hasElementArray) {}
 
