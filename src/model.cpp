@@ -194,7 +194,7 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
 GLuint createTexture(std::filesystem::path filePath) {
     int width, height, numComponents;
 
-    unsigned char* image = stbi_load(filePath.c_str(), &width, &height, &numComponents, STBI_rgb);
+    unsigned char* image = stbi_load((const char*)filePath.c_str(), &width, &height, &numComponents, STBI_rgb);
 
     if (image == NULL)
         throw std::runtime_error("Cannot load texture");
