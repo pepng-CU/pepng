@@ -3,6 +3,7 @@
 ## Build (NixOS)
 
 ```bash
+git submodule update --init --recursive
 nix-shell --command fish
 mkdir build
 cd build
@@ -19,9 +20,11 @@ You'll need to install OpenGL. Then cmake should work...
 Make sure to:
 
 ```bash
+git submodule update --init --recursive
 mkdir build
 cd build
 cmake ..
+make
 ```
 
 And not running cmake from root!
