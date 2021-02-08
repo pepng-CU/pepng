@@ -1,14 +1,30 @@
 #include "transform.hpp"
 
-Transform::Transform() : position(glm::vec3(0.0f, 0.0f, 0.0f)), scale(glm::vec3(1.0f, 1.0f, 1.0f)) {
+Transform::Transform() : 
+    position(glm::vec3(0.0f, 0.0f, 0.0f)), 
+    rotationX(glm::quat(glm::vec3(0.0f))),
+    rotationY(glm::quat(glm::vec3(0.0f))), 
+    rotationZ(glm::quat(glm::vec3(0.0f))), 
+    scale(glm::vec3(1.0f, 1.0f, 1.0f)) 
+{
     this->setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 }
 
-Transform::Transform(const Transform &transform) : position(transform.position), scale(transform.scale) {
-    this->setRotation(transform);
-}
+Transform::Transform(const Transform &transform) : 
+    position(transform.position), 
+    rotationX(glm::quat(transform.rotationX)), 
+    rotationY(glm::quat(transform.rotationY)), 
+    rotationZ(glm::quat(transform.rotationZ)), 
+    scale(transform.scale) 
+{}
 
-Transform::Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) : position(position), scale(scale) {
+Transform::Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) : 
+    position(position), 
+    rotationX(glm::quat(glm::vec3(0.0f))), 
+    rotationY(glm::quat(glm::vec3(0.0f))), 
+    rotationZ(glm::quat(glm::vec3(0.0f))), 
+    scale(scale) 
+{
     this->setRotation(rotation);
 }
 
@@ -88,9 +104,9 @@ void Transform::setRotation(glm::vec3 degRotation) {
 }
 
 void Transform::setRotation(const Transform& transform) {
-    this->rotationX = transform.rotationX;
-    this->rotationY = transform.rotationY;
-    this->rotationZ = transform.rotationZ;
+    this->rotationX = glm::quat(transform.rotationX);
+    this->rotationY = glm::quat(transform.rotationY);
+    this->rotationZ = glm::quat(transform.rotationZ);
 }
 
 void Transform::relativeTranslate(glm::vec3 delta) {
@@ -98,4 +114,16 @@ void Transform::relativeTranslate(glm::vec3 delta) {
         += this->getForward() * delta.x
         + this->getUp() * delta.y
         + this->getRight() * delta.z;
+}
+
+std::ostream& operator<<(std::ostream& os, const Transform& transform) {
+    os  << "Transform { Position: " 
+        << glm::to_string(transform.position) 
+        << ", Rotation: " 
+        << glm::to_string(transform.rotationX * transform.rotationY * transform.rotationZ) 
+        << ", Scale: " 
+        << glm::to_string(transform.scale)
+        << " }";
+
+    return os;
 }

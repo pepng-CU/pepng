@@ -34,4 +34,8 @@ class Camera : public Transform {
         virtual glm::vec3 getRight() override;
 
         virtual glm::quat getRotation() override;
+
+        friend std::ostream& operator<<(std::ostream& os, const Camera& camera);
 };
+
+std::ostream& operator<<(std::ostream& os, const Camera& camera);

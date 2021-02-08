@@ -45,3 +45,9 @@ glm::vec3 Camera::getForward() {
 glm::quat Camera::getRotation() {
     return this->rotationX * this->rotationY * this->rotationZ;
 }
+
+std::ostream& operator<<(std::ostream& os, const Camera& camera) {
+    os  << "Camera { " << (Transform&) camera << " }";
+
+    return os;
+}

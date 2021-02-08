@@ -1,8 +1,10 @@
 #pragma once
 
+#include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/quaternion.hpp>
 
 class Transform {
@@ -76,8 +78,12 @@ class Transform {
          * Gets the right vector relative to current rotation.
          */
         virtual glm::vec3 getRight();
+
+        friend std::ostream& operator<<(std::ostream& os, const Transform& transform);
     protected:
         glm::quat rotationX;
         glm::quat rotationY;
         glm::quat rotationZ;
 };
+
+std::ostream& operator<<(std::ostream& os, const Transform& transform);
