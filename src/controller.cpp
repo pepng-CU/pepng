@@ -29,13 +29,13 @@ void Controller::attachCallbacks() {
 
 void Controller::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
     for(auto component : instance->components) {
-        component->mouseButtonCallback(button, action);
+        component->mouseButtonCallback(window, button, action);
     }
 }
 
 void Controller::keyboardCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     for(auto component : instance->components) {
-        component->keyboardCallback(key, action);
+        component->keyboardCallback(window, key, action);
     }
 }
 
@@ -43,7 +43,7 @@ void Controller::scrollCallback(GLFWwindow* window, double xoffset, double yoffs
     glm::vec2 delta = glm::vec2(xoffset, yoffset);
 
     for(auto component : instance->components) {
-        component->scrollCallback(delta);
+        component->scrollCallback(window, delta);
     }
 }
 
@@ -52,7 +52,7 @@ void Controller::cursorPositionCallback(GLFWwindow* window, double xpos, double 
     glm::vec2 delta = mousePos - instance->previousMousePos;
 
     for(auto component : instance->components) {
-        component->cursorPositionCallback(delta);
+        component->cursorPositionCallback(window, delta);
     }
 
     instance->previousMousePos = mousePos;

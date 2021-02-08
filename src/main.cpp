@@ -190,6 +190,21 @@ int main(int argc, char *argv[]) {
 
     controller->attach(std::make_shared<FPSComponent>(std::static_pointer_cast<Transform>(cameras.at(0))));
 
+    std::vector<std::shared_ptr<Component>> objectComponents;
+
+    // TODO: Recursive object selection.
+    for(auto object : objects) {
+        objectComponents.push_back(
+            std::static_pointer_cast<Component>(
+                std::make_shared<MovementComponent>(
+                    object
+                )
+            )
+        );
+    }
+
+    controller->attach(std::make_shared<ObjectManagerComponent>(objectComponents)); 
+
     /**
      * OpenGL init
      */
@@ -243,20 +258,6 @@ int main(int argc, char *argv[]) {
         /**
          * Transform hierarchy input.
          */
-        if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS) {
-            selectedObject = 0;
-        } else if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
-            selectedObject = 1;
-        } else if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
-            selectedObject = 2;
-        } else if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
-            selectedObject = 3;
-        } else if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS) {
-            selectedObject = 4;
-        } else if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS) {
-            selectedObject = 5;
-        }
-
         if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
             renderMode = GL_TRIANGLES;
         }
@@ -268,120 +269,6 @@ int main(int argc, char *argv[]) {
         if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
             renderMode = GL_POINTS;
         }
-
-        if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-            std::shared_ptr<Object> object;
-
-            if (selectedObject == 0) {
-                object = objects.at(0);
-                
-            } else {
-                object = objects.at(0)->children.at(selectedObject - 1);
-            }
-
-            object->deltaRotate(glm::vec3(0.0f, -1.0f, 0.0f));
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-            std::shared_ptr<Object> object;
-            
-            if (selectedObject == 0) {
-                object = objects.at(0);
-                
-            } else {
-                object = objects.at(0)->children.at(selectedObject - 1);
-            }
-
-            object->deltaRotate(glm::vec3(0.0f, 1.0f, 0.0f));
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-            std::shared_ptr<Object> object;
-            
-            if (selectedObject == 0) {
-                object = objects.at(0);
-                
-            } else {
-                object = objects.at(0)->children.at(selectedObject - 1);
-            }
-
-            object->deltaRotate(glm::vec3(1.0f, 0.0f, 0.0f));
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-            std::shared_ptr<Object> object;
-            
-            if (selectedObject == 0) {
-                object = objects.at(0);
-                
-            } else {
-                object = objects.at(0)->children.at(selectedObject - 1);
-            }
-
-            object->deltaRotate(glm::vec3(-1.0f, 0.0f, 0.0f));
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS) {
-            std::shared_ptr<Object> object;
-            
-            if (selectedObject == 0) {
-                object = objects.at(0);
-                
-            } else {
-                object = objects.at(0)->children.at(selectedObject - 1);
-            }
-
-            object->position = glm::vec3(0.0f);
-            object->setRotation(glm::vec3(0.0f));
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-            std::shared_ptr<Object> object;
-            
-            if (selectedObject == 0) {
-                object = objects.at(0);
-            } else {
-                object = objects.at(0)->children.at(selectedObject - 1);
-            }
-
-            object->position += object->getForward() / 10.0f;
-        } 
-
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-            std::shared_ptr<Object> object;
-            
-            if (selectedObject == 0) {
-                object = objects.at(0);
-            } else {
-                object = objects.at(0)->children.at(selectedObject - 1);
-            }
-
-            object->position -= object->getForward() / 10.0f;
-        } 
-
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-            std::shared_ptr<Object> object;
-            
-            if (selectedObject == 0) {
-                object = objects.at(0);
-            } else {
-                object = objects.at(0)->children.at(selectedObject - 1);
-            }
-
-            object->position -= object->getRight() / 10.0f;
-        } 
-
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-            std::shared_ptr<Object> object;
-            
-            if (selectedObject == 0) {
-                object = objects.at(0);
-            } else {
-                object = objects.at(0)->children.at(selectedObject - 1);
-            }
-
-            object->position += object->getRight() / 10.0f;
-        } 
 
         /**
          * GLFW events.
