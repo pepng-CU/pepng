@@ -40,6 +40,8 @@ class MovementComponent : public Component {
     public:
         MovementComponent(std::shared_ptr<Transform> object, float positionSpeed = 0.1f, float rotationSpeed = 1.0f);
 
+        std::shared_ptr<Transform> getTransform();
+
         glm::vec3 getDeltaPosition(int key);
         glm::vec3 getDeltaRotation(int key);
 
@@ -56,13 +58,16 @@ class MovementComponent : public Component {
 
 class ObjectManagerComponent : public Component {
     public:
-        ObjectManagerComponent(std::vector<std::shared_ptr<Component>> components);
+        std::vector<std::shared_ptr<MovementComponent>> components;
+
+        ObjectManagerComponent(std::vector<std::shared_ptr<MovementComponent>> components);
+
+        std::shared_ptr<MovementComponent> getCurrentComponent();
 
         virtual void update() override;
         virtual void keyboardCallback(GLFWwindow* window, int key, int action) override;
     private:
-        int objectIndex;
-        std::vector<std::shared_ptr<Component>> components;
+        int componentIndex;
 };
 
 class EscapeComponent : public Component {

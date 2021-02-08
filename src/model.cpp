@@ -115,7 +115,7 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
         
         ss >> target;
 
-        if((target == "v" && vertexIndex.size() != 0) || !hasLine) {
+        if(((target == "o" || target == "v") && vertexIndex.size() != 0) || !hasLine) {
             std::vector<glm::vec3> mapVertex;
             for(auto index : vertexIndex) {
                 mapVertex.push_back(verticies.at(index));

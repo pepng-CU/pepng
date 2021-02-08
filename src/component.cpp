@@ -9,7 +9,7 @@ FPSComponent::FPSComponent(std::shared_ptr<Transform> object, float panSpeed, fl
 {}
 
 void FPSComponent::mouseButtonCallback(GLFWwindow* window, int button, int action) {
-    if(button == GLFW_MOUSE_BUTTON_LEFT) {
+    if(button == GLFW_MOUSE_BUTTON_MIDDLE) {
         this->isPanning = action == GLFW_PRESS;
     } 
     
@@ -95,7 +95,15 @@ void MovementComponent::update() {
     }
 }
 
-ObjectManagerComponent::ObjectManagerComponent(std::vector<std::shared_ptr<Component>> components) : components(components), objectIndex(0) {}
+std::shared_ptr<Transform> MovementComponent::getTransform() {
+    return this->object;
+}
+
+ObjectManagerComponent::ObjectManagerComponent(std::vector<std::shared_ptr<MovementComponent>> components) : components(components), componentIndex(0) {}
+
+std::shared_ptr<MovementComponent> ObjectManagerComponent::getCurrentComponent() {
+    return this->components.at(this->componentIndex);
+}
 
 void ObjectManagerComponent::update() {
     for(auto component : this->components) {
@@ -106,12 +114,12 @@ void ObjectManagerComponent::update() {
 void ObjectManagerComponent::keyboardCallback(GLFWwindow* window, int key, int action) {
     for(int i = GLFW_KEY_0; i <= std::min(GLFW_KEY_9, (int)(GLFW_KEY_0 + this->components.size() - 1)); i++) {
         if(glfwGetKey(window, i) == GLFW_PRESS) {
-            this->objectIndex = i - GLFW_KEY_0;
+            this->componentIndex = i - GLFW_KEY_0;
             break;
         }
     }
 
-    this->components.at(this->objectIndex)->keyboardCallback(window, key, action);
+    this->components.at(this->componentIndex)->keyboardCallback(window, key, action);
 }
 
 void EscapeComponent::keyboardCallback(GLFWwindow* window, int key, int action) {

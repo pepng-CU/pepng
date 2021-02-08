@@ -62,6 +62,8 @@ class Transform {
 
         void setRotation(const Transform& transform);
 
+        glm::vec3 getEuler();
+
         virtual glm::quat getRotation();
 
         /**

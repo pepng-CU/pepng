@@ -30,6 +30,8 @@ Object::Object(const Object& object) :
 
 std::shared_ptr<Object> Object::fromOBJ(std::filesystem::path filepath, GLuint shaderProgram, Transform transform) {
     std::shared_ptr<Object> object = std::make_shared<Object>(transform);
+    
+    object->model->name = filepath.filename();
 
     for(auto model : Model::fromOBJ(filepath)) {
         object->children.push_back(

@@ -14,6 +14,10 @@
 
 class Object : public Transform {
     public:
+        std::shared_ptr<Model> model;
+
+        std::vector<std::shared_ptr<Object>> children;
+
         Object(Transform transform);
 
         Object(Transform transform, GLuint shaderProgram);
@@ -29,11 +33,7 @@ class Object : public Transform {
         friend std::ostream& operator<<(std::ostream& os, const Object& object);
         
     protected:
-        std::shared_ptr<Model> model;
-
         GLuint shaderProgram;
-
-        std::vector<std::shared_ptr<Object>> children;
 };
 
 std::ostream& operator<<(std::ostream& os, const Object& object);

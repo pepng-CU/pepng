@@ -35,6 +35,28 @@
 #include "controller.hpp"
 #include "component.hpp"
 
+void objectHierarchy(std::shared_ptr<Object> object) {
+    if(ImGui::TreeNode(object->model->name.c_str())) {
+        for(auto child : object->children) {
+            objectHierarchy(child);
+        }
+
+        ImGui::TreePop();
+    }
+}
+
+void objectMovementComponent(std::shared_ptr<Object> object, std::vector<std::shared_ptr<MovementComponent>>* list) {
+    list->push_back(
+        std::make_shared<MovementComponent>(
+            object
+        )
+    );
+
+    for(auto child : object->children) {
+        objectMovementComponent(child, list);
+    }
+}
+
 int main(int argc, char *argv[]) {
     srand(time(NULL));
 
@@ -161,20 +183,14 @@ int main(int argc, char *argv[]) {
 
     controller->attach(std::make_shared<FPSComponent>(std::static_pointer_cast<Transform>(cameras.at(0))));
 
-    std::vector<std::shared_ptr<Component>> objectComponents;
+    std::vector<std::shared_ptr<MovementComponent>> objectComponents;
 
-    // TODO: Recursive object selection.
     for(auto object : objects) {
-        objectComponents.push_back(
-            std::static_pointer_cast<Component>(
-                std::make_shared<MovementComponent>(
-                    object
-                )
-            )
-        );
+        objectMovementComponent(object, &objectComponents);
     }
 
-    controller->attach(std::make_shared<ObjectManagerComponent>(objectComponents)); 
+    auto objectManager = std::make_shared<ObjectManagerComponent>(objectComponents);
+    controller->attach(objectManager); 
     controller->attach(std::make_shared<EscapeComponent>());
 
     auto renderMode = std::make_shared<GLenum>(GL_TRIANGLES);
@@ -207,6 +223,66 @@ int main(int argc, char *argv[]) {
 
         // Update input.
         controller->update();
+
+        /**
+         * ImGui
+         */
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::Begin("Hierarchy");
+        
+        for(auto object : objects) {
+            objectHierarchy(object);
+        }
+
+        ImGui::End();
+
+        ImGui::Begin("Inspector");
+        // TODO: Check if it is actually an object...
+        auto currentObject = std::static_pointer_cast<Object>(objectManager->getCurrentComponent()->getTransform());
+
+        ImGui::LabelText("Name", currentObject->model->name.c_str());
+
+        if(ImGui::CollapsingHeader("Transform")) {
+            glm::vec3 rotation = glm::degrees(currentObject->getEuler());
+
+            ImGui::InputFloat3("Position", glm::value_ptr(currentObject->position));
+            ImGui::InputFloat3("Rotation", glm::value_ptr(rotation));
+            ImGui::InputFloat3("Scale", glm::value_ptr(currentObject->scale));
+        }
+
+        ImGui::End();
+
+        ImGui::Begin("Debug");
+
+        if(ImGui::Button("Create Cube")) {
+            auto object = Object::fromOBJ(modelpath / "cube.obj", shaderProgram, Transform {
+                glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(1.0f, 1.0f, 1.0f)
+            });
+
+            objects.push_back(object);
+
+            objectManager->components.push_back(std::make_shared<MovementComponent>(object));
+        } else if(ImGui::Button("Create Sponza")) {
+            auto object = Object::fromOBJ(modelpath / "sponza.obj", shaderProgram, Transform {
+                glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(1.0f, 1.0f, 1.0f)
+            });
+
+            objects.push_back(object);
+
+            objectManager->components.push_back(std::make_shared<MovementComponent>(object));
+        }
+
+        ImGui::End();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         /**
          * GLFW events.

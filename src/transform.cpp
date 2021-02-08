@@ -114,6 +114,10 @@ void Transform::relativeTranslate(glm::vec3 delta) {
         + this->getRight() * delta.z;
 }
 
+glm::vec3 Transform::getEuler() {
+    return glm::eulerAngles(this->getRotation());
+}
+
 std::ostream& operator<<(std::ostream& os, const Transform& transform) {
     os  << "Transform { Position: " 
         << glm::to_string(transform.position) 
