@@ -130,4 +130,4 @@ class ModelBuilder {
  * 
  * TODO: definitely clean this up!
  */
-GLuint createTexture(std::filesystem::path filePath);
+GLuint createTexture(const std::string& filePath);

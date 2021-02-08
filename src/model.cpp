@@ -191,13 +191,15 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
     return models;
 }
 
-GLuint createTexture(std::filesystem::path filePath) {
+GLuint createTexture(const std::string& filePath) {
     int width, height, numComponents;
 
-    unsigned char* image = stbi_load((const char*)filePath.c_str(), &width, &height, &numComponents, STBI_rgb);
+    unsigned char* image = stbi_load(filePath.c_str(), &width, &height, &numComponents, STBI_rgb);
 
-    if (image == NULL)
+    if (image == NULL){
+        std::cout << "Cannot load texture: " << filePath << std::endl;
         throw std::runtime_error("Cannot load texture");
+    }
 
     GLuint texture;
 

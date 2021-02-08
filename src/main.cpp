@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
     // Find the textures directory
     auto texturespath = utils::getPath("textures");
 
-    //createTexture(texturespath / "honeycomb.jpg");
+    createTexture((const std::string&)(texturespath / "honeycomb.jpg").u8string());
 
     /**
      * Shader loading
