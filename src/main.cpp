@@ -197,14 +197,14 @@ int main(int argc, char *argv[]) {
 
     glm::vec2 clickPosition = glm::vec2();
 
+    // Object logging - TODO: Remove!
+    std::cout << *cameras.at(0) << std::endl;
+    std::cout << *objects.at(0) << std::endl;
+
     // Program loop.
     while (!glfwWindowShouldClose(window)) {
         // Clears depth + color buffer.
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-        
-        // Object logging - TODO: Remove!
-        std::cout << *cameras.at(0) << std::endl;
-        std::cout << *objects.at(0) << std::endl;
 
         /**
          * Rendering.

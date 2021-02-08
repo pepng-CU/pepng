@@ -94,7 +94,7 @@ void Transform::deltaRotate(glm::vec3 degDelta) {
 }
 
 void Transform::setRotation(glm::vec3 degRotation) {
-    glm::vec3 rotation = glm::radians(rotation);
+    glm::vec3 rotation = glm::radians(degRotation);
 
     this->rotationX = glm::quat(glm::vec3(rotation.x, 0.0f, 0.0f));
     this->rotationY = glm::quat(glm::vec3(0.0f, rotation.y, 0.0f));
