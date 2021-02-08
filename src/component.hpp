@@ -20,12 +20,15 @@ class Component {
 
 class FPSComponent : public Component {
     public:
-        FPSComponent(std::shared_ptr<Transform> object);
+        FPSComponent(std::shared_ptr<Transform> object, float panSpeed = 0.025f, float rotationSpeed = 0.25f);
 
         virtual void mouseButtonCallback(GLFWwindow* window, int button, int action) override;
         virtual void scrollCallback(GLFWwindow* window, glm::vec2 delta) override;
         virtual void cursorPositionCallback(GLFWwindow* window, glm::vec2 delta) override;
     private:
+        float panSpeed;
+        float rotationSpeed;
+
         bool isPanning;
         bool isRotating;
 
@@ -39,16 +42,14 @@ class MovementComponent : public Component {
         glm::vec3 getDeltaPosition(int key);
         glm::vec3 getDeltaRotation(int key);
 
-        bool hasDeltaPosition(int key);
-        bool hasDeltaRotation(int key);
-
         virtual void update() override;
         virtual void keyboardCallback(GLFWwindow* window, int key, int action) override;
     private:
-        glm::vec3 deltaPosition;
-        glm::vec3 deltaRotation;
         float positionSpeed;
         float rotationSpeed;
+
+        glm::vec3 deltaPosition;
+        glm::vec3 deltaRotation;
         std::shared_ptr<Transform> object;
 };
 
@@ -61,4 +62,21 @@ class ObjectManagerComponent : public Component {
     private:
         int objectIndex;
         std::vector<std::shared_ptr<Component>> components;
+};
+
+class EscapeComponent : public Component {
+    public:
+        virtual void keyboardCallback(GLFWwindow* window, int key, int action) override;
+};
+
+class RenderModeComponent : public Component {
+    public:
+        RenderModeComponent(std::shared_ptr<GLenum> renderMode);
+
+        GLenum getRenderMode(int key);
+        bool hasRenderMode(int key);
+
+        virtual void keyboardCallback(GLFWwindow* window, int key, int action) override;
+    private:
+        std::shared_ptr<GLenum> renderMode;
 };

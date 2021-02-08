@@ -21,7 +21,6 @@ class Viewport {
 class Camera : public Transform {
     public:
         Viewport viewport;
-        glm::mat4 projection;
 
         Camera(Transform transform, Viewport viewport, glm::mat4 projection);
 
@@ -36,6 +35,9 @@ class Camera : public Transform {
         virtual glm::quat getRotation() override;
 
         friend std::ostream& operator<<(std::ostream& os, const Camera& camera);
+
+    private:
+        glm::mat4 projection;
 };
 
 std::ostream& operator<<(std::ostream& os, const Camera& camera);

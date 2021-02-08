@@ -47,7 +47,9 @@ glm::quat Camera::getRotation() {
 }
 
 std::ostream& operator<<(std::ostream& os, const Camera& camera) {
-    os  << "Camera { " << (Transform&) camera << " }";
+    os  << "Camera { " 
+        << (Transform&) camera 
+        << " }";
 
     return os;
 }

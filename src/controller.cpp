@@ -1,6 +1,6 @@
 #include "controller.hpp"
 
-Controller* Controller::instance = nullptr;
+std::shared_ptr<Controller> Controller::instance = nullptr;
 
 Controller::Controller(GLFWwindow* window) : window(window) {}
 
@@ -8,7 +8,7 @@ void Controller::attach(std::shared_ptr<Component> component) {
     this->components.push_back(component);
 }
 
-void Controller::setInstance(Controller* controller) {
+void Controller::setInstance(std::shared_ptr<Controller> controller) {
     instance = controller;
 
     controller->attachCallbacks();

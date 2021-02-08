@@ -1,7 +1,5 @@
 #include "object.hpp"
 
-Object::Object() : Object(Transform {}) {}
-
 Object::Object(Transform transform) : Object(transform, -1) {}
 
 Object::Object(Transform transform, GLuint shaderProgram) : 
@@ -54,18 +52,22 @@ void Object::render(std::shared_ptr<Camera> camera, GLenum mode, glm::mat4 paren
 
         camera->render(this->shaderProgram);
 
-        glUniformMatrix4fv(
-            glGetUniformLocation(shaderProgram, "u_world"),
-            1,
-            GL_FALSE,
+        GLuint uWorld = glGetUniformLocation(shaderProgram, "u_world");
+
+        if(uWorld >= 0) {
             // Offsets the object to rotate around the object origin 
             // instead of world origin. The object is then put back in place.
-            glm::value_ptr(parentMatrix 
-                * this->model->getOffsetMatrix() 
-                * worldMatrix
-                * this->model->getNegativeOffsetMatrix()
-            )
-        );
+            glUniformMatrix4fv(
+                uWorld,
+                1,
+                GL_FALSE,
+                glm::value_ptr(parentMatrix 
+                    * this->model->getOffsetMatrix() 
+                    * worldMatrix
+                    * this->model->getNegativeOffsetMatrix()
+                )
+            );
+        }
 
         this->model->render(shaderProgram, mode);
     }
@@ -76,7 +78,9 @@ void Object::render(std::shared_ptr<Camera> camera, GLenum mode, glm::mat4 paren
 }
 
 std::ostream& operator<<(std::ostream& os, const Object& object) {
-    os  << "Object { " << (Transform&) object << " }";
+    os  << "Object { " 
+        << (Transform&) object 
+        << " }";
 
     return os;
 }

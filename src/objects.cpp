@@ -1,10 +1,8 @@
 #include "objects.hpp"
 
-Axes::Axes() : Object() {}
-
 Axes::Axes(Transform transform, GLuint shaderProgram) : Object(transform, shaderProgram) {
-    this->model = std::make_shared<ModelBuilder>()
-        ->attachBuffer(
+    this->model = ModelBuilder()
+        .attachBuffer(
             std::vector { 
                 glm::vec3(0.0f, 0.0f, 0.0f),
                 glm::vec3(1.0f, 0.0f, 0.0f), 
@@ -17,7 +15,7 @@ Axes::Axes(Transform transform, GLuint shaderProgram) : Object(transform, shader
             0, 
             3
         )
-        ->attachBuffer(
+        .attachBuffer(
             std::vector { 
                 glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 
                 glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 
@@ -30,7 +28,7 @@ Axes::Axes(Transform transform, GLuint shaderProgram) : Object(transform, shader
             1, 
             4
         )
-        ->attachBuffer(
+        .attachBuffer(
             std::vector {
                 0, 1, 
                 2, 3, 
@@ -39,7 +37,7 @@ Axes::Axes(Transform transform, GLuint shaderProgram) : Object(transform, shader
             GL_ELEMENT_ARRAY_BUFFER,
             true
         )
-        ->build();
+        .build();
 }
 
 void Axes::render(std::shared_ptr<Camera> camera, GLenum mode, glm::mat4 parentMatrix) {
@@ -49,8 +47,6 @@ void Axes::render(std::shared_ptr<Camera> camera, GLenum mode, glm::mat4 parentM
 
     glLineWidth(1.0f);
 }
-
-Grid::Grid() : Object() {}
 
 Grid::Grid(Transform transform, GLuint shaderProgram, int count, glm::vec4 color) : Object(transform, shaderProgram) {
     if (count < 2) {
@@ -78,23 +74,23 @@ Grid::Grid(Transform transform, GLuint shaderProgram, int count, glm::vec4 color
         colors.push_back(color);
     }
 
-    this->model = std::make_shared<ModelBuilder>()
-        ->attachBuffer(
+    this->model = ModelBuilder()
+        .attachBuffer(
             verticies,
             GL_ARRAY_BUFFER,
             0,
             3
         )
-        ->attachBuffer(
+        .attachBuffer(
             colors,
             GL_ARRAY_BUFFER,
             1,
             4
         )
-        ->attachBuffer(
+        .attachBuffer(
             indicies,
             GL_ELEMENT_ARRAY_BUFFER,
             true
         )
-        ->build();
+        .build();
 }

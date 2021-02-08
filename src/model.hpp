@@ -70,17 +70,17 @@ class ModelBuilder {
 
         std::shared_ptr<Model> build();
 
-        ModelBuilder* setName(std::string name);
+        ModelBuilder& setName(std::string name);
 
-        ModelBuilder* setCount(unsigned int count);
+        ModelBuilder& setCount(unsigned int count);
 
-        ModelBuilder* calculateOffset(std::vector<glm::vec3> vertexArray, std::vector<unsigned int> faceArray);
+        ModelBuilder& calculateOffset(std::vector<glm::vec3> vertexArray, std::vector<unsigned int> faceArray);
         
         /**
          * Creates and binds a GL buffer.
          */
         template <typename T>
-        ModelBuilder* attachBuffer(std::vector<T> vectors, GLenum type, bool isCount = false) {
+        ModelBuilder& attachBuffer(std::vector<T> vectors, GLenum type, bool isCount = false) {
             GLuint buffer;
 
             glGenBuffers(1, &buffer);
@@ -94,14 +94,14 @@ class ModelBuilder {
             // TODO: better check for this...
             this->model->hasElementArray = true;
 
-            return this;
+            return *this;
         }
 
         /**
          * Creates and binds a GL buffer.
          */
         template <typename T>
-        ModelBuilder* attachBuffer(std::vector<T> vectors, GLenum type, int index, int size) {
+        ModelBuilder& attachBuffer(std::vector<T> vectors, GLenum type, int index, int size) {
             GLuint buffer;
 
             glGenBuffers(1, &buffer);
@@ -119,7 +119,7 @@ class ModelBuilder {
 
             glEnableVertexAttribArray(index);
 
-            return this;
+            return *this;
         }
     private:
         std::shared_ptr<Model> model;
@@ -130,4 +130,4 @@ class ModelBuilder {
  * 
  * TODO: definitely clean this up!
  */
-GLuint createTexture(const std::string& filePath);
+GLuint createTexture(const std::filesystem::path& filePath);

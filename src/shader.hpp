@@ -25,10 +25,12 @@ const std::string readShader(std::filesystem::path filepath);
 GLuint compileShader(const std::string shader, GLenum shaderType);
 
 class ShaderBuilder {
-    std::vector<GLuint> shaders;
-    GLuint shaderProgram;
-public:
-    ShaderBuilder(); // Create a shader program
-    ShaderBuilder& operator<<(GLuint shader); // Add a shader to the shaders list
-    GLuint finish(); // Attach and link all shaders
+    public:
+        ShaderBuilder();
+        ShaderBuilder& attach(GLuint shader);
+        GLuint build();
+
+    private:
+        std::vector<GLuint> shaders;
+        GLuint shaderProgram;
 };

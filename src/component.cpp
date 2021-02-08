@@ -1,6 +1,12 @@
 #include "component.hpp"
         
-FPSComponent::FPSComponent(std::shared_ptr<Transform> object) : object(object), isPanning(false), isRotating(false) {}
+FPSComponent::FPSComponent(std::shared_ptr<Transform> object, float panSpeed, float rotationSpeed) : 
+    object(object), 
+    isPanning(false), 
+    isRotating(false),
+    panSpeed(panSpeed),
+    rotationSpeed(rotationSpeed)
+{}
 
 void FPSComponent::mouseButtonCallback(GLFWwindow* window, int button, int action) {
     if(button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -18,11 +24,11 @@ void FPSComponent::scrollCallback(GLFWwindow* window, glm::vec2 delta) {
 
 void FPSComponent::cursorPositionCallback(GLFWwindow* window, glm::vec2 delta) {
     if(this->isPanning) {
-        this->object->position += this->object->getUp() * delta.y / 10.0f + this->object->getRight() * delta.x / 10.0f;
+        this->object->position += this->object->getUp() * delta.y * this->panSpeed + this->object->getRight() * delta.x * this->panSpeed;
     } 
 
     if(this->isRotating) {
-        this->object->deltaRotate(glm::vec3(delta.y, delta.x, 0.0f));
+        this->object->deltaRotate(glm::vec3(delta.y, delta.x, 0.0f) * this->rotationSpeed);
     }
 }
 
@@ -62,14 +68,6 @@ glm::vec3 MovementComponent::getDeltaRotation(int key) {
         default:
             return glm::vec3(0.0f);
     }
-}
-
-bool MovementComponent::hasDeltaPosition(int key) {
-    return glm::length(this->getDeltaPosition(key)) > 0.5f;
-}
-
-bool MovementComponent::hasDeltaRotation(int key) {
-    return glm::length(this->getDeltaRotation(key)) > 0.5f;
 }
 
 void MovementComponent::keyboardCallback(GLFWwindow* window, int key, int action) {
@@ -114,4 +112,39 @@ void ObjectManagerComponent::keyboardCallback(GLFWwindow* window, int key, int a
     }
 
     this->components.at(this->objectIndex)->keyboardCallback(window, key, action);
+}
+
+void EscapeComponent::keyboardCallback(GLFWwindow* window, int key, int action) {
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, true);
+    }
+}
+
+RenderModeComponent::RenderModeComponent(std::shared_ptr<GLenum> renderMode) : renderMode(renderMode) {}
+
+GLenum RenderModeComponent::getRenderMode(int key) {
+    switch(key) {
+        case GLFW_KEY_T:
+            return GL_TRIANGLES;
+        case GLFW_KEY_P:
+            return GL_POINTS;
+        case GLFW_KEY_L:
+            return GL_LINES;
+        default:
+            return -1;
+    }
+}
+
+bool RenderModeComponent::hasRenderMode(int key) {
+    return this->getRenderMode(key) != -1;
+}
+
+void RenderModeComponent::keyboardCallback(GLFWwindow* window, int key, int action) {
+    if (action != GLFW_PRESS) {
+        return;
+    }
+
+    if(this->hasRenderMode(key)) {
+        *this->renderMode = this->getRenderMode(key);
+    }
 }

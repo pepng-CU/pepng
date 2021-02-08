@@ -9,19 +9,19 @@ ModelBuilder::ModelBuilder() : model(std::make_shared<Model>()) {
     this->model->vao = vao;
 }
 
-ModelBuilder* ModelBuilder::setCount(unsigned int count) {
+ModelBuilder& ModelBuilder::setCount(unsigned int count) {
     this->model->count = count;
 
-    return this;
+    return *this;
 }
 
-ModelBuilder* ModelBuilder::setName(std::string name) {
+ModelBuilder& ModelBuilder::setName(std::string name) {
     this->model->name = name;
 
-    return this;
+    return *this;
 }
 
-ModelBuilder* ModelBuilder::calculateOffset(std::vector<glm::vec3> vertexArray, std::vector<unsigned int> faceArray) {
+ModelBuilder& ModelBuilder::calculateOffset(std::vector<glm::vec3> vertexArray, std::vector<unsigned int> faceArray) {
     int count = 0;
     glm::vec3 offset = glm::vec3(0.0f, 0.0f, 0.0f);
     std::unordered_set<unsigned int> seenPoints;
@@ -42,7 +42,7 @@ ModelBuilder* ModelBuilder::calculateOffset(std::vector<glm::vec3> vertexArray, 
 
     this->model->offset = offset;
 
-    return this;
+    return *this;
 }
 
 std::shared_ptr<Model> ModelBuilder::build() {
@@ -132,14 +132,14 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
             }
 
             models.push_back(
-                std::make_shared<ModelBuilder>()
-                    ->setName(name)
-                    ->attachBuffer(mapVertex, GL_ARRAY_BUFFER, 0, 3)
-                    ->attachBuffer(mapNormal, GL_ARRAY_BUFFER, 1, 3)
-                    ->attachBuffer(mapTexture, GL_ARRAY_BUFFER, 2, 2)
-                    ->setCount(mapVertex.size())
-                    ->calculateOffset(verticies, vertexIndex)
-                    ->build()
+                ModelBuilder()
+                    .setName(name)
+                    .attachBuffer(mapVertex, GL_ARRAY_BUFFER, 0, 3)
+                    .attachBuffer(mapNormal, GL_ARRAY_BUFFER, 1, 3)
+                    .attachBuffer(mapTexture, GL_ARRAY_BUFFER, 2, 2)
+                    .setCount(mapVertex.size())
+                    .calculateOffset(verticies, vertexIndex)
+                    .build()
             );
 
             vertexIndex.clear();
@@ -191,8 +191,14 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
     return models;
 }
 
-GLuint createTexture(const std::string& filePath) {
+GLuint createTexture(const std::filesystem::path& filePath) {
     int width, height, numComponents;
+
+    #ifdef _MSC_VER
+        const std::string& filePathString = (const std::string&) filePath.u8string();
+    #else
+        const std::string& filePathString = (const std::string&) filePath;
+    #endif
 
     unsigned char* image = stbi_load(filePath.c_str(), &width, &height, &numComponents, STBI_rgb);
 

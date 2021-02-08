@@ -34,19 +34,17 @@ GLuint compileShader(const std::string shaderSource, GLenum shaderType) {
     return shader;
 }
 
-/* Every creation of ShaderBuilder will create a new shader program in opengl.
-This is not a problem now but might become one */
 ShaderBuilder::ShaderBuilder() {
     shaderProgram = glCreateProgram();
 }
 
-ShaderBuilder& ShaderBuilder::operator<<(GLuint shader) {
+ShaderBuilder& ShaderBuilder::attach(GLuint shader) {
     shaders.push_back(shader);
-
+    
     return *this;
 }
 
-GLuint ShaderBuilder::finish() {
+GLuint ShaderBuilder::build() {
     for (GLuint shader : shaders) {
         glAttachShader(shaderProgram, shader);
     }
@@ -60,10 +58,10 @@ GLuint ShaderBuilder::finish() {
 
     if(!success) {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        
         std::stringstream ss;
         ss << "ERROR::PROGRAM::LINKING_FAILED" << std::endl << infoLog << std::endl;
-        // Doesn't render on terminal if not
-        std::cout << ss.str() << std::endl; 
+
         throw std::runtime_error(ss.str());
     }
 

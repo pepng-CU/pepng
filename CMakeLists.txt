@@ -24,6 +24,8 @@ include(BuildGLEW)
 include(BuildGLFW)
 include(BuildGLM)
 
+add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/imgui-cmake)
+
 set(EXEC main)
 
 file(GLOB SRC src/*.cpp)
@@ -34,7 +36,7 @@ include_directories(${CMAKE_SOURCE_DIR}/thirdparty/stb)
 
 link_directories(${EXEC} ${CMAKE_SOURCE_DIR}/thirdparty/stb) 
 
-target_link_libraries(${EXEC} OpenGL::GL glew_s glfw glm)
+target_link_libraries(${EXEC} OpenGL::GL glew_s glfw glm imgui)
 
 list(APPEND BIN ${EXEC})
 
