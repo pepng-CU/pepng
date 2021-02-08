@@ -30,6 +30,8 @@
 #include "transform.hpp"
 #include "object.hpp"
 #include "objects.hpp"
+#include "controller.hpp"
+#include "component.hpp"
 
 void GLAPIENTRY
 MessageCallback( GLenum source,
@@ -89,7 +91,11 @@ int main(int argc, char *argv[]) {
     // Find the textures directory
     auto texturespath = utils::getPath("textures");
 
-    createTexture((const std::string&)(texturespath / "honeycomb.jpg").u8string());
+    #ifdef _MSC_VER
+        createTexture((const std::string&)(texturespath / "honeycomb.jpg").u8string());
+    #else
+        createTexture((const std::string&)(texturespath / "honeycomb.jpg"));
+    #endif
 
     /**
      * Shader loading
@@ -175,6 +181,18 @@ int main(int argc, char *argv[]) {
         )
     };
 
+    /**
+     * Controller
+     */
+    auto controller = new Controller(window);
+
+    Controller::setInstance(controller);
+
+    controller->attach(std::make_shared<FPSComponent>(std::static_pointer_cast<Transform>(cameras.at(0))));
+
+    /**
+     * OpenGL init
+     */
     // Sets background color.
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -196,10 +214,6 @@ int main(int argc, char *argv[]) {
     GLenum renderMode = GL_TRIANGLES;
 
     glm::vec2 clickPosition = glm::vec2();
-
-    // Object logging - TODO: Remove!
-    std::cout << *cameras.at(0) << std::endl;
-    std::cout << *objects.at(0) << std::endl;
 
     // Program loop.
     while (!glfwWindowShouldClose(window)) {
@@ -370,46 +384,12 @@ int main(int argc, char *argv[]) {
         } 
 
         /**
-         * FPS Input.
-         */
-        double mouseX, mouseY;
-
-        glfwGetCursorPos(window, &mouseX, &mouseY);
-
-        bool leftClicked = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
-        bool middleClicked = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
-        bool rightClicked = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
-
-        for(auto camera : cameras) {
-            if (leftClicked || rightClicked || middleClicked) {
-                if (clickPosition.x == 0 && clickPosition.y == 0) {
-                    clickPosition = glm::vec2((float) mouseX, (float) mouseY);
-                }
-            } else {
-                clickPosition = glm::vec2();
-            }
-
-            float mouseDx = std::clamp(((float) mouseX - clickPosition.x) / 40.0f, -3.0f, 3.0f);
-            float mouseDy = std::clamp(((float) mouseY - clickPosition.y) / 40.0f, -3.0f, 3.0f);
-
-            if (leftClicked) {
-                camera->position += camera->getForward() * mouseDy / 10.0f;
-            }
-
-            if (middleClicked) {
-                camera->position += camera->getUp() * mouseDy / 10.0f + camera->getRight() * mouseDx / 10.0f;
-            }
-
-            if (rightClicked) {
-                camera->deltaRotate(glm::vec3(mouseDy, mouseDx, 0.0f));
-            }
-        }
-
-        /**
          * GLFW events.
          */
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        controller->update();
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, true);
