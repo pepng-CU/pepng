@@ -97,7 +97,7 @@ void ObjectManagerComponent::update() {
 void ObjectManagerComponent::keyboardCallback(GLFWwindow* window, int key, int action) {
     for(int i = GLFW_KEY_0; i <= std::min(GLFW_KEY_9, (int)(GLFW_KEY_0 + this->components.size())); i++) {
         if(glfwGetKey(window, i) == GLFW_PRESS) {
-            this->objectIndex = i - 49;
+            this->objectIndex = i - GLFW_KEY_0;
             break;
         }
     }
