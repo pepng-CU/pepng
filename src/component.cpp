@@ -16,7 +16,7 @@ void FPSComponent::keyboardCallback(int key, int action) {
 }
 
 void FPSComponent::scrollCallback(glm::vec2 delta) {
-    this->object->position += this->object->getForward() * delta.y / 10.0f;
+    this->object->position -= this->object->getForward() * delta.y;
 }
 
 void FPSComponent::cursorPositionCallback(glm::vec2 delta) {
