@@ -26,7 +26,13 @@ void FPSComponent::cursorPositionCallback(GLFWwindow* window, glm::vec2 delta) {
     }
 }
 
-MovementComponent::MovementComponent(std::shared_ptr<Transform> object) : object(object), deltaPosition(glm::vec3(0.0f)), deltaRotation(glm::vec3(0.0f)) {}
+MovementComponent::MovementComponent(std::shared_ptr<Transform> object, float positionSpeed, float rotationSpeed) :
+    object(object), 
+    deltaPosition(glm::vec3(0.0f)), 
+    deltaRotation(glm::vec3(0.0f)),
+    positionSpeed(positionSpeed),
+    rotationSpeed(rotationSpeed)
+{}
 
 glm::vec3 MovementComponent::getDeltaPosition(int key) {
     switch(key) {
@@ -82,8 +88,13 @@ void MovementComponent::keyboardCallback(GLFWwindow* window, int key, int action
 }
 
 void MovementComponent::update() {
-    this->object->position += glm::vec3(this->object->getRotationMatrix() * glm::vec4(this->deltaPosition, 0.0f));
-    this->object->deltaRotate(this->deltaRotation);
+    if(glm::length(this->deltaPosition) > 0.0f) {
+        this->object->position += glm::normalize(glm::vec3(this->object->getRotationMatrix() * glm::vec4(this->deltaPosition, 0.0f))) * this->positionSpeed;
+    }
+    
+    if(glm::length(this->deltaRotation) > 0.0f) {
+        this->object->deltaRotate(glm::normalize(this->deltaRotation) * this->rotationSpeed);
+    }
 }
 
 ObjectManagerComponent::ObjectManagerComponent(std::vector<std::shared_ptr<Component>> components) : components(components), objectIndex(0) {}
@@ -95,7 +106,7 @@ void ObjectManagerComponent::update() {
 }
 
 void ObjectManagerComponent::keyboardCallback(GLFWwindow* window, int key, int action) {
-    for(int i = GLFW_KEY_0; i <= std::min(GLFW_KEY_9, (int)(GLFW_KEY_0 + this->components.size())); i++) {
+    for(int i = GLFW_KEY_0; i <= std::min(GLFW_KEY_9, (int)(GLFW_KEY_0 + this->components.size() - 1)); i++) {
         if(glfwGetKey(window, i) == GLFW_PRESS) {
             this->objectIndex = i - GLFW_KEY_0;
             break;

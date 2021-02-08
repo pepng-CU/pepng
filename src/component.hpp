@@ -34,7 +34,7 @@ class FPSComponent : public Component {
 
 class MovementComponent : public Component {
     public:
-        MovementComponent(std::shared_ptr<Transform> object);
+        MovementComponent(std::shared_ptr<Transform> object, float positionSpeed = 0.1f, float rotationSpeed = 1.0f);
 
         glm::vec3 getDeltaPosition(int key);
         glm::vec3 getDeltaRotation(int key);
@@ -47,6 +47,8 @@ class MovementComponent : public Component {
     private:
         glm::vec3 deltaPosition;
         glm::vec3 deltaRotation;
+        float positionSpeed;
+        float rotationSpeed;
         std::shared_ptr<Transform> object;
 };
 
