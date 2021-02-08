@@ -111,11 +111,6 @@ int main(int argc, char *argv[]) {
             glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec3(1.0f, 1.0f, 1.0f)
-        }),
-        Object::fromOBJ(modelpath / "sponza.obj", shaderProgram, Transform {
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(1.0f, 1.0f, 1.0f)
         })
     };
 
