@@ -98,10 +98,10 @@ int main(int argc, char *argv[]) {
     auto shaderpath = utils::getPath("shaders");
 
     // Object shader
-    std::string vertexSource = readShader(shaderpath / "vertex.glsl");
+    std::string vertexSource = readShader(shaderpath / "object/vertex.glsl");
     GLuint vertexShader = compileShader(vertexSource, GL_VERTEX_SHADER);
 
-    std::string fragmentSource = readShader(shaderpath / "fragment.glsl");
+    std::string fragmentSource = readShader(shaderpath / "object/fragment.glsl");
     GLuint fragmentShader = compileShader(fragmentSource, GL_FRAGMENT_SHADER);
 
     ShaderBuilder sb;
@@ -111,10 +111,10 @@ int main(int argc, char *argv[]) {
     GLuint shaderProgram = sb.finish();
 
     // Line shader
-    vertexSource = readShader(shaderpath / "lineVertex.glsl");
+    vertexSource = readShader(shaderpath / "line/vertex.glsl");
     vertexShader = compileShader(vertexSource, GL_VERTEX_SHADER);
 
-    fragmentSource = readShader(shaderpath / "lineFragment.glsl");
+    fragmentSource = readShader(shaderpath / "line/fragment.glsl");
     fragmentShader = compileShader(fragmentSource, GL_FRAGMENT_SHADER);
 
     sb = ShaderBuilder();
