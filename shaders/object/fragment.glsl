@@ -7,5 +7,5 @@ in float light;
 uniform sampler2D u_texture;
 
 void main(void) {
-    color = vec4(light, light, light, 1.0);
+    color = texture(u_texture, tex_coord) * light;
 }
