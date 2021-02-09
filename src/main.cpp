@@ -32,8 +32,8 @@
 #include "transform.hpp"
 #include "object.hpp"
 #include "objects.hpp"
-#include "controller.hpp"
 #include "component.hpp"
+#include "io.hpp"
 
 void objectHierarchy(std::shared_ptr<Object> object) {
     if(ImGui::TreeNode(object->model->name.c_str())) {
@@ -42,18 +42,6 @@ void objectHierarchy(std::shared_ptr<Object> object) {
         }
 
         ImGui::TreePop();
-    }
-}
-
-void objectMovementComponent(std::shared_ptr<Object> object, std::vector<std::shared_ptr<MovementComponent>>* list) {
-    list->push_back(
-        std::make_shared<MovementComponent>(
-            object
-        )
-    );
-
-    for(auto child : object->children) {
-        objectMovementComponent(child, list);
     }
 }
 
@@ -177,24 +165,37 @@ int main(int argc, char *argv[]) {
     /**
      * Controller + Components
      */
-    auto controller = std::make_shared<Controller>(window);
-
-    Controller::setInstance(controller);
-
-    controller->attach(std::make_shared<FPSComponent>(std::static_pointer_cast<Transform>(cameras.at(0))));
-
-    std::vector<std::shared_ptr<MovementComponent>> objectComponents;
-
-    for(auto object : objects) {
-        objectMovementComponent(object, &objectComponents);
-    }
-
-    auto objectManager = std::make_shared<ObjectManagerComponent>(objectComponents);
-    controller->attach(objectManager); 
-    controller->attach(std::make_shared<EscapeComponent>());
-
+    auto currentObject = objects.at(0);
     auto renderMode = std::make_shared<GLenum>(GL_TRIANGLES);
-    controller->attach(std::make_shared<RenderModeComponent>(renderMode));
+
+    cameras.at(0)->attach(std::make_shared<FPSComponent>());
+    currentObject->attach(std::make_shared<MovementComponent>());
+    currentObject->attach(std::make_shared<RenderModeComponent>(renderMode));
+
+    auto input = Input::makeInput(window)
+        ->attach(
+            Device::makeDevice(DeviceType::MOUSE)
+                ->attach(Axis::makeAxis("mouseY", AxisType::FIRST))
+                ->attach(Axis::makeAxis("mouseX", AxisType::SECOND))
+                ->attach(Button::makeButton("zoom", GLFW_MOUSE_BUTTON_5))
+                ->attach(Button::makeButton("pan", GLFW_MOUSE_BUTTON_MIDDLE))
+                ->attach(Button::makeButton("pan", GLFW_MOUSE_BUTTON_4))
+                ->attach(Button::makeButton("rotate", GLFW_MOUSE_BUTTON_RIGHT))
+        )
+        ->attach(
+            Device::makeDevice(DeviceType::KEYBOARD)
+                ->attach(Button::makeButton("vertical", GLFW_KEY_W))
+                ->attach(Button::makeButton("vertical", GLFW_KEY_S, -1.0f))
+                ->attach(Button::makeButton("horizontal", GLFW_KEY_A))
+                ->attach(Button::makeButton("horizontal", GLFW_KEY_D, -1.0f))
+                ->attach(Button::makeButton("yaw", GLFW_KEY_UP))
+                ->attach(Button::makeButton("yaw", GLFW_KEY_DOWN, -1.0f))
+                ->attach(Button::makeButton("pitch", GLFW_KEY_LEFT))
+                ->attach(Button::makeButton("pitch", GLFW_KEY_RIGHT, -1.0f))
+                ->attach(Button::makeButton("triangles", GLFW_KEY_T))
+                ->attach(Button::makeButton("points", GLFW_KEY_P))
+                ->attach(Button::makeButton("lines", GLFW_KEY_L))
+        );
 
     /**
      * OpenGL
@@ -211,18 +212,18 @@ int main(int argc, char *argv[]) {
          */
         for(auto camera : cameras) {
             if(camera->viewport.render()) {
+                camera->update();
+
                 for(auto line: lines) {
                     line->render(camera, GL_LINES);
                 }
 
                 for(auto object : objects) {
                     object->render(camera, *renderMode);
+                    object->update();
                 }
             }
         }
-
-        // Update input.
-        controller->update();
 
         /**
          * ImGui
@@ -240,8 +241,6 @@ int main(int argc, char *argv[]) {
         ImGui::End();
 
         ImGui::Begin("Inspector");
-        // TODO: Check if it is actually an object...
-        auto currentObject = std::static_pointer_cast<Object>(objectManager->getCurrentComponent()->getTransform());
 
         ImGui::LabelText("Name", currentObject->model->name.c_str());
 
@@ -265,8 +264,6 @@ int main(int argc, char *argv[]) {
             });
 
             objects.push_back(object);
-
-            objectManager->components.push_back(std::make_shared<MovementComponent>(object));
         } else if(ImGui::Button("Create Sponza")) {
             auto object = Object::fromOBJ(modelpath / "sponza.obj", shaderProgram, Transform {
                 glm::vec3(0.0f, 0.0f, 0.0f),
@@ -275,8 +272,6 @@ int main(int argc, char *argv[]) {
             });
 
             objects.push_back(object);
-
-            objectManager->components.push_back(std::make_shared<MovementComponent>(object));
         }
 
         ImGui::End();

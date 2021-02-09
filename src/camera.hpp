@@ -5,6 +5,7 @@
 #include <GL/glew.h>
 
 #include "transform.hpp"
+#include "component.hpp"
 
 class Viewport {
     public:
@@ -18,7 +19,7 @@ class Viewport {
         bool render();
 };
 
-class Camera : public Transform {
+class Camera : public Transform, public ComponentManager, public std::enable_shared_from_this<Camera> {
     public:
         Viewport viewport;
 
@@ -33,6 +34,12 @@ class Camera : public Transform {
         virtual glm::vec3 getRight() override;
 
         virtual glm::quat getRotation() override;
+
+        virtual void update() override {
+            for(auto component : this->components) {
+                component->update(shared_from_this());
+            }
+        }
 
         friend std::ostream& operator<<(std::ostream& os, const Camera& camera);
 
