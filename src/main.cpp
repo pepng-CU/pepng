@@ -35,20 +35,32 @@
 #include "component.hpp"
 #include "io.hpp"
 
-void objectHierarchy(std::shared_ptr<Object> object) {
-    if(ImGui::TreeNode(object->model->name.c_str())) {
-        for(auto child : object->children) {
-            objectHierarchy(child);
-        }
-
-        ImGui::TreePop();
-    }
-}
-
 static glm::vec2 windowDimension = glm::vec2(1024.0f, 768.0f);
 
 void windowSizeCallback(GLFWwindow* window, int width, int height) {
     windowDimension = glm::vec2(width, height);
+}
+
+void objectHierarchy(std::shared_ptr<Object> object, std::shared_ptr<Object>* currentObject) {
+    ImGuiTreeNodeFlags nodeFlags = 0;
+
+    if(object == *currentObject) {
+        nodeFlags |= ImGuiTreeNodeFlags_Selected;
+    }
+
+    bool nodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)&object, nodeFlags, object->model->name.c_str());
+
+    if (ImGui::IsItemClicked()) {
+        *currentObject = object;
+    }
+
+    if(nodeOpen) {
+        for(auto child : object->children) {
+            objectHierarchy(child, currentObject);
+        }
+
+        ImGui::TreePop();
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -249,7 +261,7 @@ int main(int argc, char *argv[]) {
         ImGui::Begin("Hierarchy");
         
         for(auto object : objects) {
-            objectHierarchy(object);
+            objectHierarchy(object, &currentObject);
         }
 
         ImGui::End();
