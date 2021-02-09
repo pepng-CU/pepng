@@ -16,14 +16,39 @@ class Viewport {
          * Attempts to render the viewport.
          * Returns if the viewport is visible or not.
          */
-        bool render();
+        bool render(glm::vec2 windowDimension);
+};
+
+class Projection {
+    public:
+        Projection(float aspect);
+
+        virtual glm::mat4 getMatrix() = 0;
+
+        void setAspect(float aspect);
+    protected:
+        float aspect;
+};
+
+class Perspective : public Projection {
+    public:
+        Perspective(float fovy, float aspect, float near, float far);
+
+        virtual glm::mat4 getMatrix() override;
+
+    private:
+        float fovy;
+        float near;
+        float far;
 };
 
 class Camera : public Transform, public ComponentManager, public std::enable_shared_from_this<Camera> {
     public:
+        std::shared_ptr<Projection> projection;
+        
         Viewport viewport;
 
-        Camera(Transform transform, Viewport viewport, glm::mat4 projection);
+        Camera(Transform transform, Viewport viewport, std::shared_ptr<Projection> projection);
 
         void render(GLuint shaderProgram);
 
@@ -42,9 +67,6 @@ class Camera : public Transform, public ComponentManager, public std::enable_sha
         }
 
         friend std::ostream& operator<<(std::ostream& os, const Camera& camera);
-
-    private:
-        glm::mat4 projection;
 };
 
 std::ostream& operator<<(std::ostream& os, const Camera& camera);

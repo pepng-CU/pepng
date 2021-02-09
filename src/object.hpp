@@ -19,6 +19,8 @@ class Object : public Transform, public ComponentManager, public std::enable_sha
 
         std::vector<std::shared_ptr<Object>> children;
 
+        Object();
+
         Object(Transform transform);
 
         Object(Transform transform, GLuint shaderProgram);
@@ -36,6 +38,8 @@ class Object : public Transform, public ComponentManager, public std::enable_sha
                 component->update(shared_from_this());
             }
         }
+
+        std::shared_ptr<Object> attachChild(std::shared_ptr<Object> object);
 
         friend std::ostream& operator<<(std::ostream& os, const Object& object);
         

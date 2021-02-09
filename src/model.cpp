@@ -49,7 +49,7 @@ std::shared_ptr<Model> ModelBuilder::build() {
     return this->model;
 }
 
-Model::Model() : count(-1), vao(-1), offset(glm::vec3(0.0f, 0.0f, 0.0f)), hasElementArray(false) {}
+Model::Model() : count(-1), vao(-1), offset(glm::vec3(0.0f, 0.0f, 0.0f)), hasElementArray(false), name("Empty") {}
 
 Model::Model(const Model& model) : count(model.count), vao(model.vao), offset(glm::vec3(model.offset)), hasElementArray(model.hasElementArray) {}
 

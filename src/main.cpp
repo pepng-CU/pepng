@@ -45,6 +45,12 @@ void objectHierarchy(std::shared_ptr<Object> object) {
     }
 }
 
+static glm::vec2 windowDimension = glm::vec2(1024.0f, 768.0f);
+
+void windowSizeCallback(GLFWwindow* window, int width, int height) {
+    windowDimension = glm::vec2(width, height);
+}
+
 int main(int argc, char *argv[]) {
     srand(time(NULL));
 
@@ -59,7 +65,7 @@ int main(int argc, char *argv[]) {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 
-    GLFWwindow *window = glfwCreateWindow(1024, 768, "Comp371 - Final Project", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(windowDimension.x, windowDimension.y, "Comp371 - Final Project", NULL, NULL);
 
     if (window == NULL) {
         std::cerr << "Failed to create GLFW window" << std::endl;
@@ -78,6 +84,7 @@ int main(int argc, char *argv[]) {
     }
 
     glfwSwapInterval(1);
+    glfwSetWindowSizeCallback(window, windowSizeCallback);
 
     /**
      * ImGui
@@ -136,9 +143,14 @@ int main(int argc, char *argv[]) {
             },
             Viewport {
                 glm::vec2(0.0f, 0.0f),
-                glm::vec2(1024.0f, 768.0f)
+                glm::vec2(1.0f, 1.0f)
             },
-            glm::perspective(glm::radians(60.0f), 1024.0f / 768.0f, 0.01f, 1000.0f)
+            std::make_shared<Perspective>(
+                glm::radians(60.0f),
+                windowDimension.x / windowDimension.y,
+                0.01f,
+                1000.0f
+            )
         )
     };
 
@@ -211,7 +223,9 @@ int main(int argc, char *argv[]) {
          * Rendering.
          */
         for(auto camera : cameras) {
-            if(camera->viewport.render()) {
+            if(camera->viewport.render(windowDimension)) {
+                camera->projection->setAspect(windowDimension.x / windowDimension.y);
+                
                 camera->update();
 
                 for(auto line: lines) {
@@ -250,6 +264,12 @@ int main(int argc, char *argv[]) {
             ImGui::InputFloat3("Position", glm::value_ptr(currentObject->position));
             ImGui::InputFloat3("Rotation", glm::value_ptr(rotation));
             ImGui::InputFloat3("Scale", glm::value_ptr(currentObject->scale));
+        }
+
+        for(auto component : currentObject->components) {
+            if(ImGui::CollapsingHeader(component->getName().c_str())) {
+                component->imgui();
+            }
         }
 
         ImGui::End();

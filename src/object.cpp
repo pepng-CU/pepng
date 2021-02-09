@@ -1,5 +1,7 @@
 #include "object.hpp"
 
+Object::Object() : Object(Transform {}) {}
+
 Object::Object(Transform transform) : Object(transform, -1) {}
 
 Object::Object(Transform transform, GLuint shaderProgram) : 
@@ -26,6 +28,12 @@ Object::Object(const Object& object) :
     }
 
     this->children = children;
+}
+
+std::shared_ptr<Object> Object::attachChild(std::shared_ptr<Object> object) {
+    this->children.push_back(object);
+
+    return shared_from_this();
 }
 
 std::shared_ptr<Object> Object::fromOBJ(std::filesystem::path filepath, GLuint shaderProgram, Transform transform) {
