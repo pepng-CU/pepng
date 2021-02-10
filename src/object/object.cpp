@@ -53,11 +53,3 @@ void Object::update(){
         child->update();
     }
 }
-
-std::ostream& operator<<(std::ostream& os, const Object& object) {
-    os  << "Object { " 
-        << (Transform&) object 
-        << " }";
-
-    return os;
-}

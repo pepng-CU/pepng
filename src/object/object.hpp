@@ -27,8 +27,4 @@ class Object : public WithComponents, public std::enable_shared_from_this<Object
         virtual void update() override;
 
         std::shared_ptr<Object> attachChild(std::shared_ptr<Object> object);
-
-        friend std::ostream& operator<<(std::ostream& os, const Object& object);
 };
-
-std::ostream& operator<<(std::ostream& os, const Object& object);
