@@ -26,18 +26,36 @@ void Camera::render(GLuint shaderProgram) {
     );
 }
 
-std::ostream& operator<<(std::ostream& os, const Camera& camera) {
-    os  << "Camera { " 
-        << (Transform&) camera 
-        << " }";
+void Camera::imgui() {
+    Object::imgui();
 
-    return os;
+    if (ImGui::CollapsingHeader("Camera")) {
+        this->viewport.imgui();
+        this->projection->imgui();
+    }
 }
 
+Viewport::Viewport(glm::vec2 position, glm::vec2 scale) : position(position), scale(scale), isActive(true) {}
+
 bool Viewport::render(glm::vec2 windowDimension) {
-    glViewport(this->position.x, this->position.y, this->scale.x * windowDimension.x, this->scale.y * windowDimension.y);
+    if(!this->isActive) {
+        return false;
+    }
+
+    glViewport(
+        this->position.x * windowDimension.x, 
+        this->position.y * windowDimension.y, 
+        this->scale.x * windowDimension.x, 
+        this->scale.y * windowDimension.y
+    );
 
     return true;
+}
+
+void Viewport::imgui() {
+    ImGui::Checkbox("Active", &this->isActive);
+    ImGui::InputFloat2("Position", glm::value_ptr(this->position));
+    ImGui::InputFloat2("Scale", glm::value_ptr(this->scale));
 }
 
 Projection::Projection(float aspect) : aspect(aspect) {}
@@ -50,4 +68,10 @@ Perspective::Perspective(float fovy, float aspect, float near, float far) : Proj
 
 glm::mat4 Perspective::getMatrix() {
     return glm::perspective(this->fovy, this->aspect, this->near, this->far);
+}
+
+void Perspective::imgui() {
+    ImGui::InputFloat("Fovy", &this->fovy);
+    ImGui::InputFloat("Near", &this->near);
+    ImGui::InputFloat("Far", &this->far);
 }

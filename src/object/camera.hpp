@@ -7,19 +7,24 @@
 #include "object.hpp"
 #include "../component/components.hpp"
 
-class Viewport {
+class Viewport : public WithImGui {
     public:
+        bool isActive;
         glm::vec2 position;
         glm::vec2 scale;
+
+        Viewport(glm::vec2 position, glm::vec2 scale);
 
         /**
          * Attempts to render the viewport.
          * Returns if the viewport is visible or not.
          */
         bool render(glm::vec2 windowDimension);
+
+        virtual void imgui() override;
 };
 
-class Projection {
+class Projection : public WithImGui {
     public:
         Projection(float aspect);
 
@@ -35,6 +40,8 @@ class Perspective : public Projection {
         Perspective(float fovy, float aspect, float near, float far);
 
         virtual glm::mat4 getMatrix() override;
+
+        virtual void imgui() override;
 
     private:
         float fovy;
@@ -54,7 +61,5 @@ class Camera : public Object {
 
         void render(GLuint shaderProgram);
 
-        friend std::ostream& operator<<(std::ostream& os, const Camera& camera);
+        virtual void imgui() override;
 };
-
-std::ostream& operator<<(std::ostream& os, const Camera& camera);
