@@ -14,12 +14,14 @@
 
 class Renderer;
 
+#include "buffer.hpp"
+#include "../util/delayed_init.hpp"
 #include "../util/utils.hpp"
 #include "../gl/texture.hpp"
 
 class Renderer;
 
-class Model : public std::enable_shared_from_this<Model>  {
+class Model : public std::enable_shared_from_this<Model>, public DelayedInit  {
     public:
         friend Renderer;
 
@@ -31,7 +33,11 @@ class Model : public std::enable_shared_from_this<Model>  {
 
         std::shared_ptr<Model> setCount(unsigned int count);
 
+        std::shared_ptr<Model> setElementArray(bool hasElementArray);
+
         std::shared_ptr<Model> calculateOffset(std::vector<glm::vec3> vertexArray, std::vector<unsigned int> faceArray);
+
+        virtual void delayedInit() override;
 
         /**
          * Reads models from OBJ file.
@@ -40,47 +46,11 @@ class Model : public std::enable_shared_from_this<Model>  {
         static std::vector<std::shared_ptr<Model>> fromOBJ(std::filesystem::path filepath);
 
         /**
-         * Creates and binds a GL buffer.
+         * Binds buffer.
          */
         template <typename T>
-        std::shared_ptr<Model> attachBuffer(std::vector<T> vectors, GLenum type, bool isCount = false) {
-            GLuint buffer;
-
-            glGenBuffers(1, &buffer);
-            glBindBuffer(type, buffer);
-            glBufferData(type, vectors.size() * sizeof(T), &vectors[0], GL_STATIC_DRAW);
-
-            if(isCount) {
-                this->count = vectors.size();
-            }
-
-            // TODO: better check for this...
-            this->hasElementArray = true;
-
-            return shared_from_this();
-        }
-
-        /**
-         * Creates and binds a GL buffer.
-         */
-        template <typename T>
-        std::shared_ptr<Model> attachBuffer(std::vector<T> vectors, GLenum type, int index, int size) {
-            GLuint buffer;
-
-            glGenBuffers(1, &buffer);
-            glBindBuffer(type, buffer);
-            glBufferData(type, vectors.size() * sizeof(T), &vectors[0], GL_STATIC_DRAW);
-
-            glVertexAttribPointer(
-                index, 
-                size, 
-                GL_FLOAT, 
-                GL_FALSE, 
-                0, 
-                0
-            );
-
-            glEnableVertexAttribArray(index);
+        std::shared_ptr<Model> attach(std::shared_ptr<Buffer<T>> buffer) {
+            this->attachDelayed(buffer);
 
             return shared_from_this();
         }

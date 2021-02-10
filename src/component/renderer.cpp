@@ -12,7 +12,11 @@ Renderer::Renderer(std::shared_ptr<Model> model, GLuint shaderProgram, GLuint te
 {}
 
 void Renderer::update(std::shared_ptr<WithComponents> parent) {
-    if (this->model->vao == -1 || !this->isActive) {
+    if(!this->model->isInit) {
+        this->model->delayedInit();
+    }
+
+    if(this->model->vao == -1 || !this->isActive) {
         return;
     }
 

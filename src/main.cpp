@@ -69,6 +69,8 @@ void objectAttachTransformer(std::shared_ptr<Object> object) {
     }
 }
 
+static std::shared_ptr<Object> currentObject = nullptr;
+
 int main(int argc, char *argv[]) {
     srand(time(NULL));
 
@@ -119,21 +121,21 @@ int main(int argc, char *argv[]) {
      */
     auto texturespath = utils::getPath("textures");
 
-    auto missingTexture = createTexture(texturespath / "missing.jpg");
-    auto honeyTexture = createTexture(texturespath / "honeycomb.jpg");
-    auto objectTexture = createTexture(texturespath / "suzanne.png");
+    static auto missingTexture = createTexture(texturespath / "missing.jpg");
+    static auto honeyTexture = createTexture(texturespath / "honeycomb.jpg");
+    static auto objectTexture = createTexture(texturespath / "suzanne.png");
 
     /**
      * Shaders
      */
     auto shaderpath = utils::getPath("shaders");
 
-    GLuint shaderProgram = ShaderBuilder()
+    static GLuint shaderProgram = ShaderBuilder()
         .attach(compileShader(readShader(shaderpath / "object/vertex.glsl"), GL_VERTEX_SHADER))
         .attach(compileShader(readShader(shaderpath / "object/fragment.glsl"), GL_FRAGMENT_SHADER))
         .build();
 
-    GLuint lineShaderProgram = ShaderBuilder()
+    static GLuint lineShaderProgram = ShaderBuilder()
         .attach(compileShader(readShader(shaderpath / "line/vertex.glsl"), GL_VERTEX_SHADER))
         .attach(compileShader(readShader(shaderpath / "line/fragment.glsl"), GL_FRAGMENT_SHADER))
         .build();
@@ -141,7 +143,7 @@ int main(int argc, char *argv[]) {
     /**
      * Cameras
      */
-    std::vector<std::shared_ptr<Camera>> cameras {
+    static std::vector<std::shared_ptr<Camera>> cameras {
         std::make_shared<Camera>(
             std::make_shared<CameraTransform>(
                 glm::vec3(0.0f, 2.0f, 10.0f),
@@ -166,14 +168,7 @@ int main(int argc, char *argv[]) {
      */
     auto modelpath = utils::getPath("models");
 
-    std::vector<std::shared_ptr<Object>> objects {
-        Object::fromOBJ(modelpath / "scene.obj", shaderProgram, 
-            std::make_shared<Transform>(
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 1.0f, 1.0f)
-            )
-        ),
+    static std::vector<std::shared_ptr<Object>> objects {
         std::static_pointer_cast<Object>(
             std::make_shared<Axes>(
                 std::make_shared<Transform>(
@@ -194,6 +189,19 @@ int main(int argc, char *argv[]) {
         )
     };
 
+    pepng::load(
+        modelpath / "scene.obj", 
+        std::function<void(std::shared_ptr<Object>)>([](std::shared_ptr<Object> object) {
+            object->attach(std::make_shared<Selector>());
+
+            objectAttachTransformer(object);
+
+            objects.push_back(object);
+        }),
+        shaderProgram,
+        std::make_shared<Transform>()
+    );
+
     for(auto camera : cameras) {
         objects.push_back(camera);
     }
@@ -201,14 +209,7 @@ int main(int argc, char *argv[]) {
     /**
      * Controller + Components
      */
-    auto currentObject = objects.at(0);
-
     cameras.at(0)->attach(std::make_shared<FPS>());
-    objects.at(0)->attach(std::make_shared<Selector>());
-
-    objects.at(0)->children.at(0)->getComponent<Renderer>()->texture = honeyTexture;
-
-    objectAttachTransformer(objects.at(0));
 
     auto input = Input::makeInput(window)
         ->attach(
@@ -254,7 +255,7 @@ int main(int argc, char *argv[]) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    while (!glfwWindowShouldClose(window)) {
+    while(!glfwWindowShouldClose(window)) {
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
         /**
@@ -289,8 +290,10 @@ int main(int argc, char *argv[]) {
 
         ImGui::Begin("Inspector");
 
-        currentObject->imgui();
-
+        if(currentObject) {
+            currentObject->imgui();
+        }
+        
         ImGui::End();
 
         ImGui::Begin("Debug");

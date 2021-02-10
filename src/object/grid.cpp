@@ -1,4 +1,5 @@
 #include "grid.hpp"
+#include "../gl/buffer.hpp"
 
 Grid::Grid(std::shared_ptr<Transform> transform, GLuint shaderProgram, int count, glm::vec4 color) : Object("Grid", transform) {
     if (count < 2) {
@@ -28,23 +29,30 @@ Grid::Grid(std::shared_ptr<Transform> transform, GLuint shaderProgram, int count
 
     this->attach(std::make_shared<Renderer>(
         Model::makeModel()
-            ->attachBuffer(
-                verticies,
-                GL_ARRAY_BUFFER,
-                0,
-                3
+            ->attach(
+                Buffer<glm::vec3>::makeBuffer(
+                    verticies,
+                    GL_ARRAY_BUFFER,
+                    0,
+                    3
+                )
             )
-            ->attachBuffer(
-                colors,
-                GL_ARRAY_BUFFER,
-                1,
-                4
+            ->attach(
+                Buffer<glm::vec4>::makeBuffer(
+                    colors,
+                    GL_ARRAY_BUFFER,
+                    1,
+                    4
+                )
             )
-            ->attachBuffer(
-                indicies,
-                GL_ELEMENT_ARRAY_BUFFER,
-                true
+            ->attach(
+                Buffer<int>::makeBuffer(
+                    indicies,
+                    GL_ELEMENT_ARRAY_BUFFER
+                )
             )
+            ->setCount(indicies.size())
+            ->setElementArray(true)
             ->setName("Grid"),
         shaderProgram,
         -1,

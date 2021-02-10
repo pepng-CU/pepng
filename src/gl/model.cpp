@@ -10,20 +10,38 @@ Model::Model() :
 {}
 
 std::shared_ptr<Model> Model::makeModel() {
+    std::shared_ptr<Model> model(new Model());
+
+    return model;
+}
+
+void Model::delayedInit() {
+    if(this->isInit) {
+        return;
+    }
+
+    this->isInit = true;
+
     GLuint vao;
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    std::shared_ptr<Model> model(new Model());
+    this->vao = vao;
 
-    model->vao = vao;
-
-    return model;
+    for(auto child : this->delayedChildren) {
+        child->delayedInit();
+    }
 }
 
 std::shared_ptr<Model> Model::setCount(unsigned int count) {
     this->count = count;
+
+    return shared_from_this();
+}
+
+std::shared_ptr<Model> Model::setElementArray(bool hasElementArray) {
+    this->hasElementArray = hasElementArray;
 
     return shared_from_this();
 }
@@ -112,11 +130,11 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
             models.push_back(
                 Model::makeModel()
                     ->setName(name)
-                    ->attachBuffer(mapVertex, GL_ARRAY_BUFFER, 0, 3)
-                    ->attachBuffer(mapTexture, GL_ARRAY_BUFFER, 2, 2)
-                    ->attachBuffer(mapNormal, GL_ARRAY_BUFFER, 1, 3)
                     ->setCount(mapVertex.size())
                     ->calculateOffset(verticies, vertexIndex)
+                    ->attach(Buffer<glm::vec3>::makeBuffer(mapVertex, GL_ARRAY_BUFFER, 0, 3))
+                    ->attach(Buffer<glm::vec2>::makeBuffer(mapTexture, GL_ARRAY_BUFFER, 2, 2))
+                    ->attach(Buffer<glm::vec3>::makeBuffer(mapNormal, GL_ARRAY_BUFFER, 1, 3))
             );
 
             vertexIndex.clear();
