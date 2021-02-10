@@ -35,7 +35,7 @@ class WithComponents : public WithImGui {
                 }
             }
 
-            throw std::runtime_error("Could not get component type.");
+            return nullptr;
         }
 
         std::vector<std::shared_ptr<Component>> getComponents() {

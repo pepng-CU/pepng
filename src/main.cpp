@@ -12,6 +12,7 @@
 #include <filesystem>
 #include <stdlib.h>
 #include <time.h>
+#include <sstream>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -204,6 +205,7 @@ int main(int argc, char *argv[]) {
 
     cameras.at(0)->attach(std::make_shared<FPSComponent>());
 
+    objects.at(0)->attach(std::make_shared<Selector>());
     objects.at(0)->children.at(0)->getComponent<Renderer>()->texture = honeyTexture;
 
     objectAttachMovement(objects.at(0));
@@ -217,22 +219,31 @@ int main(int argc, char *argv[]) {
                 ->attach(Button::makeButton("pan", GLFW_MOUSE_BUTTON_MIDDLE))
                 ->attach(Button::makeButton("pan", GLFW_MOUSE_BUTTON_4))
                 ->attach(Button::makeButton("rotate", GLFW_MOUSE_BUTTON_RIGHT))
-        )
-        ->attach(
-            Device::makeDevice(DeviceType::KEYBOARD)
-                ->attach(Button::makeButton("vertical", GLFW_KEY_W))
-                ->attach(Button::makeButton("vertical", GLFW_KEY_S, -1.0f))
-                ->attach(Button::makeButton("horizontal", GLFW_KEY_A))
-                ->attach(Button::makeButton("horizontal", GLFW_KEY_D, -1.0f))
-                ->attach(Button::makeButton("yaw", GLFW_KEY_UP))
-                ->attach(Button::makeButton("yaw", GLFW_KEY_DOWN, -1.0f))
-                ->attach(Button::makeButton("pitch", GLFW_KEY_LEFT))
-                ->attach(Button::makeButton("pitch", GLFW_KEY_RIGHT, -1.0f))
-                ->attach(Button::makeButton("triangles", GLFW_KEY_T))
-                ->attach(Button::makeButton("points", GLFW_KEY_P))
-                ->attach(Button::makeButton("lines", GLFW_KEY_L))
-                ->attach(Button::makeButton("recenter", GLFW_KEY_HOME))
         );
+
+    auto keyboard = Device::makeDevice(DeviceType::KEYBOARD)
+        ->attach(Button::makeButton("vertical", GLFW_KEY_W))
+        ->attach(Button::makeButton("vertical", GLFW_KEY_S, -1.0f))
+        ->attach(Button::makeButton("horizontal", GLFW_KEY_A))
+        ->attach(Button::makeButton("horizontal", GLFW_KEY_D, -1.0f))
+        ->attach(Button::makeButton("yaw", GLFW_KEY_UP))
+        ->attach(Button::makeButton("yaw", GLFW_KEY_DOWN, -1.0f))
+        ->attach(Button::makeButton("pitch", GLFW_KEY_LEFT))
+        ->attach(Button::makeButton("pitch", GLFW_KEY_RIGHT, -1.0f))
+        ->attach(Button::makeButton("triangles", GLFW_KEY_T))
+        ->attach(Button::makeButton("points", GLFW_KEY_P))
+        ->attach(Button::makeButton("lines", GLFW_KEY_L))
+        ->attach(Button::makeButton("recenter", GLFW_KEY_HOME));
+
+    for(int i = 0; i < 10; i++) {
+        std::stringstream ss;
+
+        ss << "object_" << i;
+
+        keyboard->attach(Button::makeButton(ss.str(), GLFW_KEY_0 + i));
+    }
+
+    input->attach(keyboard);
 
     /**
      * OpenGL
