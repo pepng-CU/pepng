@@ -1,4 +1,5 @@
 #include "model.hpp"
+#include "camera.hpp"
 
 ModelBuilder::ModelBuilder() : model(std::make_shared<Model>()) {
     GLuint vao;
@@ -17,6 +18,18 @@ ModelBuilder& ModelBuilder::setCount(unsigned int count) {
 
 ModelBuilder& ModelBuilder::setName(std::string name) {
     this->model->name = name;
+
+    return *this;
+}
+
+ModelBuilder& ModelBuilder::setRenderMode(GLenum mode) {
+    this->model->renderMode = mode;
+
+    return *this;
+}
+
+ModelBuilder& ModelBuilder::setShaderProgram(GLuint shaderProgram) {
+    this->model->shaderProgram = shaderProgram;
 
     return *this;
 }
@@ -49,42 +62,71 @@ std::shared_ptr<Model> ModelBuilder::build() {
     return this->model;
 }
 
-Model::Model() : count(-1), vao(-1), offset(glm::vec3(0.0f, 0.0f, 0.0f)), hasElementArray(false), name("Empty") {}
+Model::Model() : 
+    Component("Model"),
+    renderMode(GL_TRIANGLES),
+    count(-1), 
+    vao(-1), 
+    offset(glm::vec3(0.0f, 0.0f, 0.0f)), 
+    hasElementArray(false), 
+    name("Empty"),
+    shaderProgram(-1)
+{}
 
-Model::Model(const Model& model) : count(model.count), vao(model.vao), offset(glm::vec3(model.offset)), hasElementArray(model.hasElementArray) {}
+Model::Model(const Model& model) : 
+    Component("Model"),
+    renderMode(GL_TRIANGLES),
+    count(model.count), 
+    vao(model.vao), 
+    offset(glm::vec3(model.offset)), 
+    hasElementArray(model.hasElementArray),
+    name(model.name),
+    shaderProgram(model.shaderProgram)
+{}
 
-void Model::render(GLuint program, GLenum mode) {
-    if (this->vao == -1) {
+void Model::update(std::shared_ptr<Transform> parent) {
+    if (this->vao == -1 || !this->isActive) {
         return;
+    }
+
+    glUseProgram(this->shaderProgram);
+
+    Camera::currentCamera->render(this->shaderProgram);
+
+    GLuint uWorld = glGetUniformLocation(shaderProgram, "u_world");
+
+    if(uWorld >= 0) {
+        glUniformMatrix4fv(
+            uWorld,
+            1,
+            GL_FALSE,
+            glm::value_ptr(parent->parentMatrix
+                * glm::translate(glm::mat4(1.0f), this->offset)
+                * parent->getWorldMatrix()
+                * glm::translate(glm::mat4(1.0f), -this->offset)
+            )
+        );
     }
 
     glBindVertexArray(this->vao);
 
     if(this->hasElementArray) {
         glDrawElements(
-            mode,
+            this->renderMode,
             this->count,
             GL_UNSIGNED_INT,
             0
         );
     } else {
         glDrawArrays(
-            mode,
+            this->renderMode,
             0,
             this->count
         );
     }
 }
 
-glm::mat4 Model::getOffsetMatrix() {
-    return glm::translate(glm::mat4(1.0f), this->offset);
-}
-
-glm::mat4 Model::getNegativeOffsetMatrix() {
-    return glm::translate(glm::mat4(1.0f), -this->offset);
-}
-
-std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepath) {
+std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepath, GLuint shaderProgram) {
     std::ifstream in(filepath);
 
     if(!in.is_open()) {
@@ -139,6 +181,7 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
                     .attachBuffer(mapTexture, GL_ARRAY_BUFFER, 2, 2)
                     .setCount(mapVertex.size())
                     .calculateOffset(verticies, vertexIndex)
+                    .setShaderProgram(shaderProgram)
                     .build()
             );
 
@@ -189,6 +232,62 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
     in.close();
 
     return models;
+}
+
+void Model::imgui() {
+    Component::imgui();
+
+    ImGui::LabelText("Name", this->name.c_str());
+    std::stringstream ss;
+
+    ss << this->count;
+
+    ImGui::LabelText("Index Count", ss.str().c_str());
+
+    const char* items[] = { "Triangles", "Points", "Lines" };
+    static int item_current_idx = -1;
+
+    if (item_current_idx == -1) {
+        switch(this->renderMode) {
+            case GL_TRIANGLES:
+                item_current_idx = 0;
+                break;
+            case GL_POINTS:
+                item_current_idx = 1;
+                break;
+            case GL_LINES:
+                item_current_idx = 2;
+        }
+    }
+
+    const char* combo_label = items[item_current_idx];
+
+    if (ImGui::BeginCombo("Render", combo_label)) {
+        for (int n = 0; n < IM_ARRAYSIZE(items); n++) {
+            const bool is_selected = (item_current_idx == n);
+            
+            if (ImGui::Selectable(items[n], is_selected)) {
+                item_current_idx = n;
+
+                switch(item_current_idx) {
+                    case 0:
+                        this->renderMode = GL_TRIANGLES;
+                        break;
+                    case 1:
+                        this->renderMode = GL_POINTS;
+                        break;
+                    case 2:
+                        this->renderMode = GL_LINES;
+                        break;
+                }
+            }
+
+            if (is_selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
+    }
 }
 
 GLuint createTexture(const std::filesystem::path& filePath) {

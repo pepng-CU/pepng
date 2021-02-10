@@ -12,34 +12,26 @@
 #include <sstream>
 #include <string>
 #include <stb_image.h>
+#include <imgui.h>
 
 #include "utils.hpp"
+#include "component.hpp"
 
-class Model {
+class Model : public Component {
     public:
         Model();
 
         Model(const Model& model);
 
-        /**
-         * Renders model using shader program.
-         * @param program Shader program to use.
-         */
-        void render(GLuint program, GLenum mode = GL_TRIANGLES);
+        virtual void update(std::shared_ptr<Transform> parent) override;
 
-        /**
-         * Returns the translation performed by the pivot.
-         * Will be used in object - so not sure if it should just be moved there?
-         */
-        glm::mat4 getOffsetMatrix();
-
-        glm::mat4 getNegativeOffsetMatrix();
+        virtual void imgui() override;
 
         /**
          * Reads models from OBJ file.
          * @param program Relative path to OBJ file.
          */
-        static std::vector<std::shared_ptr<Model>> fromOBJ(std::filesystem::path filepath);
+        static std::vector<std::shared_ptr<Model>> fromOBJ(std::filesystem::path filepath, GLuint shaderProgram);
     // private:
         // Keeps count of the number of faces.
         int count;
@@ -62,6 +54,10 @@ class Model {
          * Variable to check if using element array.
          */
         bool hasElementArray;
+
+        GLuint shaderProgram;
+
+        GLenum renderMode;
 };
 
 class ModelBuilder {
@@ -73,6 +69,10 @@ class ModelBuilder {
         ModelBuilder& setName(std::string name);
 
         ModelBuilder& setCount(unsigned int count);
+
+        ModelBuilder& setRenderMode(GLenum mode);
+
+        ModelBuilder& setShaderProgram(GLuint shaderProgram);
 
         ModelBuilder& calculateOffset(std::vector<glm::vec3> vertexArray, std::vector<unsigned int> faceArray);
         

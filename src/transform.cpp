@@ -13,7 +13,8 @@ Transform::Transform(const Transform &transform) :
     rotationX(glm::quat(transform.rotationX)), 
     rotationY(glm::quat(transform.rotationY)), 
     rotationZ(glm::quat(transform.rotationZ)), 
-    scale(transform.scale) 
+    scale(transform.scale),
+    parentMatrix(transform.parentMatrix)
 {}
 
 Transform::Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) : 
@@ -21,7 +22,8 @@ Transform::Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) :
     rotationX(glm::quat(glm::vec3(0.0f))), 
     rotationY(glm::quat(glm::vec3(0.0f))), 
     rotationZ(glm::quat(glm::vec3(0.0f))), 
-    scale(scale) 
+    scale(scale),
+    parentMatrix(glm::mat4(1.0f))
 {
     this->setRotation(rotation);
 }
@@ -36,7 +38,8 @@ Transform::Transform(
     rotationX(rotationX), 
     rotationY(rotationY),
     rotationZ(rotationZ),
-    scale(scale) {}
+    scale(scale) 
+{}
 
 glm::quat Transform::getRotation() {
     return this->rotationZ * this->rotationY * this->rotationX;
@@ -117,6 +120,17 @@ void Transform::relativeTranslate(glm::vec3 delta) {
 glm::vec3 Transform::getEuler() {
     return glm::eulerAngles(this->getRotation());
 }
+
+void Transform::imgui() {
+    if(ImGui::CollapsingHeader("Transform")) {
+        glm::vec3 rotation = glm::degrees(this->getEuler());
+
+        ImGui::InputFloat3("Position", glm::value_ptr(this->position));
+        ImGui::InputFloat3("Rotation", glm::value_ptr(rotation));
+        ImGui::InputFloat3("Scale", glm::value_ptr(this->scale));
+    }
+}
+
 
 std::ostream& operator<<(std::ostream& os, const Transform& transform) {
     os  << "Transform { Position: " 

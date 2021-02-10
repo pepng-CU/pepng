@@ -3,8 +3,6 @@
 #include <memory>
 #include <vector>
 #include <imgui.h>
-#include <imgui_impl_opengl3.h>
-#include <imgui_impl_glfw.h>
 #include <glm/glm.hpp>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -19,13 +17,16 @@ class ComponentManager;
 
 class Component {
     public:
+        bool isActive;
+
         Component(std::string name);
 
         std::string getName();
 
         virtual void update(std::shared_ptr<Transform> parent) {};
 
-        virtual void imgui() {};
+        virtual void imgui();
+
     private:
         std::string name;
 };
@@ -36,6 +37,31 @@ class ComponentManager {
 
         virtual void update() = 0;
 
+        virtual void imgui();
+
+        template<typename T>
+        std::vector<std::shared_ptr<T>> getComponents() {
+            std::vector<std::shared_ptr<T>> components;
+
+            for (auto component : this->components) {
+                if(auto ptr = std::dynamic_pointer_cast<T>(component)) {
+                    components.push_back(ptr);
+                }
+            }
+
+            return components;
+        }
+
+        template<typename T>
+        std::shared_ptr<T> getComponent() {
+            return this->getComponents<T>().at(0);
+        }
+
+        std::vector<std::shared_ptr<Component>> getComponents() {
+            return this->components;
+        }
+
+    private:
         std::vector<std::shared_ptr<Component>> components;
 };
 
@@ -61,15 +87,4 @@ class MovementComponent : public Component {
     private:
         float positionSpeed;
         float rotationSpeed;
-};
-
-class RenderModeComponent : public Component {
-    public:
-        RenderModeComponent(std::shared_ptr<GLenum> renderMode);
-
-        virtual void update(std::shared_ptr<Transform> parent) override;
-
-        virtual void imgui() override;
-    private:
-        std::shared_ptr<GLenum> renderMode;
 };

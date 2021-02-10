@@ -1,25 +1,16 @@
 #include "object.hpp"
 
-Object::Object() : Object(Transform {}) {}
-
-Object::Object(Transform transform) : Object(transform, -1) {}
-
-Object::Object(Transform transform, GLuint shaderProgram) : 
-    Object(transform, std::make_shared<Model>(), shaderProgram) 
+Object::Object() : 
+    Object("Object", Transform {}) 
 {}
 
-Object::Object(Transform transform, std::shared_ptr<Model> model, GLuint shaderProgram) : 
-    Transform(transform), 
-    model(model), 
-    shaderProgram(shaderProgram) 
+Object::Object(std::string name, Transform transform) :
+    Transform(transform),
+    name(name)
 {}
 
 Object::Object(const Object& object) : 
-    Object(
-        Transform(object), 
-        std::make_shared<Model>(*object.model), 
-        object.shaderProgram
-    ) 
+    Transform(object)
 {
     std::vector<std::shared_ptr<Object>> children;
 
@@ -37,53 +28,38 @@ std::shared_ptr<Object> Object::attachChild(std::shared_ptr<Object> object) {
 }
 
 std::shared_ptr<Object> Object::fromOBJ(std::filesystem::path filepath, GLuint shaderProgram, Transform transform) {
-    std::shared_ptr<Object> object = std::make_shared<Object>(transform);
-    
-    object->model->name = filepath.filename();
+    std::shared_ptr<Object> object = std::make_shared<Object>(filepath.filename(), transform);
 
-    for(auto model : Model::fromOBJ(filepath)) {
-        object->children.push_back(
-            std::make_shared<Object>(
-                Transform(transform),
-                model,
-                shaderProgram
-            )
-        );
+    for(auto model : Model::fromOBJ(filepath, shaderProgram)) {
+        auto child = std::make_shared<Object>(model->name, Transform(transform));
+
+        child->attach(model);
+
+        object->children.push_back(child);
     }
 
     return object;
 }
 
-void Object::render(std::shared_ptr<Camera> camera, GLenum mode, glm::mat4 parentMatrix) {
-    auto worldMatrix = this->getWorldMatrix();
+void Object::imgui() {
+    ImGui::LabelText("Name", this->name.c_str());
 
-    if (this->model->count != -1) {
-        glUseProgram(this->shaderProgram);
+    Transform::imgui();
 
-        camera->render(this->shaderProgram);
+    ComponentManager::imgui();
+}
 
-        GLuint uWorld = glGetUniformLocation(shaderProgram, "u_world");
+void Object::update(){
+    auto parentMatrix = this->parentMatrix * this->getWorldMatrix();
 
-        if(uWorld >= 0) {
-            // Offsets the object to rotate around the object origin 
-            // instead of world origin. The object is then put back in place.
-            glUniformMatrix4fv(
-                uWorld,
-                1,
-                GL_FALSE,
-                glm::value_ptr(parentMatrix 
-                    * this->model->getOffsetMatrix() 
-                    * worldMatrix
-                    * this->model->getNegativeOffsetMatrix()
-                )
-            );
-        }
-
-        this->model->render(shaderProgram, mode);
+    for(auto component : this->getComponents()) {
+        component->update(shared_from_this());
     }
 
     for(auto child : this->children) {
-        child->render(camera, mode, parentMatrix * worldMatrix);
+        child->parentMatrix = parentMatrix;
+
+        child->update();
     }
 }
 

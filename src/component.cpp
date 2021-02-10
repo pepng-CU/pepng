@@ -1,13 +1,28 @@
 #include "component.hpp"
 
-Component::Component(std::string name) : name(name) {}
+Component::Component(std::string name) : 
+    name(name),
+    isActive(true)
+{}
 
 std::string Component::getName() {
     return this->name;
 }
 
+void Component::imgui() {
+    ImGui::Checkbox("Active", &this->isActive);
+}
+
 void ComponentManager::attach(std::shared_ptr<Component> component) {
     this->components.push_back(component);
+}
+
+void ComponentManager::imgui() {
+    for(auto component : this->getComponents()) {
+        if(ImGui::CollapsingHeader(component->getName().c_str())) {
+            component->imgui();
+        }
+    }
 }
 
 FPSComponent::FPSComponent(float panSpeed, float rotationSpeed) : 
@@ -17,6 +32,10 @@ FPSComponent::FPSComponent(float panSpeed, float rotationSpeed) :
 {}
 
 void FPSComponent::update(std::shared_ptr<Transform> parent) {
+    if(!this->isActive) {
+        return;
+    }
+
     auto input = Input::get();
     auto mouseDelta = glm::vec2(input->getAxis("mouseX"), input->getAxis("mouseY"));
 
@@ -34,8 +53,10 @@ void FPSComponent::update(std::shared_ptr<Transform> parent) {
 }
 
 void FPSComponent::imgui() {
-    ImGui::InputFloat("panSpeed", &this->panSpeed);
-    ImGui::InputFloat("rotationSpeed", &this->rotationSpeed);
+    Component::imgui();
+
+    ImGui::InputFloat("Pan Speed", &this->panSpeed);
+    ImGui::InputFloat("Rotation Speed", &this->rotationSpeed);
 }
 
 MovementComponent::MovementComponent(float positionSpeed, float rotationSpeed) :
@@ -45,6 +66,10 @@ MovementComponent::MovementComponent(float positionSpeed, float rotationSpeed) :
 {}
 
 void MovementComponent::update(std::shared_ptr<Transform> parent) {
+    if(!this->isActive) {
+        return;
+    }
+
     auto input = Input::get();
 
     auto deltaPosition = glm::vec4(input->getAxis("horizontal"), 0.0f, input->getAxis("vertical"), 0.0f);
@@ -56,60 +81,18 @@ void MovementComponent::update(std::shared_ptr<Transform> parent) {
     auto deltaRotation = glm::vec3(input->getAxis("yaw"), 0.0f, input->getAxis("pitch"));
 
     if (glm::length(deltaRotation) > 0.0f) {
-        parent->deltaRotate(glm::normalize(deltaRotation) * this->rotationSpeed);
+        parent->deltaRotate(deltaRotation * this->rotationSpeed);
+    }
+
+    if(input->getButtonDown("recenter")) {
+        parent->position = glm::vec3(0.0f);
+        parent->setRotation(glm::vec3(0.0f));
     }
 }
 
 void MovementComponent::imgui() {
+    Component::imgui();
+    
     ImGui::InputFloat("Position Speed", &this->positionSpeed);
     ImGui::InputFloat("Rotation Speed", &this->rotationSpeed);
-}
-
-RenderModeComponent::RenderModeComponent(std::shared_ptr<GLenum> renderMode) : 
-    Component("Render Mode"),
-    renderMode(renderMode) 
-{}
-
-void RenderModeComponent::update(std::shared_ptr<Transform> parent) {
-    auto input = Input::get();
-
-    if(input->getButtonDown("triangles")) {
-        *this->renderMode = GL_TRIANGLES;
-    } else if(input->getButtonDown("points")) {
-        *this->renderMode = GL_POINTS;
-    } else if(input->getButtonDown("lines")) {
-        *this->renderMode = GL_LINES;
-    }
-}
-
-void RenderModeComponent::imgui() {
-    const char* items[] = { "Triangles", "Points", "Lines" };
-    static int item_current_idx = 0;
-    const char* combo_label = items[item_current_idx];
-
-    if (ImGui::BeginCombo("Mode", combo_label)) {
-        for (int n = 0; n < IM_ARRAYSIZE(items); n++) {
-            const bool is_selected = (item_current_idx == n);
-            
-            if (ImGui::Selectable(items[n], is_selected)) {
-                item_current_idx = n;
-
-                switch(item_current_idx) {
-                    case 0:
-                        *this->renderMode = GL_TRIANGLES;
-                        break;
-                    case 1:
-                        *this->renderMode = GL_POINTS;
-                        break;
-                    case 2:
-                        *this->renderMode = GL_LINES;
-                        break;
-                }
-            }
-
-            if (is_selected)
-                ImGui::SetItemDefaultFocus();
-        }
-        ImGui::EndCombo();
-    }
 }

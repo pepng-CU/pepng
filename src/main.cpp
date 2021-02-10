@@ -48,7 +48,7 @@ void objectHierarchy(std::shared_ptr<Object> object, std::shared_ptr<Object>* cu
         nodeFlags |= ImGuiTreeNodeFlags_Selected;
     }
 
-    bool nodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)&object, nodeFlags, object->model->name.c_str());
+    bool nodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)&object, nodeFlags, object->name.c_str());
 
     if (ImGui::IsItemClicked()) {
         *currentObject = object;
@@ -131,19 +131,6 @@ int main(int argc, char *argv[]) {
         .build();
 
     /**
-     * Models
-     */
-    auto modelpath = utils::getPath("models");
-
-    std::vector<std::shared_ptr<Object>> objects {
-        Object::fromOBJ(modelpath / "scene.obj", shaderProgram, Transform {
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(1.0f, 1.0f, 1.0f)
-        })
-    };
-
-    /**
      * Cameras
      */
     std::vector<std::shared_ptr<Camera>> cameras {
@@ -167,9 +154,16 @@ int main(int argc, char *argv[]) {
     };
 
     /**
-     * Lines
+     * Objects
      */
-    std::vector<std::shared_ptr<Object>> lines {
+    auto modelpath = utils::getPath("models");
+
+    std::vector<std::shared_ptr<Object>> objects {
+        Object::fromOBJ(modelpath / "scene.obj", shaderProgram, Transform {
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f),
+            glm::vec3(1.0f, 1.0f, 1.0f)
+        }),
         std::static_pointer_cast<Object>(
             std::make_shared<Axes>(Transform {
                 glm::vec3(0.0f, 0.0f, 0.0f),
@@ -186,15 +180,17 @@ int main(int argc, char *argv[]) {
         )
     };
 
+    for(auto camera : cameras) {
+        objects.push_back(camera);
+    }
+
     /**
      * Controller + Components
      */
     auto currentObject = objects.at(0);
-    auto renderMode = std::make_shared<GLenum>(GL_TRIANGLES);
 
     cameras.at(0)->attach(std::make_shared<FPSComponent>());
     currentObject->attach(std::make_shared<MovementComponent>());
-    currentObject->attach(std::make_shared<RenderModeComponent>(renderMode));
 
     auto input = Input::makeInput(window)
         ->attach(
@@ -219,6 +215,7 @@ int main(int argc, char *argv[]) {
                 ->attach(Button::makeButton("triangles", GLFW_KEY_T))
                 ->attach(Button::makeButton("points", GLFW_KEY_P))
                 ->attach(Button::makeButton("lines", GLFW_KEY_L))
+                ->attach(Button::makeButton("recenter", GLFW_KEY_HOME))
         );
 
     /**
@@ -232,20 +229,15 @@ int main(int argc, char *argv[]) {
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
         /**
-         * Rendering.
+         * Update
          */
         for(auto camera : cameras) {
             if(camera->viewport.render(windowDimension)) {
-                camera->projection->setAspect(windowDimension.x / windowDimension.y);
-                
-                camera->update();
+                Camera::currentCamera = camera;
 
-                for(auto line: lines) {
-                    line->render(camera, GL_LINES);
-                }
+                camera->projection->setAspect(windowDimension.x / windowDimension.y);
 
                 for(auto object : objects) {
-                    object->render(camera, *renderMode);
                     object->update();
                 }
             }
@@ -268,21 +260,7 @@ int main(int argc, char *argv[]) {
 
         ImGui::Begin("Inspector");
 
-        ImGui::LabelText("Name", currentObject->model->name.c_str());
-
-        if(ImGui::CollapsingHeader("Transform")) {
-            glm::vec3 rotation = glm::degrees(currentObject->getEuler());
-
-            ImGui::InputFloat3("Position", glm::value_ptr(currentObject->position));
-            ImGui::InputFloat3("Rotation", glm::value_ptr(rotation));
-            ImGui::InputFloat3("Scale", glm::value_ptr(currentObject->scale));
-        }
-
-        for(auto component : currentObject->components) {
-            if(ImGui::CollapsingHeader(component->getName().c_str())) {
-                component->imgui();
-            }
-        }
+        currentObject->imgui();
 
         ImGui::End();
 

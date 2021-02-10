@@ -1,7 +1,7 @@
 #include "objects.hpp"
 
-Axes::Axes(Transform transform, GLuint shaderProgram) : Object(transform, shaderProgram) {
-    this->model = ModelBuilder()
+Axes::Axes(Transform transform, GLuint shaderProgram) : Object("Axes", transform) {
+    this->attach(ModelBuilder()
         .attachBuffer(
             std::vector { 
                 glm::vec3(0.0f, 0.0f, 0.0f),
@@ -37,18 +37,14 @@ Axes::Axes(Transform transform, GLuint shaderProgram) : Object(transform, shader
             GL_ELEMENT_ARRAY_BUFFER,
             true
         )
-        .build();
+        .setName("Axes")
+        .setRenderMode(GL_LINES)
+        .setShaderProgram(shaderProgram)
+        .build()
+    );
 }
 
-void Axes::render(std::shared_ptr<Camera> camera, GLenum mode, glm::mat4 parentMatrix) {
-    glLineWidth(5.0f);
-
-    Object::render(camera, mode, parentMatrix);
-
-    glLineWidth(1.0f);
-}
-
-Grid::Grid(Transform transform, GLuint shaderProgram, int count, glm::vec4 color) : Object(transform, shaderProgram) {
+Grid::Grid(Transform transform, GLuint shaderProgram, int count, glm::vec4 color) : Object("Grid", transform) {
     if (count < 2) {
         throw std::runtime_error("A grid needs at least 2 lines for edges.");
     }
@@ -74,7 +70,7 @@ Grid::Grid(Transform transform, GLuint shaderProgram, int count, glm::vec4 color
         colors.push_back(color);
     }
 
-    this->model = ModelBuilder()
+    this->attach(ModelBuilder()
         .attachBuffer(
             verticies,
             GL_ARRAY_BUFFER,
@@ -92,5 +88,9 @@ Grid::Grid(Transform transform, GLuint shaderProgram, int count, glm::vec4 color
             GL_ELEMENT_ARRAY_BUFFER,
             true
         )
-        .build();
+        .setName("Grid")
+        .setRenderMode(GL_LINES)
+        .setShaderProgram(shaderProgram)
+        .build()
+    );
 }

@@ -1,10 +1,12 @@
 #include "camera.hpp"
 
 Camera::Camera(Transform transform, Viewport viewport, std::shared_ptr<Projection> projection) : 
-    Transform(transform), 
+    Object("Camera", transform), 
     viewport(viewport),
     projection(projection) 
 {}
+
+std::shared_ptr<Camera> Camera::currentCamera = nullptr;
 
 void Camera::render(GLuint shaderProgram) {
     glUniformMatrix4fv(

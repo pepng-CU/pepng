@@ -6,11 +6,14 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <imgui.h>
 
 class Transform {
     public:
         glm::vec3 position;
         glm::vec3 scale;
+        glm::mat4 parentMatrix;
 
         Transform();
 
@@ -80,6 +83,8 @@ class Transform {
          * Gets the right vector relative to current rotation.
          */
         virtual glm::vec3 getRight();
+
+        virtual void imgui();
 
         friend std::ostream& operator<<(std::ostream& os, const Transform& transform);
     protected:

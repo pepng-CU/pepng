@@ -6,6 +6,7 @@
 
 #include "transform.hpp"
 #include "component.hpp"
+#include "object.hpp"
 
 class Viewport {
     public:
@@ -42,8 +43,10 @@ class Perspective : public Projection {
         float far;
 };
 
-class Camera : public Transform, public ComponentManager, public std::enable_shared_from_this<Camera> {
+class Camera : public Object {
     public:
+        static std::shared_ptr<Camera> currentCamera;
+
         std::shared_ptr<Projection> projection;
         
         Viewport viewport;
@@ -59,12 +62,6 @@ class Camera : public Transform, public ComponentManager, public std::enable_sha
         virtual glm::vec3 getRight() override;
 
         virtual glm::quat getRotation() override;
-
-        virtual void update() override {
-            for(auto component : this->components) {
-                component->update(shared_from_this());
-            }
-        }
 
         friend std::ostream& operator<<(std::ostream& os, const Camera& camera);
 };
