@@ -1,13 +1,13 @@
 #include "fps.hpp"
 #include "transform.hpp"
 
-FPSComponent::FPSComponent(float panSpeed, float rotationSpeed) : 
+FPS::FPS(float panSpeed, float rotationSpeed) : 
     Component("FPS"),
     panSpeed(panSpeed),
     rotationSpeed(rotationSpeed)
 {}
 
-void FPSComponent::update(std::shared_ptr<WithComponents> parent) {
+void FPS::update(std::shared_ptr<WithComponents> parent) {
     if(!this->isActive) {
         return;
     }
@@ -30,7 +30,7 @@ void FPSComponent::update(std::shared_ptr<WithComponents> parent) {
     }
 }
 
-void FPSComponent::imgui() {
+void FPS::imgui() {
     Component::imgui();
 
     ImGui::InputFloat("Pan Speed", &this->panSpeed);

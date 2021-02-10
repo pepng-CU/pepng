@@ -3,7 +3,7 @@
 Selector::Selector() : Component("Selector"), index(0), needsUpdate(true) {}
 
 void Selector::dfsSwitch(std::shared_ptr<Object> object, int& index) {
-    if(auto move = object->getComponent<MovementComponent>()) {
+    if(auto move = object->getComponent<Transformer>()) {
         move->isActive = index == this->index;
     }
 

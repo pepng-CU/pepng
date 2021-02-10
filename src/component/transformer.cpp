@@ -1,13 +1,14 @@
-#include "movement.hpp"
+#include "transformer.hpp"
 #include "transform.hpp"
 
-MovementComponent::MovementComponent(float positionSpeed, float rotationSpeed) :
-    Component("Movement"),
+Transformer::Transformer(float positionSpeed, float rotationSpeed, float scaleSpeed) :
+    Component("Transformer"),
     positionSpeed(positionSpeed),
-    rotationSpeed(rotationSpeed)
+    rotationSpeed(rotationSpeed),
+    scaleSpeed(scaleSpeed)
 {}
 
-void MovementComponent::update(std::shared_ptr<WithComponents> parent) {
+void Transformer::update(std::shared_ptr<WithComponents> parent) {
     if(!this->isActive) {
         return;
     }
@@ -28,15 +29,23 @@ void MovementComponent::update(std::shared_ptr<WithComponents> parent) {
         transform->deltaRotate(deltaRotation * this->rotationSpeed);
     }
 
+    auto deltaScale = glm::vec3(input->getAxis("scale"));
+
+    if (glm::length(deltaScale) > 0.0f) {
+        transform->scale += deltaScale * this->scaleSpeed;
+    }
+
     if(input->getButtonDown("recenter")) {
         transform->position = glm::vec3(0.0f);
         transform->setRotation(glm::vec3(0.0f));
+        transform->scale = glm::vec3(1.0f);
     }
 }
 
-void MovementComponent::imgui() {
+void Transformer::imgui() {
     Component::imgui();
     
     ImGui::InputFloat("Position Speed", &this->positionSpeed);
     ImGui::InputFloat("Rotation Speed", &this->rotationSpeed);
+    ImGui::InputFloat("Scale Speed", &this->scaleSpeed);
 }

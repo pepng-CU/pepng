@@ -61,11 +61,11 @@ void objectHierarchy(std::shared_ptr<Object> object, std::shared_ptr<Object>* cu
     }
 }
 
-void objectAttachMovement(std::shared_ptr<Object> object) {
-    object->attach(std::make_shared<MovementComponent>());
+void objectAttachTransformer(std::shared_ptr<Object> object) {
+    object->attach(std::make_shared<Transformer>());
 
     for(auto child : object->children) {
-        objectAttachMovement(child);
+        objectAttachTransformer(child);
     }
 }
 
@@ -203,12 +203,12 @@ int main(int argc, char *argv[]) {
      */
     auto currentObject = objects.at(0);
 
-    cameras.at(0)->attach(std::make_shared<FPSComponent>());
-
+    cameras.at(0)->attach(std::make_shared<FPS>());
     objects.at(0)->attach(std::make_shared<Selector>());
+
     objects.at(0)->children.at(0)->getComponent<Renderer>()->texture = honeyTexture;
 
-    objectAttachMovement(objects.at(0));
+    objectAttachTransformer(objects.at(0));
 
     auto input = Input::makeInput(window)
         ->attach(
@@ -233,7 +233,9 @@ int main(int argc, char *argv[]) {
         ->attach(Button::makeButton("triangles", GLFW_KEY_T))
         ->attach(Button::makeButton("points", GLFW_KEY_P))
         ->attach(Button::makeButton("lines", GLFW_KEY_L))
-        ->attach(Button::makeButton("recenter", GLFW_KEY_HOME));
+        ->attach(Button::makeButton("recenter", GLFW_KEY_HOME))
+        ->attach(Button::makeButton("scale", GLFW_KEY_U))
+        ->attach(Button::makeButton("scale", GLFW_KEY_J, -1.0f));
 
     for(int i = 0; i < 10; i++) {
         std::stringstream ss;

@@ -2,9 +2,9 @@
 
 #include "component.hpp"
 
-class FPSComponent : public Component {
+class FPS : public Component {
     public:
-        FPSComponent(float panSpeed = 0.025f, float rotationSpeed = 0.25f);
+        FPS(float panSpeed = 0.025f, float rotationSpeed = 0.25f);
 
         virtual void update(std::shared_ptr<WithComponents> parent) override;
 
