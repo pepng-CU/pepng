@@ -7,9 +7,10 @@
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <imgui.h>
 
-class Transform {
+#include "component.hpp"
+
+class Transform : public Component {
     public:
         glm::vec3 position;
         glm::vec3 scale;
@@ -84,7 +85,7 @@ class Transform {
          */
         virtual glm::vec3 getRight();
 
-        virtual void imgui();
+        virtual void imgui() override;
 
         friend std::ostream& operator<<(std::ostream& os, const Transform& transform);
     protected:
@@ -94,3 +95,33 @@ class Transform {
 };
 
 std::ostream& operator<<(std::ostream& os, const Transform& transform);
+
+/**
+ * Class that fixes the transform for the camera.
+ *
+ * Use this class instead of the normal transform for the camera.
+ */
+class CameraTransform : public Transform {  
+    public:
+        CameraTransform();
+
+        CameraTransform(const Transform &transform);
+
+        CameraTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
+
+        CameraTransform(
+            glm::vec3 position, 
+            glm::quat rotationX, 
+            glm::quat rotationY,
+            glm::quat rotationZ, 
+            glm::vec3 scale
+        );
+
+        virtual glm::quat getRotation() override;
+
+        virtual glm::vec3 getForward() override;
+
+        virtual glm::vec3 getUp() override;
+
+        virtual glm::vec3 getRight() override;
+};

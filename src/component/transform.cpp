@@ -9,15 +9,17 @@ Transform::Transform() :
 {}
 
 Transform::Transform(const Transform &transform) : 
-    position(transform.position), 
+    Component("Transform"),
+    position(glm::vec3(transform.position)), 
     rotationX(glm::quat(transform.rotationX)), 
     rotationY(glm::quat(transform.rotationY)), 
     rotationZ(glm::quat(transform.rotationZ)), 
-    scale(transform.scale),
-    parentMatrix(transform.parentMatrix)
+    scale(glm::vec3(transform.scale)),
+    parentMatrix(glm::mat4(transform.parentMatrix))
 {}
 
 Transform::Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) : 
+    Component("Transform"),
     position(position), 
     rotationX(glm::quat(glm::vec3(0.0f))), 
     rotationY(glm::quat(glm::vec3(0.0f))), 
@@ -34,7 +36,9 @@ Transform::Transform(
     glm::quat rotationY,
     glm::quat rotationZ, 
     glm::vec3 scale
-) : position(position), 
+) : 
+    Component("Transform"),
+    position(position), 
     rotationX(rotationX), 
     rotationY(rotationY),
     rotationZ(rotationZ),
@@ -122,15 +126,12 @@ glm::vec3 Transform::getEuler() {
 }
 
 void Transform::imgui() {
-    if(ImGui::CollapsingHeader("Transform")) {
-        glm::vec3 rotation = glm::degrees(this->getEuler());
+    glm::vec3 rotation = glm::degrees(this->getEuler());
 
-        ImGui::InputFloat3("Position", glm::value_ptr(this->position));
-        ImGui::InputFloat3("Rotation", glm::value_ptr(rotation));
-        ImGui::InputFloat3("Scale", glm::value_ptr(this->scale));
-    }
+    ImGui::InputFloat3("Position", glm::value_ptr(this->position));
+    ImGui::InputFloat3("Rotation", glm::value_ptr(rotation));
+    ImGui::InputFloat3("Scale", glm::value_ptr(this->scale));
 }
-
 
 std::ostream& operator<<(std::ostream& os, const Transform& transform) {
     os  << "Transform { Position: " 
@@ -142,4 +143,40 @@ std::ostream& operator<<(std::ostream& os, const Transform& transform) {
         << " }";
 
     return os;
+}
+
+CameraTransform::CameraTransform() : Transform() {}
+
+CameraTransform::CameraTransform(const Transform &transform) : Transform(transform) {}
+
+CameraTransform::CameraTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) : Transform(position, rotation, scale) {}
+
+CameraTransform::CameraTransform(
+    glm::vec3 position, 
+    glm::quat rotationX, 
+    glm::quat rotationY,
+    glm::quat rotationZ, 
+    glm::vec3 scale
+) : Transform(position, rotationX, rotationY, rotationZ, scale) {}
+
+glm::vec3 CameraTransform::getRight() {
+    auto rotationMatrix = this->getRotationMatrix();
+
+    return glm::vec3(rotationMatrix[0][0], rotationMatrix[1][0], rotationMatrix[2][0]);
+}
+
+glm::vec3 CameraTransform::getUp() {
+    auto rotationMatrix = this->getRotationMatrix();
+
+    return -glm::vec3(rotationMatrix[0][1], rotationMatrix[1][1], rotationMatrix[2][1]);
+}
+
+glm::vec3 CameraTransform::getForward() {
+    auto rotationMatrix = this->getRotationMatrix();
+
+    return glm::vec3(rotationMatrix[0][2], rotationMatrix[1][2], rotationMatrix[2][2]);
+}
+
+glm::quat CameraTransform::getRotation() {
+    return this->rotationX * this->rotationY * this->rotationZ;
 }

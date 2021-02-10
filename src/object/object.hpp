@@ -8,11 +8,9 @@
 #include <iostream>
 #include <glm/gtx/string_cast.hpp>
 
-#include "../components/transform.hpp"
-#include "../components/model.hpp"
-#include "../components/component.hpp"
+#include "../component/components.hpp"
 
-class Object : public Transform, public ComponentManager, public std::enable_shared_from_this<Object> {
+class Object : public WithComponents, public std::enable_shared_from_this<Object> {
     public:
         std::string name;
 
@@ -20,11 +18,9 @@ class Object : public Transform, public ComponentManager, public std::enable_sha
 
         Object();
 
-        Object(std::string name, Transform transform);
+        Object(std::string name, std::shared_ptr<Transform> transform);
 
-        Object(const Object& object);
-
-        static std::shared_ptr<Object> fromOBJ(std::filesystem::path filepath, GLuint shaderProgram, Transform transform = Transform {});
+        static std::shared_ptr<Object> fromOBJ(std::filesystem::path filepath, GLuint shaderProgram, std::shared_ptr<Transform> transform);
 
         virtual void imgui();
 

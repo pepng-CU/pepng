@@ -25,15 +25,12 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_glfw.h>
 
-#include "utils.hpp"
-#include "gl/shader.hpp"
-#include "components/model.hpp"
-#include "objects/camera.hpp"
-#include "components/transform.hpp"
-#include "objects/object.hpp"
-#include "objects/objects.hpp"
-#include "components/component.hpp"
+#include "util/utils.hpp"
+#include "gl/gl.hpp"
+#include "component/components.hpp"
+#include "object/objects.hpp"
 #include "io/io.hpp"
+#include "ui/ui.hpp"
 
 static glm::vec2 windowDimension = glm::vec2(1024.0f, 768.0f);
 
@@ -113,7 +110,8 @@ int main(int argc, char *argv[]) {
      */
     auto texturespath = utils::getPath("textures");
 
-    createTexture(texturespath / "honeycomb.jpg");
+    auto honeyTexture = createTexture(texturespath / "honeycomb.jpg");
+    auto objectTexture = createTexture(texturespath / "suzanne.png");
 
     /**
      * Shaders
@@ -135,11 +133,11 @@ int main(int argc, char *argv[]) {
      */
     std::vector<std::shared_ptr<Camera>> cameras {
         std::make_shared<Camera>(
-            Transform {
+            std::make_shared<CameraTransform>(
                 glm::vec3(0.0f, 2.0f, 10.0f),
                 glm::vec3(0.0f, 0.0f, 0.0f),
                 glm::vec3(1.0f, 1.0f, 1.0f)
-            },
+            ),
             Viewport {
                 glm::vec2(0.0f, 0.0f),
                 glm::vec2(1.0f, 1.0f)
@@ -159,24 +157,30 @@ int main(int argc, char *argv[]) {
     auto modelpath = utils::getPath("models");
 
     std::vector<std::shared_ptr<Object>> objects {
-        Object::fromOBJ(modelpath / "scene.obj", shaderProgram, Transform {
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(1.0f, 1.0f, 1.0f)
-        }),
-        std::static_pointer_cast<Object>(
-            std::make_shared<Axes>(Transform {
+        Object::fromOBJ(modelpath / "suzanne.obj", shaderProgram, 
+            std::make_shared<Transform>(
                 glm::vec3(0.0f, 0.0f, 0.0f),
                 glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(7.0f, 7.0f, 7.0f)
-            }, lineShaderProgram)
+                glm::vec3(1.0f, 1.0f, 1.0f)
+            )
         ),
         std::static_pointer_cast<Object>(
-            std::make_shared<Grid>(Transform {
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(128.0f, 128.0f, 128.0f)
-            }, lineShaderProgram, 129)
+            std::make_shared<Axes>(
+                std::make_shared<Transform>(
+                    glm::vec3(0.0f, 0.0f, 0.0f),
+                    glm::vec3(0.0f, 0.0f, 0.0f),
+                    glm::vec3(7.0f, 7.0f, 7.0f)
+                )
+            , lineShaderProgram)
+        ),
+        std::static_pointer_cast<Object>(
+            std::make_shared<Grid>(
+                std::make_shared<Transform>(
+                    glm::vec3(0.0f, 0.0f, 0.0f),
+                    glm::vec3(0.0f, 0.0f, 0.0f),
+                    glm::vec3(128.0f, 128.0f, 128.0f)
+                )
+            , lineShaderProgram, 129)
         )
     };
 
@@ -265,24 +269,6 @@ int main(int argc, char *argv[]) {
         ImGui::End();
 
         ImGui::Begin("Debug");
-
-        if(ImGui::Button("Create Cube")) {
-            auto object = Object::fromOBJ(modelpath / "cube.obj", shaderProgram, Transform {
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 1.0f, 1.0f)
-            });
-
-            objects.push_back(object);
-        } else if(ImGui::Button("Create Sponza")) {
-            auto object = Object::fromOBJ(modelpath / "sponza.obj", shaderProgram, Transform {
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 1.0f, 1.0f)
-            });
-
-            objects.push_back(object);
-        }
 
         ImGui::End();
 

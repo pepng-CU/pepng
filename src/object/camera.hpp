@@ -4,9 +4,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <GL/glew.h>
 
-#include "../components/transform.hpp"
-#include "../components/component.hpp"
 #include "object.hpp"
+#include "../component/components.hpp"
 
 class Viewport {
     public:
@@ -51,17 +50,9 @@ class Camera : public Object {
         
         Viewport viewport;
 
-        Camera(Transform transform, Viewport viewport, std::shared_ptr<Projection> projection);
+        Camera(std::shared_ptr<CameraTransform> transform, Viewport viewport, std::shared_ptr<Projection> projection);
 
         void render(GLuint shaderProgram);
-
-        virtual glm::vec3 getForward() override;
-
-        virtual glm::vec3 getUp() override;
-
-        virtual glm::vec3 getRight() override;
-
-        virtual glm::quat getRotation() override;
 
         friend std::ostream& operator<<(std::ostream& os, const Camera& camera);
 };
