@@ -25,15 +25,15 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_glfw.h>
 
-#include "shader.hpp"
-#include "model.hpp"
 #include "utils.hpp"
-#include "camera.hpp"
-#include "transform.hpp"
-#include "object.hpp"
-#include "objects.hpp"
-#include "component.hpp"
-#include "io.hpp"
+#include "gl/shader.hpp"
+#include "components/model.hpp"
+#include "objects/camera.hpp"
+#include "components/transform.hpp"
+#include "objects/object.hpp"
+#include "objects/objects.hpp"
+#include "components/component.hpp"
+#include "io/io.hpp"
 
 static glm::vec2 windowDimension = glm::vec2(1024.0f, 768.0f);
 

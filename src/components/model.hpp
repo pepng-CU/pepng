@@ -14,8 +14,8 @@
 #include <stb_image.h>
 #include <imgui.h>
 
-#include "utils.hpp"
-#include "component.hpp"
+#include "../utils.hpp"
+#include "../components/component.hpp"
 
 class Model : public Component {
     public:

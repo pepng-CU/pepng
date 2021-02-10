@@ -1,5 +1,5 @@
 #include "model.hpp"
-#include "camera.hpp"
+#include "../objects/camera.hpp"
 
 ModelBuilder::ModelBuilder() : model(std::make_shared<Model>()) {
     GLuint vao;

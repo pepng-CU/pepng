@@ -4,8 +4,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <GL/glew.h>
 
-#include "transform.hpp"
-#include "component.hpp"
+#include "../components/transform.hpp"
+#include "../components/component.hpp"
 #include "object.hpp"
 
 class Viewport {

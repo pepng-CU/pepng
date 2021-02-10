@@ -10,8 +10,8 @@
 #include <iostream>
 #include <string>
 
-#include "io.hpp"
-#include "transform.hpp"
+#include "../io/io.hpp"
+#include "../components/transform.hpp"
 
 class ComponentManager;
 

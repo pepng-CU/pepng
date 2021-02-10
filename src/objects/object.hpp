@@ -8,9 +8,9 @@
 #include <iostream>
 #include <glm/gtx/string_cast.hpp>
 
-#include "transform.hpp"
-#include "model.hpp"
-#include "component.hpp"
+#include "../components/transform.hpp"
+#include "../components/model.hpp"
+#include "../components/component.hpp"
 
 class Object : public Transform, public ComponentManager, public std::enable_shared_from_this<Object> {
     public:
