@@ -99,22 +99,22 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
                 mapVertex.push_back(verticies.at(index));
             }
 
-            std::vector<glm::vec3> mapNormal;
-            for(auto index : normalIndex) {
-                mapNormal.push_back(normals.at(index));
-            }
-
             std::vector<glm::vec2> mapTexture;
             for(auto index : textureIndex) {
                 mapTexture.push_back(textures.at(index));
+            }
+
+            std::vector<glm::vec3> mapNormal;
+            for(auto index : normalIndex) {
+                mapNormal.push_back(normals.at(index));
             }
 
             models.push_back(
                 Model::makeModel()
                     ->setName(name)
                     ->attachBuffer(mapVertex, GL_ARRAY_BUFFER, 0, 3)
-                    ->attachBuffer(mapNormal, GL_ARRAY_BUFFER, 1, 3)
                     ->attachBuffer(mapTexture, GL_ARRAY_BUFFER, 2, 2)
+                    ->attachBuffer(mapNormal, GL_ARRAY_BUFFER, 1, 3)
                     ->setCount(mapVertex.size())
                     ->calculateOffset(verticies, vertexIndex)
             );
@@ -141,7 +141,7 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
 
             ss >> u >> v;
 
-            textures.push_back(glm::vec2(u, v));
+            textures.push_back(glm::vec2(u, 1.0f - v));
         } else if (target == "vn") {
             float x, y, z;
 
