@@ -183,7 +183,9 @@ int main(int argc, char *argv[]) {
             , lineShaderProgram, 129)
         )
     };
-
+    
+    objects.at(0)->children.at(0)->getComponent<Renderer>()->texture = honeyTexture;
+    
     for(auto camera : cameras) {
         objects.push_back(camera);
     }

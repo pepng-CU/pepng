@@ -20,6 +20,10 @@ void Renderer::update(std::shared_ptr<WithComponents> parent) {
 
     glUseProgram(this->shaderProgram);
 
+    if (this->texture >= 0) {
+        glBindTexture(GL_TEXTURE_2D, this->texture);
+    }
+
     Camera::currentCamera->render(this->shaderProgram);
 
     GLuint uWorld = glGetUniformLocation(this->shaderProgram, "u_world");
