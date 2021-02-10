@@ -12,6 +12,7 @@
 #include <filesystem>
 #include <stdlib.h>
 #include <time.h>
+#include <sstream>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -25,35 +26,46 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_glfw.h>
 
-#include "shader.hpp"
-#include "model.hpp"
-#include "utils.hpp"
-#include "camera.hpp"
-#include "transform.hpp"
-#include "object.hpp"
-#include "objects.hpp"
-#include "controller.hpp"
-#include "component.hpp"
+#include "util/utils.hpp"
+#include "gl/gl.hpp"
+#include "component/components.hpp"
+#include "object/objects.hpp"
+#include "io/io.hpp"
+#include "ui/ui.hpp"
 
-void objectHierarchy(std::shared_ptr<Object> object) {
-    if(ImGui::TreeNode(object->model->name.c_str())) {
+static glm::vec2 windowDimension = glm::vec2(1024.0f, 768.0f);
+
+void windowSizeCallback(GLFWwindow* window, int width, int height) {
+    windowDimension = glm::vec2(width, height);
+}
+
+void objectHierarchy(std::shared_ptr<Object> object, std::shared_ptr<Object>* currentObject) {
+    ImGuiTreeNodeFlags nodeFlags = 0;
+
+    if(object == *currentObject) {
+        nodeFlags |= ImGuiTreeNodeFlags_Selected;
+    }
+
+    bool nodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)&object, nodeFlags, object->name.c_str());
+
+    if (ImGui::IsItemClicked()) {
+        *currentObject = object;
+    }
+
+    if(nodeOpen) {
         for(auto child : object->children) {
-            objectHierarchy(child);
+            objectHierarchy(child, currentObject);
         }
 
         ImGui::TreePop();
     }
 }
 
-void objectMovementComponent(std::shared_ptr<Object> object, std::vector<std::shared_ptr<MovementComponent>>* list) {
-    list->push_back(
-        std::make_shared<MovementComponent>(
-            object
-        )
-    );
+void objectAttachTransformer(std::shared_ptr<Object> object) {
+    object->attach(std::make_shared<Transformer>());
 
     for(auto child : object->children) {
-        objectMovementComponent(child, list);
+        objectAttachTransformer(child);
     }
 }
 
@@ -71,7 +83,7 @@ int main(int argc, char *argv[]) {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 
-    GLFWwindow *window = glfwCreateWindow(1024, 768, "Comp371 - Final Project", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(windowDimension.x, windowDimension.y, "Comp371 - Final Project", NULL, NULL);
 
     if (window == NULL) {
         std::cerr << "Failed to create GLFW window" << std::endl;
@@ -90,6 +102,7 @@ int main(int argc, char *argv[]) {
     }
 
     glfwSwapInterval(1);
+    glfwSetWindowSizeCallback(window, windowSizeCallback);
 
     /**
      * ImGui
@@ -106,7 +119,9 @@ int main(int argc, char *argv[]) {
      */
     auto texturespath = utils::getPath("textures");
 
-    createTexture(texturespath / "honeycomb.jpg");
+    auto missingTexture = createTexture(texturespath / "missing.jpg");
+    auto honeyTexture = createTexture(texturespath / "honeycomb.jpg");
+    auto objectTexture = createTexture(texturespath / "suzanne.png");
 
     /**
      * Shaders
@@ -124,77 +139,113 @@ int main(int argc, char *argv[]) {
         .build();
 
     /**
-     * Models
-     */
-    auto modelpath = utils::getPath("models");
-
-    std::vector<std::shared_ptr<Object>> objects {
-        Object::fromOBJ(modelpath / "scene.obj", shaderProgram, Transform {
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f),
-            glm::vec3(1.0f, 1.0f, 1.0f)
-        })
-    };
-
-    /**
      * Cameras
      */
     std::vector<std::shared_ptr<Camera>> cameras {
         std::make_shared<Camera>(
-            Transform {
+            std::make_shared<CameraTransform>(
                 glm::vec3(0.0f, 2.0f, 10.0f),
                 glm::vec3(0.0f, 0.0f, 0.0f),
                 glm::vec3(1.0f, 1.0f, 1.0f)
-            },
+            ),
             Viewport {
                 glm::vec2(0.0f, 0.0f),
-                glm::vec2(1024.0f, 768.0f)
+                glm::vec2(1.0f, 1.0f)
             },
-            glm::perspective(glm::radians(60.0f), 1024.0f / 768.0f, 0.01f, 1000.0f)
+            std::make_shared<Perspective>(
+                glm::radians(60.0f),
+                windowDimension.x / windowDimension.y,
+                0.01f,
+                1000.0f
+            )
         )
     };
 
     /**
-     * Lines
+     * Objects
      */
-    std::vector<std::shared_ptr<Object>> lines {
-        std::static_pointer_cast<Object>(
-            std::make_shared<Axes>(Transform {
+    auto modelpath = utils::getPath("models");
+
+    std::vector<std::shared_ptr<Object>> objects {
+        Object::fromOBJ(modelpath / "scene.obj", shaderProgram, 
+            std::make_shared<Transform>(
                 glm::vec3(0.0f, 0.0f, 0.0f),
                 glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(7.0f, 7.0f, 7.0f)
-            }, lineShaderProgram)
+                glm::vec3(1.0f, 1.0f, 1.0f)
+            )
         ),
         std::static_pointer_cast<Object>(
-            std::make_shared<Grid>(Transform {
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(128.0f, 128.0f, 128.0f)
-            }, lineShaderProgram, 129)
+            std::make_shared<Axes>(
+                std::make_shared<Transform>(
+                    glm::vec3(0.0f, 0.0f, 0.0f),
+                    glm::vec3(0.0f, 0.0f, 0.0f),
+                    glm::vec3(7.0f, 7.0f, 7.0f)
+                )
+            , lineShaderProgram)
+        ),
+        std::static_pointer_cast<Object>(
+            std::make_shared<Grid>(
+                std::make_shared<Transform>(
+                    glm::vec3(0.0f, 0.0f, 0.0f),
+                    glm::vec3(0.0f, 0.0f, 0.0f),
+                    glm::vec3(128.0f, 128.0f, 128.0f)
+                )
+            , lineShaderProgram, 129)
         )
     };
+
+    for(auto camera : cameras) {
+        objects.push_back(camera);
+    }
 
     /**
      * Controller + Components
      */
-    auto controller = std::make_shared<Controller>(window);
+    auto currentObject = objects.at(0);
 
-    Controller::setInstance(controller);
+    cameras.at(0)->attach(std::make_shared<FPS>());
+    objects.at(0)->attach(std::make_shared<Selector>());
 
-    controller->attach(std::make_shared<FPSComponent>(std::static_pointer_cast<Transform>(cameras.at(0))));
+    objects.at(0)->children.at(0)->getComponent<Renderer>()->texture = honeyTexture;
 
-    std::vector<std::shared_ptr<MovementComponent>> objectComponents;
+    objectAttachTransformer(objects.at(0));
 
-    for(auto object : objects) {
-        objectMovementComponent(object, &objectComponents);
+    auto input = Input::makeInput(window)
+        ->attach(
+            Device::makeDevice(DeviceType::MOUSE)
+                ->attach(Axis::makeAxis("mouseY", AxisType::FIRST))
+                ->attach(Axis::makeAxis("mouseX", AxisType::SECOND))
+                ->attach(Button::makeButton("zoom", GLFW_MOUSE_BUTTON_5))
+                ->attach(Button::makeButton("pan", GLFW_MOUSE_BUTTON_MIDDLE))
+                ->attach(Button::makeButton("pan", GLFW_MOUSE_BUTTON_4))
+                ->attach(Button::makeButton("rotate", GLFW_MOUSE_BUTTON_RIGHT))
+        );
+
+    auto keyboard = Device::makeDevice(DeviceType::KEYBOARD)
+        ->attach(Button::makeButton("vertical", GLFW_KEY_W))
+        ->attach(Button::makeButton("vertical", GLFW_KEY_S, -1.0f))
+        ->attach(Button::makeButton("horizontal", GLFW_KEY_A))
+        ->attach(Button::makeButton("horizontal", GLFW_KEY_D, -1.0f))
+        ->attach(Button::makeButton("yaw", GLFW_KEY_UP))
+        ->attach(Button::makeButton("yaw", GLFW_KEY_DOWN, -1.0f))
+        ->attach(Button::makeButton("pitch", GLFW_KEY_LEFT))
+        ->attach(Button::makeButton("pitch", GLFW_KEY_RIGHT, -1.0f))
+        ->attach(Button::makeButton("triangles", GLFW_KEY_T))
+        ->attach(Button::makeButton("points", GLFW_KEY_P))
+        ->attach(Button::makeButton("lines", GLFW_KEY_L))
+        ->attach(Button::makeButton("recenter", GLFW_KEY_HOME))
+        ->attach(Button::makeButton("scale", GLFW_KEY_U))
+        ->attach(Button::makeButton("scale", GLFW_KEY_J, -1.0f));
+
+    for(int i = 0; i < 10; i++) {
+        std::stringstream ss;
+
+        ss << "object_" << i;
+
+        keyboard->attach(Button::makeButton(ss.str(), GLFW_KEY_0 + i));
     }
 
-    auto objectManager = std::make_shared<ObjectManagerComponent>(objectComponents);
-    controller->attach(objectManager); 
-    controller->attach(std::make_shared<EscapeComponent>());
-
-    auto renderMode = std::make_shared<GLenum>(GL_TRIANGLES);
-    controller->attach(std::make_shared<RenderModeComponent>(renderMode));
+    input->attach(keyboard);
 
     /**
      * OpenGL
@@ -207,22 +258,19 @@ int main(int argc, char *argv[]) {
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
         /**
-         * Rendering.
+         * Update
          */
         for(auto camera : cameras) {
-            if(camera->viewport.render()) {
-                for(auto line: lines) {
-                    line->render(camera, GL_LINES);
-                }
+            if(camera->viewport.render(windowDimension)) {
+                Camera::currentCamera = camera;
+
+                camera->projection->setAspect(windowDimension.x / windowDimension.y);
 
                 for(auto object : objects) {
-                    object->render(camera, *renderMode);
+                    object->update();
                 }
             }
         }
-
-        // Update input.
-        controller->update();
 
         /**
          * ImGui
@@ -234,50 +282,18 @@ int main(int argc, char *argv[]) {
         ImGui::Begin("Hierarchy");
         
         for(auto object : objects) {
-            objectHierarchy(object);
+            objectHierarchy(object, &currentObject);
         }
 
         ImGui::End();
 
         ImGui::Begin("Inspector");
-        // TODO: Check if it is actually an object...
-        auto currentObject = std::static_pointer_cast<Object>(objectManager->getCurrentComponent()->getTransform());
 
-        ImGui::LabelText("Name", currentObject->model->name.c_str());
-
-        if(ImGui::CollapsingHeader("Transform")) {
-            glm::vec3 rotation = glm::degrees(currentObject->getEuler());
-
-            ImGui::InputFloat3("Position", glm::value_ptr(currentObject->position));
-            ImGui::InputFloat3("Rotation", glm::value_ptr(rotation));
-            ImGui::InputFloat3("Scale", glm::value_ptr(currentObject->scale));
-        }
+        currentObject->imgui();
 
         ImGui::End();
 
         ImGui::Begin("Debug");
-
-        if(ImGui::Button("Create Cube")) {
-            auto object = Object::fromOBJ(modelpath / "cube.obj", shaderProgram, Transform {
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 1.0f, 1.0f)
-            });
-
-            objects.push_back(object);
-
-            objectManager->components.push_back(std::make_shared<MovementComponent>(object));
-        } else if(ImGui::Button("Create Sponza")) {
-            auto object = Object::fromOBJ(modelpath / "sponza.obj", shaderProgram, Transform {
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 1.0f, 1.0f)
-            });
-
-            objects.push_back(object);
-
-            objectManager->components.push_back(std::make_shared<MovementComponent>(object));
-        }
 
         ImGui::End();
 

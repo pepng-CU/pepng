@@ -28,7 +28,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/imgui-cmake)
 
 set(EXEC main)
 
-file(GLOB SRC src/*.cpp)
+file(GLOB_RECURSE SRC src/*.cpp)
 
 add_executable(${EXEC} ${SRC})
 
