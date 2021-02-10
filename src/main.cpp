@@ -60,6 +60,14 @@ void objectHierarchy(std::shared_ptr<Object> object, std::shared_ptr<Object>* cu
     }
 }
 
+void objectAttachMovement(std::shared_ptr<Object> object) {
+    object->attach(std::make_shared<MovementComponent>());
+
+    for(auto child : object->children) {
+        objectAttachMovement(child);
+    }
+}
+
 int main(int argc, char *argv[]) {
     srand(time(NULL));
 
@@ -110,6 +118,7 @@ int main(int argc, char *argv[]) {
      */
     auto texturespath = utils::getPath("textures");
 
+    auto missingTexture = createTexture(texturespath / "missing.jpg");
     auto honeyTexture = createTexture(texturespath / "honeycomb.jpg");
     auto objectTexture = createTexture(texturespath / "suzanne.png");
 
@@ -157,7 +166,7 @@ int main(int argc, char *argv[]) {
     auto modelpath = utils::getPath("models");
 
     std::vector<std::shared_ptr<Object>> objects {
-        Object::fromOBJ(modelpath / "suzanne.obj", shaderProgram, 
+        Object::fromOBJ(modelpath / "scene.obj", shaderProgram, 
             std::make_shared<Transform>(
                 glm::vec3(0.0f, 0.0f, 0.0f),
                 glm::vec3(0.0f, 0.0f, 0.0f),
@@ -183,9 +192,7 @@ int main(int argc, char *argv[]) {
             , lineShaderProgram, 129)
         )
     };
-    
-    objects.at(0)->children.at(0)->getComponent<Renderer>()->texture = honeyTexture;
-    
+
     for(auto camera : cameras) {
         objects.push_back(camera);
     }
@@ -196,7 +203,10 @@ int main(int argc, char *argv[]) {
     auto currentObject = objects.at(0);
 
     cameras.at(0)->attach(std::make_shared<FPSComponent>());
-    currentObject->attach(std::make_shared<MovementComponent>());
+
+    objects.at(0)->children.at(0)->getComponent<Renderer>()->texture = honeyTexture;
+
+    objectAttachMovement(objects.at(0));
 
     auto input = Input::makeInput(window)
         ->attach(

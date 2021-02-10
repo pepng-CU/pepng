@@ -57,6 +57,8 @@ void Renderer::update(std::shared_ptr<WithComponents> parent) {
             this->model->count
         );
     }
+
+    glBindTexture(GL_TEXTURE_2D, 1);
 }
 
 void Renderer::imgui() {
@@ -69,19 +71,19 @@ void Renderer::imgui() {
 
     ImGui::LabelText("Index Count", ss.str().c_str());
 
-    const char* items[] = { "Triangles", "Points", "Lines" };
+    const char* items[] = { "Lines", "Points", "Triangles" };
     static int item_current_idx = -1;
 
     if (item_current_idx == -1) {
         switch(this->renderMode) {
             case GL_TRIANGLES:
-                item_current_idx = 0;
+                item_current_idx = 2;
                 break;
             case GL_POINTS:
                 item_current_idx = 1;
                 break;
             case GL_LINES:
-                item_current_idx = 2;
+                item_current_idx = 0;
         }
     }
 
@@ -95,13 +97,13 @@ void Renderer::imgui() {
                 item_current_idx = n;
 
                 switch(item_current_idx) {
-                    case 0:
+                    case 2:
                         this->renderMode = GL_TRIANGLES;
                         break;
                     case 1:
                         this->renderMode = GL_POINTS;
                         break;
-                    case 2:
+                    case 0:
                         this->renderMode = GL_LINES;
                         break;
                 }
