@@ -27,6 +27,7 @@
 #include <imgui_impl_glfw.h>
 
 #include "util/utils.hpp"
+#include "util/load.hpp"
 #include "gl/gl.hpp"
 #include "component/components.hpp"
 #include "object/objects.hpp"

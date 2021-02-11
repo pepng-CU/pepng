@@ -18,8 +18,6 @@ class Object : public WithComponents {
 
         static std::shared_ptr<Object> makeObject(std::string name);
 
-        static std::shared_ptr<Object> fromOBJ(std::filesystem::path filepath, GLuint shaderProgram, std::shared_ptr<Transform> transform);
-
         std::shared_ptr<Object> attachChild(std::shared_ptr<Object> object);
 
         virtual void imgui();

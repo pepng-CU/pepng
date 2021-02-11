@@ -1,6 +1,6 @@
 #pragma once
 
-#include "load.hpp"
+#include "buffer.hpp"
 #include "model.hpp"
 #include "shader.hpp"
 #include "texture.hpp"

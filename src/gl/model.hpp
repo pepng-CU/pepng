@@ -40,12 +40,6 @@ class Model : public std::enable_shared_from_this<Model>, public DelayedInit  {
         virtual void delayedInit() override;
 
         /**
-         * Reads models from OBJ file.
-         * @param program Relative path to OBJ file.
-         */
-        static std::vector<std::shared_ptr<Model>> fromOBJ(std::filesystem::path filepath);
-
-        /**
          * Binds buffer.
          */
         template <typename T>
