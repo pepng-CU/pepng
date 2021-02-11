@@ -35,7 +35,7 @@ std::shared_ptr<Object> pepng::makeGrid(std::shared_ptr<Transform> transform, GL
 
     grid->attachComponent(pepng::makeRenderer(
             pepng::makeModel()
-                ->attach(
+                ->attachBuffer(
                     pepng::makeBuffer<glm::vec3>(
                         verticies,
                         GL_ARRAY_BUFFER,
@@ -43,7 +43,7 @@ std::shared_ptr<Object> pepng::makeGrid(std::shared_ptr<Transform> transform, GL
                         3
                     )
                 )
-                ->attach(
+                ->attachBuffer(
                     pepng::makeBuffer<glm::vec4>(
                         colors,
                         GL_ARRAY_BUFFER,
@@ -51,7 +51,7 @@ std::shared_ptr<Object> pepng::makeGrid(std::shared_ptr<Transform> transform, GL
                         4
                     )
                 )
-                ->attach(
+                ->attachBuffer(
                     pepng::makeBuffer<int>(
                         indicies,
                         GL_ELEMENT_ARRAY_BUFFER

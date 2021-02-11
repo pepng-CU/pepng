@@ -32,10 +32,28 @@ std::vector<int> utils::splitInt(const std::string& line, const std::string& del
     return ints;
 }
 
+std::vector<float> utils::splitFloat(const std::string& line, const std::string& delim) {
+    auto splits = split(line, delim);
+
+    std::vector<float> floats;
+
+    for(std::string word : splits) {
+        floats.push_back(std::stof(word));
+    }
+
+    return floats;
+}
+
 std::filesystem::path pepng::getFolderPath(std::filesystem::path folderName) {
     auto finalPath = std::filesystem::current_path();
 
+    int depth = 0;
+
     while (!std::filesystem::exists(finalPath / folderName)) {
+        if(depth++ > 10) {
+            throw std::runtime_error("Unable to load directory: " + folderName.string());
+        }
+
         finalPath = finalPath.parent_path();
     }
 

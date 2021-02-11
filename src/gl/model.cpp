@@ -18,6 +18,7 @@ std::shared_ptr<Model> Model::makeModel() {
 std::shared_ptr<Model> pepng::makeModel() {
     return Model::makeModel();
 }
+
 void Model::delayedInit() {
     if(this->isInit) {
         return;

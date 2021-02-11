@@ -16,7 +16,9 @@ class Transform : public Component {
         glm::vec3 scale;
         glm::mat4 parentMatrix;
 
-        static std::shared_ptr<Transform> makeTransform(glm::vec3 position = glm::vec3(0.0f), glm::vec3 rotation = glm::vec3(0.0f), glm::vec3 scale = glm::vec3(1.0f));
+        static std::shared_ptr<Transform> makeTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
+
+        static std::shared_ptr<Transform> makeTransform(glm::vec3 position, glm::quat rotation, glm::vec3 scale);
 
         static std::shared_ptr<Transform> copyTransform(std::shared_ptr<Transform> transform);
 
@@ -81,7 +83,9 @@ class Transform : public Component {
     protected:
         Transform(const Transform &transform);
 
-        Transform(glm::vec3 position = glm::vec3(0.0f), glm::vec3 rotation = glm::vec3(0.0f), glm::vec3 scale = glm::vec3(1.0f));
+        Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
+
+        Transform(glm::vec3 position, glm::quat rotation, glm::vec3 scale);
 
         Transform(
             glm::vec3 position, 
@@ -105,11 +109,9 @@ std::ostream& operator<<(std::ostream& os, const Transform& transform);
  */
 class CameraTransform : public Transform {  
     public:
-        CameraTransform(const Transform &transform);
+        static std::shared_ptr<CameraTransform> makeCameraTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
 
-        CameraTransform(glm::vec3 position = glm::vec3(0.0f), glm::vec3 rotation = glm::vec3(0.0f), glm::vec3 scale = glm::vec3(1.0f));
-
-        static std::shared_ptr<CameraTransform> makeCameraTransform(glm::vec3 position = glm::vec3(0.0f), glm::vec3 rotation = glm::vec3(0.0f), glm::vec3 scale = glm::vec3(1.0f));
+        static std::shared_ptr<CameraTransform> makeCameraTransform(glm::vec3 position, glm::quat rotation, glm::vec3 scale);
 
         static std::shared_ptr<CameraTransform> copyCameraTransform(std::shared_ptr<CameraTransform> transform);
 
@@ -120,12 +122,23 @@ class CameraTransform : public Transform {
         virtual glm::vec3 getUp() override;
 
         virtual glm::vec3 getRight() override;
+    private:
+        CameraTransform(const Transform &transform);
+
+        CameraTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
+
+        CameraTransform(glm::vec3 position, glm::quat rotation, glm::vec3 scale);
+
 };
 
 namespace pepng {
     std::shared_ptr<Transform> makeTransform(glm::vec3 position = glm::vec3(0.0f), glm::vec3 rotation = glm::vec3(0.0f), glm::vec3 scale = glm::vec3(1.0f));
 
+    std::shared_ptr<Transform> makeTransform(glm::vec3 position, glm::quat rotation, glm::vec3 scale);
+
     std::shared_ptr<CameraTransform> makeCameraTransform(glm::vec3 position = glm::vec3(0.0f), glm::vec3 rotation = glm::vec3(0.0f), glm::vec3 scale = glm::vec3(1.0f));
+
+    std::shared_ptr<CameraTransform> makeCameraTransform(glm::vec3 position, glm::quat rotation, glm::vec3 scale);
 
     std::shared_ptr<Transform> copyTransform(std::shared_ptr<Transform> transform);
 

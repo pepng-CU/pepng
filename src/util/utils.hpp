@@ -20,6 +20,13 @@ namespace utils {
      * @param delim
      */
     std::vector<int> splitInt(const std::string& line, const std::string& delim = " ");
+
+        /**
+     * Uses word split and convert sections into float.
+     * @param line
+     * @param delim
+     */
+    std::vector<float> splitFloat(const std::string& line, const std::string& delim = " ");
 }
 
 namespace pepng {

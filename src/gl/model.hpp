@@ -43,7 +43,7 @@ class Model : public std::enable_shared_from_this<Model>, public DelayedInit  {
          * Binds buffer.
          */
         template <typename T>
-        std::shared_ptr<Model> attach(std::shared_ptr<Buffer<T>> buffer) {
+        std::shared_ptr<Model> attachBuffer(std::shared_ptr<Buffer<T>> buffer) {
             this->attachDelayed(buffer);
 
             return shared_from_this();

@@ -42,6 +42,8 @@ include(BuildGLM)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/imgui-cmake)
 
+add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/tinyxml2)
+
 set(EXEC main)
 
 file(GLOB_RECURSE SRC src/*.cpp)
@@ -52,7 +54,7 @@ include_directories(${CMAKE_SOURCE_DIR}/thirdparty/stb)
 
 link_directories(${EXEC} ${CMAKE_SOURCE_DIR}/thirdparty/stb) 
 
-target_link_libraries(${EXEC} OpenGL::GL glew_s glfw glm imgui)
+target_link_libraries(${EXEC} OpenGL::GL glew_s glfw glm imgui tinyxml2)
 
 list(APPEND BIN ${EXEC})
 

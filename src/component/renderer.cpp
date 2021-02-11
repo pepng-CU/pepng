@@ -34,9 +34,7 @@ void Renderer::update(std::shared_ptr<WithComponents> parent) {
 
     glUseProgram(this->shaderProgram);
 
-    if (this->texture >= 0) {
-        glBindTexture(GL_TEXTURE_2D, this->texture);
-    }
+    glBindTexture(GL_TEXTURE_2D, this->texture);
 
     Camera::currentCamera->render(this->shaderProgram);
 
@@ -71,19 +69,20 @@ void Renderer::update(std::shared_ptr<WithComponents> parent) {
             this->model->count
         );
     }
-
-    glBindTexture(GL_TEXTURE_2D, 1);
 }
 
 void Renderer::imgui() {
     Component::imgui();
 
     ImGui::LabelText("Name", this->model->name.c_str());
+
     std::stringstream ss;
 
     ss << this->model->count;
 
     ImGui::LabelText("Index Count", ss.str().c_str());
+
+    ImGui::InputInt("Texture", (int*)&this->texture);
 
     const char* items[] = { "Lines", "Points", "Triangles" };
     static int item_current_idx = -1;

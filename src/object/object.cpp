@@ -28,6 +28,10 @@ void Object::update() {
 
     auto transform = this->getComponent<Transform>();
 
+    if(transform == nullptr) {
+        throw std::runtime_error("This object has no transform. Make sure to object->attachComponent(Transform)");
+    }
+
     auto parentMatrix = transform->parentMatrix * transform->getWorldMatrix();
 
     for(auto child : this->children) {

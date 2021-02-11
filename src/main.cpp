@@ -62,11 +62,15 @@ void objectHierarchy(std::shared_ptr<Object> object, std::shared_ptr<Object>* cu
     }
 }
 
-void objectAttachTransformer(std::shared_ptr<Object> object) {
+void objectAttachRecursive(std::shared_ptr<Object> object, GLuint texture) {
     object->attachComponent(pepng::makeTransformer());
 
+    if(auto renderer = object->getComponent<Renderer>()) {
+        renderer->texture = texture;
+    }
+
     for(auto child : object->children) {
-        objectAttachTransformer(child);
+        objectAttachRecursive(child, texture);
     }
 }
 
@@ -183,12 +187,16 @@ int main(int argc, char *argv[]) {
         )
     };
 
+    static auto mcBlockTexture = pepng::makeTexture(modelpath / "minecraft/terrain.png");
+
+    static auto mcSteveTexture = pepng::makeTexture(modelpath / "minecraft/steve.png");
+
     pepng::load(
-        modelpath / "scene.obj", 
+        modelpath / "minecraft/scene.dae", 
         std::function([](std::shared_ptr<Object> object) {
             object->attachComponent(pepng::makeSelector());
 
-            objectAttachTransformer(object);
+            objectAttachRecursive(object, mcBlockTexture);
 
             objects.push_back(object);
         }),

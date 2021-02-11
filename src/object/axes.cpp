@@ -10,7 +10,7 @@ std::shared_ptr<Object> pepng::makeAxes(std::shared_ptr<Transform> transform, GL
 
     axes->attachComponent(pepng::makeRenderer(
             pepng::makeModel()
-                ->attach(
+                ->attachBuffer(
                     pepng::makeBuffer<glm::vec3>(
                         std::vector { 
                             glm::vec3(0.0f, 0.0f, 0.0f),
@@ -25,7 +25,7 @@ std::shared_ptr<Object> pepng::makeAxes(std::shared_ptr<Transform> transform, GL
                         3
                     )
                 )
-                ->attach(
+                ->attachBuffer(
                     pepng::makeBuffer<glm::vec4>(
                         std::vector { 
                             glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 
@@ -40,7 +40,7 @@ std::shared_ptr<Object> pepng::makeAxes(std::shared_ptr<Transform> transform, GL
                         4
                     )
                 )
-                ->attach(
+                ->attachBuffer(
                     pepng::makeBuffer<int>(
                         std::vector {
                             0, 1, 
