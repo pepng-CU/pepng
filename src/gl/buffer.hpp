@@ -2,6 +2,8 @@
 
 #include <memory>
 #include <GL/glew.h>
+#include <glm/glm.hpp>
+
 #include "../util/delayed_init.hpp"
 
 template <typename T>
@@ -44,3 +46,10 @@ class Buffer : public DelayedInit {
         int size;
         std::vector<T> vectors;
 };
+
+namespace pepng {
+    template <typename T>
+    std::shared_ptr<Buffer<T>> makeBuffer(std::vector<T> vectors, GLenum type, int index = -1, int size = -1) {
+        return Buffer<T>::makeBuffer(vectors, type, index, size);
+    }
+}

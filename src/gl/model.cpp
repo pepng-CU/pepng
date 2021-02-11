@@ -15,6 +15,9 @@ std::shared_ptr<Model> Model::makeModel() {
     return model;
 }
 
+std::shared_ptr<Model> pepng::makeModel() {
+    return Model::makeModel();
+}
 void Model::delayedInit() {
     if(this->isInit) {
         return;
@@ -132,9 +135,9 @@ std::vector<std::shared_ptr<Model>> Model::fromOBJ(std::filesystem::path filepat
                     ->setName(name)
                     ->setCount(mapVertex.size())
                     ->calculateOffset(verticies, vertexIndex)
-                    ->attach(Buffer<glm::vec3>::makeBuffer(mapVertex, GL_ARRAY_BUFFER, 0, 3))
-                    ->attach(Buffer<glm::vec2>::makeBuffer(mapTexture, GL_ARRAY_BUFFER, 2, 2))
-                    ->attach(Buffer<glm::vec3>::makeBuffer(mapNormal, GL_ARRAY_BUFFER, 1, 3))
+                    ->attach(pepng::makeBuffer<glm::vec3>(mapVertex, GL_ARRAY_BUFFER, 0, 3))
+                    ->attach(pepng::makeBuffer<glm::vec2>(mapTexture, GL_ARRAY_BUFFER, 2, 2))
+                    ->attach(pepng::makeBuffer<glm::vec3>(mapNormal, GL_ARRAY_BUFFER, 1, 3))
             );
 
             vertexIndex.clear();

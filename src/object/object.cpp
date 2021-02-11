@@ -1,28 +1,33 @@
 #include "object.hpp"
 
-Object::Object() : 
-    Object("Object", std::make_shared<Transform>()) 
+Object::Object(std::string name) : 
+    name(name) 
 {}
 
-Object::Object(std::string name, std::shared_ptr<Transform> transform) :
-    name(name)
-{
-    this->attach(transform);
+std::shared_ptr<Object> Object::makeObject(std::string name) {
+    std::shared_ptr<Object> object(new Object(name));
+
+    return object;
 }
 
 std::shared_ptr<Object> Object::attachChild(std::shared_ptr<Object> object) {
     this->children.push_back(object);
 
-    return shared_from_this();
+    return std::dynamic_pointer_cast<Object>(shared_from_this());
 }
 
 std::shared_ptr<Object> Object::fromOBJ(std::filesystem::path filepath, GLuint shaderProgram, std::shared_ptr<Transform> transform) {
-    std::shared_ptr<Object> object = std::make_shared<Object>(filepath.filename(), std::make_shared<Transform>(*transform));
+    std::shared_ptr<Object> object = pepng::makeObject(filepath.filename());
+
+    object
+        ->attachComponent(pepng::copyTransform(transform));
 
     for(auto model : Model::fromOBJ(filepath)) {
-        auto child = std::make_shared<Object>(model->getName(), std::make_shared<Transform>());
+        auto child = pepng::makeObject(model->getName());
 
-        child->attach(std::make_shared<Renderer>(model, shaderProgram, -1, GL_TRIANGLES));
+        child
+            ->attachComponent(pepng::makeTransform())
+            ->attachComponent(pepng::makeRenderer(model, shaderProgram, -1, GL_TRIANGLES));
 
         object->children.push_back(child);
     }
@@ -36,10 +41,8 @@ void Object::imgui() {
     WithComponents::imgui();
 }
 
-void Object::update(){
-    for(auto component : this->getComponents()) {
-        component->update(shared_from_this());
-    }
+void Object::update() {
+    WithComponents::updateComponents();
 
     auto transform = this->getComponent<Transform>();
 
@@ -53,3 +56,9 @@ void Object::update(){
         child->update();
     }
 }
+
+namespace pepng {
+    std::shared_ptr<Object> makeObject(std::string name) {
+        return Object::makeObject(name);
+    }
+};

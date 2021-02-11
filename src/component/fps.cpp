@@ -1,4 +1,5 @@
 #include "fps.hpp"
+#include "../io/io.hpp"
 #include "transform.hpp"
 
 FPS::FPS(float panSpeed, float rotationSpeed) : 
@@ -6,6 +7,16 @@ FPS::FPS(float panSpeed, float rotationSpeed) :
     panSpeed(panSpeed),
     rotationSpeed(rotationSpeed)
 {}
+
+std::shared_ptr<FPS> FPS::makeFPS(float panSpeed, float rotationSpeed) {
+    std::shared_ptr<FPS> fps(new FPS(panSpeed, rotationSpeed));
+
+    return fps;
+}
+
+std::shared_ptr<FPS> pepng::makeFPS(float panSpeed, float rotationSpeed) {
+    return FPS::makeFPS(panSpeed, rotationSpeed);
+}
 
 void FPS::update(std::shared_ptr<WithComponents> parent) {
     if(!this->isActive) {

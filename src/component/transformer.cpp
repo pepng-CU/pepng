@@ -1,4 +1,5 @@
 #include "transformer.hpp"
+#include "../io/io.hpp"
 #include "transform.hpp"
 
 Transformer::Transformer(float positionSpeed, float rotationSpeed, float scaleSpeed) :
@@ -7,6 +8,16 @@ Transformer::Transformer(float positionSpeed, float rotationSpeed, float scaleSp
     rotationSpeed(rotationSpeed),
     scaleSpeed(scaleSpeed)
 {}
+
+std::shared_ptr<Transformer> Transformer::makeTransformer(float positionSpeed, float rotationSpeed, float scaleSpeed) {
+    std::shared_ptr<Transformer> transformer(new Transformer(positionSpeed, rotationSpeed, scaleSpeed));
+
+    return transformer;
+}
+
+std::shared_ptr<Transformer> pepng::makeTransformer(float positionSpeed, float rotationSpeed, float scaleSpeed) {
+    return Transformer::makeTransformer(positionSpeed, rotationSpeed, scaleSpeed);
+}
 
 void Transformer::update(std::shared_ptr<WithComponents> parent) {
     if(!this->isActive) {

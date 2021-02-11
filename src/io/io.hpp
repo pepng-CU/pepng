@@ -74,7 +74,7 @@ class Device : public std::enable_shared_from_this<Device> {
 
         static std::shared_ptr<Device> makeDevice(DeviceType deviceType);
 
-        std::shared_ptr<Device> attach(std::shared_ptr<DeviceUnit> unit);
+        std::shared_ptr<Device> attachUnit(std::shared_ptr<DeviceUnit> unit);
 
         float getAxis(std::string name);
 
@@ -92,7 +92,7 @@ class Input : public std::enable_shared_from_this<Input> {
     public:
         static std::shared_ptr<Input> makeInput(GLFWwindow* window);
 
-        std::shared_ptr<Input> attach(std::shared_ptr<Device> device);
+        std::shared_ptr<Input> attachDevice(std::shared_ptr<Device> device);
 
         float getAxis(std::string name);
 
@@ -111,3 +111,10 @@ class Input : public std::enable_shared_from_this<Input> {
 
         Input(GLFWwindow* window);
 };
+
+namespace pepng {
+    std::shared_ptr<Input> makeInput(GLFWwindow* window);
+    std::shared_ptr<Device> makeDevice(DeviceType deviceType);
+    std::shared_ptr<Axis> makeAxis(std::string name, AxisType axisType);
+    std::shared_ptr<Button> makeButton(std::string name, int buttonId, float strength = 1);
+}

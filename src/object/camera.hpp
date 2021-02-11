@@ -13,7 +13,7 @@ class Viewport : public WithImGui {
         glm::vec2 position;
         glm::vec2 scale;
 
-        Viewport(glm::vec2 position, glm::vec2 scale);
+        static std::shared_ptr<Viewport> makeViewport(glm::vec2 position, glm::vec2 scale);
 
         /**
          * Attempts to render the viewport.
@@ -22,6 +22,8 @@ class Viewport : public WithImGui {
         bool render(glm::vec2 windowDimension);
 
         virtual void imgui() override;
+    private:
+        Viewport(glm::vec2 position, glm::vec2 scale);
 };
 
 class Projection : public WithImGui {
@@ -37,13 +39,15 @@ class Projection : public WithImGui {
 
 class Perspective : public Projection {
     public:
-        Perspective(float fovy, float aspect, float near, float far);
+        static std::shared_ptr<Perspective> makePerspective(float fovy, float aspect, float near, float far);
 
         virtual glm::mat4 getMatrix() override;
 
         virtual void imgui() override;
 
     private:
+        Perspective(float fovy, float aspect, float near, float far);
+
         float fovy;
         float near;
         float far;
@@ -53,13 +57,24 @@ class Camera : public Object {
     public:
         static std::shared_ptr<Camera> currentCamera;
 
+        static std::shared_ptr<Camera> makeCamera(std::shared_ptr<CameraTransform> transform, std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection);
+
         std::shared_ptr<Projection> projection;
         
-        Viewport viewport;
-
-        Camera(std::shared_ptr<CameraTransform> transform, Viewport viewport, std::shared_ptr<Projection> projection);
+        std::shared_ptr<Viewport> viewport;
 
         void render(GLuint shaderProgram);
 
         virtual void imgui() override;
+
+    private:
+        Camera(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection);
+};
+
+namespace pepng {
+    std::shared_ptr<Camera> makeCamera(std::shared_ptr<CameraTransform> transform, std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection);
+
+    std::shared_ptr<Viewport> makeViewport(glm::vec2 position, glm::vec2 scale);
+
+    std::shared_ptr<Perspective> makePerspective(float fovy, float aspect, float near, float far);
 };

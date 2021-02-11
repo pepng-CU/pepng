@@ -32,12 +32,12 @@ std::vector<int> utils::splitInt(const std::string& line, const std::string& del
     return ints;
 }
 
-std::filesystem::path utils::getPath(std::filesystem::path relativePath) {
+std::filesystem::path pepng::getFolderPath(std::filesystem::path folderName) {
     auto finalPath = std::filesystem::current_path();
 
-    while (!std::filesystem::exists(finalPath / relativePath)) {
+    while (!std::filesystem::exists(finalPath / folderName)) {
         finalPath = finalPath.parent_path();
     }
 
-    return finalPath / relativePath;
+    return finalPath / folderName;
 }

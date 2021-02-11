@@ -1,6 +1,6 @@
 #include "texture.hpp"
 
-GLuint createTexture(const std::filesystem::path& filePath) {
+GLuint pepng::makeTexture(const std::filesystem::path& filePath) {
     int width, height, numComponents;
 
     #ifdef _MSC_VER

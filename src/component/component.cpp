@@ -1,5 +1,4 @@
 #include "component.hpp"
-#include "../io/io.hpp"
 
 Component::Component(std::string name) : 
     name(name),

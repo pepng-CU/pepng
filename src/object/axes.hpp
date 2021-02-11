@@ -2,7 +2,6 @@
 
 #include "object.hpp"
 
-class Axes : public Object {
-    public:
-        Axes(std::shared_ptr<Transform> transform, GLuint shaderProgram);
-};
+namespace pepng {
+    std::shared_ptr<Object> makeAxes(std::shared_ptr<Transform> transform, GLuint shaderProgram);
+}

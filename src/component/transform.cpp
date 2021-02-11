@@ -1,31 +1,25 @@
 #include "transform.hpp"
 
-Transform::Transform() :
-    Transform(
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(1.0f, 1.0f, 1.0f)
-    )
-{}
-
 Transform::Transform(const Transform &transform) : 
-    Component("Transform"),
-    position(glm::vec3(transform.position)), 
-    rotationX(glm::quat(transform.rotationX)), 
-    rotationY(glm::quat(transform.rotationY)), 
-    rotationZ(glm::quat(transform.rotationZ)), 
-    scale(glm::vec3(transform.scale)),
-    parentMatrix(glm::mat4(transform.parentMatrix))
-{}
+    Transform(
+        transform.position,
+        transform.rotationX,
+        transform.rotationY,
+        transform.rotationZ,
+        transform.scale
+    )
+{
+    this->parentMatrix = glm::mat4(transform.parentMatrix);
+}
 
 Transform::Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) : 
-    Component("Transform"),
-    position(position), 
-    rotationX(glm::quat(glm::vec3(0.0f))), 
-    rotationY(glm::quat(glm::vec3(0.0f))), 
-    rotationZ(glm::quat(glm::vec3(0.0f))), 
-    scale(scale),
-    parentMatrix(glm::mat4(1.0f))
+    Transform(
+        position,
+        glm::quat(glm::vec3(0.0f)),
+        glm::quat(glm::vec3(0.0f)),
+        glm::quat(glm::vec3(0.0f)),
+        scale
+    )
 {
     this->setRotation(rotation);
 }
@@ -42,8 +36,21 @@ Transform::Transform(
     rotationX(rotationX), 
     rotationY(rotationY),
     rotationZ(rotationZ),
-    scale(scale) 
+    scale(scale),
+    parentMatrix(glm::mat4(1.0f))
 {}
+
+std::shared_ptr<Transform> Transform::makeTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) {
+    std::shared_ptr<Transform> transform(new Transform(position, rotation, scale));
+
+    return transform;
+}
+
+std::shared_ptr<Transform> Transform::copyTransform(std::shared_ptr<Transform> transform) {
+    std::shared_ptr<Transform> newTransform(new Transform(*transform));
+
+    return newTransform;
+}
 
 glm::quat Transform::getRotation() {
     return this->rotationZ * this->rotationY * this->rotationX;
@@ -145,19 +152,21 @@ std::ostream& operator<<(std::ostream& os, const Transform& transform) {
     return os;
 }
 
-CameraTransform::CameraTransform() : Transform() {}
-
 CameraTransform::CameraTransform(const Transform &transform) : Transform(transform) {}
 
 CameraTransform::CameraTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) : Transform(position, rotation, scale) {}
 
-CameraTransform::CameraTransform(
-    glm::vec3 position, 
-    glm::quat rotationX, 
-    glm::quat rotationY,
-    glm::quat rotationZ, 
-    glm::vec3 scale
-) : Transform(position, rotationX, rotationY, rotationZ, scale) {}
+std::shared_ptr<CameraTransform> CameraTransform::makeCameraTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) {
+    std::shared_ptr<CameraTransform> transform(new CameraTransform(position, rotation, scale));
+
+    return transform;
+}
+
+std::shared_ptr<CameraTransform> CameraTransform::copyCameraTransform(std::shared_ptr<CameraTransform> transform) {
+    std::shared_ptr<CameraTransform> newTransform(new CameraTransform(*transform));
+
+    return newTransform;
+}
 
 glm::vec3 CameraTransform::getRight() {
     auto rotationMatrix = this->getRotationMatrix();
@@ -179,4 +188,22 @@ glm::vec3 CameraTransform::getForward() {
 
 glm::quat CameraTransform::getRotation() {
     return this->rotationX * this->rotationY * this->rotationZ;
+}
+
+namespace pepng {
+    std::shared_ptr<Transform> makeTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) {
+        return Transform::makeTransform(position, rotation, scale);
+    }
+
+    std::shared_ptr<CameraTransform> makeCameraTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) {
+        return CameraTransform::makeCameraTransform(position, rotation, scale);
+    }
+
+    std::shared_ptr<Transform> copyTransform(std::shared_ptr<Transform> transform) {
+        return Transform::copyTransform(transform);
+    }
+
+    std::shared_ptr<CameraTransform> copyCameraTransform(std::shared_ptr<CameraTransform> transform) {
+        return CameraTransform::copyCameraTransform(transform);
+    }
 }

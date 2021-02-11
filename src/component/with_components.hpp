@@ -3,14 +3,14 @@
 #include <memory>
 #include <vector>
 
-#include "../ui/ui.hpp"
 #include "component.hpp"
+#include "../ui/with_imgui.hpp"
 
-class WithComponents : public WithImGui {
+class WithComponents : public WithImGui, public std::enable_shared_from_this<WithComponents> {
     public:
-        void attach(std::shared_ptr<Component> component);
+        std::shared_ptr<WithComponents> attachComponent(std::shared_ptr<Component> component);
 
-        virtual void update() = 0;
+        void updateComponents();
 
         virtual void imgui();
 

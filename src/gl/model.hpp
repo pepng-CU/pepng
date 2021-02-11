@@ -15,9 +15,9 @@
 class Renderer;
 
 #include "buffer.hpp"
+#include "texture.hpp"
 #include "../util/delayed_init.hpp"
 #include "../util/utils.hpp"
-#include "../gl/texture.hpp"
 
 class Renderer;
 
@@ -80,5 +80,9 @@ class Model : public std::enable_shared_from_this<Model>, public DelayedInit  {
          */
         bool hasElementArray;
 };
+
+namespace pepng {
+    std::shared_ptr<Model> makeModel();
+}
 
 #include "../component/renderer.hpp"

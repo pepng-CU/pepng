@@ -10,8 +10,7 @@
 #include <iostream>
 #include <string>
 
-#include "../io/io.hpp"
-#include "../ui/ui.hpp"
+#include "../ui/with_imgui.hpp"
 
 class WithComponents;
 
@@ -22,6 +21,8 @@ class Component : public WithImGui {
         Component(std::string name);
 
         std::string getName();
+
+        virtual void init(std::shared_ptr<WithComponents> parent) {};
 
         virtual void update(std::shared_ptr<WithComponents> parent) {};
 

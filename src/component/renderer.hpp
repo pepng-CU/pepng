@@ -14,9 +14,14 @@ class Renderer : public Component {
         GLuint texture;
         std::shared_ptr<Model> model;
 
-        Renderer(std::shared_ptr<Model> model);
-        Renderer(std::shared_ptr<Model> model, GLuint shaderProgram, GLuint texture, GLenum renderMode = GL_TRIANGLES);
+        static std::shared_ptr<Renderer> makeRenderer(std::shared_ptr<Model> model, GLuint shaderProgram = -1, GLuint texture = -1, GLenum renderMode = GL_TRIANGLES);
 
         virtual void update(std::shared_ptr<WithComponents> object) override;
         virtual void imgui() override;
+    private:
+        Renderer(std::shared_ptr<Model> model, GLuint shaderProgram = -1, GLuint texture = -1, GLenum renderMode = GL_TRIANGLES);
+};
+
+namespace pepng {
+    std::shared_ptr<Renderer> makeRenderer(std::shared_ptr<Model> model, GLuint shaderProgram = -1, GLuint texture = -1, GLenum renderMode = GL_TRIANGLES);
 };

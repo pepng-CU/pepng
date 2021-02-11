@@ -1,8 +1,8 @@
 #include "renderer.hpp"
+#include "../io/io.hpp"
 #include "transform.hpp"
 #include "../object/camera.hpp"
 
-Renderer::Renderer(std::shared_ptr<Model> model) : Renderer(model, -1, -1, GL_TRIANGLES) {}
 Renderer::Renderer(std::shared_ptr<Model> model, GLuint shaderProgram, GLuint texture, GLenum renderMode) :
     Component("Renderer"),
     model(model),
@@ -10,6 +10,16 @@ Renderer::Renderer(std::shared_ptr<Model> model, GLuint shaderProgram, GLuint te
     texture(texture),
     renderMode(renderMode)
 {}
+
+std::shared_ptr<Renderer> Renderer::makeRenderer(std::shared_ptr<Model> model, GLuint shaderProgram, GLuint texture, GLenum renderMode) {
+    std::shared_ptr<Renderer> renderer(new Renderer(model, shaderProgram, texture, renderMode));
+
+    return renderer;
+}
+
+std::shared_ptr<Renderer> pepng::makeRenderer(std::shared_ptr<Model> model, GLuint shaderProgram, GLuint texture, GLenum renderMode) {
+    return Renderer::makeRenderer(model, shaderProgram, texture, renderMode);
+}
 
 void Renderer::update(std::shared_ptr<WithComponents> parent) {
     if(!this->model->isInit) {

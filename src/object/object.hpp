@@ -10,21 +10,26 @@
 
 #include "../component/components.hpp"
 
-class Object : public WithComponents, public std::enable_shared_from_this<Object> {
+class Object : public WithComponents {
     public:
         std::string name;
 
         std::vector<std::shared_ptr<Object>> children;
 
-        Object();
-
-        Object(std::string name, std::shared_ptr<Transform> transform);
+        static std::shared_ptr<Object> makeObject(std::string name);
 
         static std::shared_ptr<Object> fromOBJ(std::filesystem::path filepath, GLuint shaderProgram, std::shared_ptr<Transform> transform);
 
+        std::shared_ptr<Object> attachChild(std::shared_ptr<Object> object);
+
         virtual void imgui();
 
-        virtual void update() override;
+        virtual void update();
 
-        std::shared_ptr<Object> attachChild(std::shared_ptr<Object> object);
+    protected:
+        Object(std::string name);
+};
+
+namespace pepng {
+    std::shared_ptr<Object> makeObject(std::string name);
 };

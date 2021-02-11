@@ -6,7 +6,9 @@
 #include <stb_image.h>
 #include <GL/glew.h>
 
-/**
- * Creates and binds texture.
- */
-GLuint createTexture(const std::filesystem::path& filePath);
+namespace pepng {
+    /**
+     * Creates and binds texture.
+     */
+    GLuint makeTexture(const std::filesystem::path& filePath);
+}

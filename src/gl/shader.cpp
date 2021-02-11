@@ -1,6 +1,6 @@
 #include "shader.hpp"
 
-const std::string readShader(std::filesystem::path filepath) {
+const std::string pepng::readShader(std::filesystem::path filepath) {
     std::ifstream in(filepath);
     
     std::string contents((std::istreambuf_iterator<char>(in)), 
@@ -9,7 +9,7 @@ const std::string readShader(std::filesystem::path filepath) {
     return contents;
 }
 
-GLuint compileShader(const std::string shaderSource, GLenum shaderType) {
+GLuint pepng::compileShader(const std::string shaderSource, GLenum shaderType) {
     GLuint shader = glCreateShader(shaderType);
 
     const char* shaderSourceCStr = shaderSource.c_str();
@@ -34,36 +34,6 @@ GLuint compileShader(const std::string shaderSource, GLenum shaderType) {
     return shader;
 }
 
-ShaderBuilder::ShaderBuilder() {
-    shaderProgram = glCreateProgram();
-}
-
-ShaderBuilder& ShaderBuilder::attach(GLuint shader) {
-    shaders.push_back(shader);
-    
-    return *this;
-}
-
-GLuint ShaderBuilder::build() {
-    for (GLuint shader : shaders) {
-        glAttachShader(shaderProgram, shader);
-    }
-
-    glLinkProgram(shaderProgram);
-
-    GLint success;
-    char infoLog[512];
-
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-
-    if(!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        
-        std::stringstream ss;
-        ss << "ERROR::PROGRAM::LINKING_FAILED" << std::endl << infoLog << std::endl;
-
-        throw std::runtime_error(ss.str());
-    }
-
-    return shaderProgram;
+GLuint pepng::makeShader(std::filesystem::path filepath, GLenum shaderType) {
+    return pepng::compileShader(pepng::readShader(filepath), shaderType);
 }

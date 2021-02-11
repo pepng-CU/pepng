@@ -93,7 +93,7 @@ std::shared_ptr<Device> Device::makeDevice(DeviceType deviceType) {
     return device;
 }
 
-std::shared_ptr<Device> Device::attach(std::shared_ptr<DeviceUnit> unit) {
+std::shared_ptr<Device> Device::attachUnit(std::shared_ptr<DeviceUnit> unit) {
     this->units.push_back(unit);
 
     unit->device = shared_from_this();
@@ -136,7 +136,7 @@ std::shared_ptr<Input> Input::makeInput(GLFWwindow* window) {
     return input;
 }
 
-std::shared_ptr<Input> Input::attach(std::shared_ptr<Device> device) {
+std::shared_ptr<Input> Input::attachDevice(std::shared_ptr<Device> device) {
     this->devices.push_back(device);
 
     device->input = shared_from_this();
@@ -166,4 +166,22 @@ GLFWwindow* Input::getWindow() {
 
 std::shared_ptr<Input> Input::get() {
     return inputs.at(0);
+}
+
+namespace pepng {
+    std::shared_ptr<Input> makeInput(GLFWwindow* window) {
+        return Input::makeInput(window);
+    }
+
+    std::shared_ptr<Device> makeDevice(DeviceType deviceType) {
+        return Device::makeDevice(deviceType);
+    }
+
+    std::shared_ptr<Axis> makeAxis(std::string name, AxisType axisType) {
+        return Axis::makeAxis(name, axisType);
+    }
+
+    std::shared_ptr<Button> makeButton(std::string name, int buttonId, float strength) {
+        return Button::makeButton(name, buttonId, strength);
+    }
 }

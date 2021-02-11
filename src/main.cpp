@@ -62,7 +62,7 @@ void objectHierarchy(std::shared_ptr<Object> object, std::shared_ptr<Object>* cu
 }
 
 void objectAttachTransformer(std::shared_ptr<Object> object) {
-    object->attach(std::make_shared<Transformer>());
+    object->attachComponent(pepng::makeTransformer());
 
     for(auto child : object->children) {
         objectAttachTransformer(child);
@@ -119,42 +119,42 @@ int main(int argc, char *argv[]) {
     /**
      * Textures
      */
-    auto texturespath = utils::getPath("textures");
+    auto texturespath = pepng::getFolderPath("textures");
 
-    static auto missingTexture = createTexture(texturespath / "missing.jpg");
-    static auto honeyTexture = createTexture(texturespath / "honeycomb.jpg");
-    static auto objectTexture = createTexture(texturespath / "suzanne.png");
+    static auto missingTexture = pepng::makeTexture(texturespath / "missing.jpg");
+    static auto honeyTexture = pepng::makeTexture(texturespath / "honeycomb.jpg");
+    static auto objectTexture = pepng::makeTexture(texturespath / "suzanne.png");
 
     /**
      * Shaders
      */
-    auto shaderpath = utils::getPath("shaders");
+    auto shaderpath = pepng::getFolderPath("shaders");
 
-    static GLuint shaderProgram = ShaderBuilder()
-        .attach(compileShader(readShader(shaderpath / "object/vertex.glsl"), GL_VERTEX_SHADER))
-        .attach(compileShader(readShader(shaderpath / "object/fragment.glsl"), GL_FRAGMENT_SHADER))
-        .build();
+    static auto shaderProgram = pepng::makeShaderProgram(
+        pepng::makeShader(shaderpath / "object/vertex.glsl", GL_VERTEX_SHADER),
+        pepng::makeShader(shaderpath / "object/fragment.glsl", GL_FRAGMENT_SHADER)
+    );
 
-    static GLuint lineShaderProgram = ShaderBuilder()
-        .attach(compileShader(readShader(shaderpath / "line/vertex.glsl"), GL_VERTEX_SHADER))
-        .attach(compileShader(readShader(shaderpath / "line/fragment.glsl"), GL_FRAGMENT_SHADER))
-        .build();
+    static auto lineShaderProgram = pepng::makeShaderProgram(
+        pepng::makeShader(shaderpath / "line/vertex.glsl", GL_VERTEX_SHADER),
+        pepng::makeShader(shaderpath / "line/fragment.glsl", GL_FRAGMENT_SHADER)
+    );
 
     /**
      * Cameras
      */
     static std::vector<std::shared_ptr<Camera>> cameras {
-        std::make_shared<Camera>(
-            std::make_shared<CameraTransform>(
+        pepng::makeCamera(
+            pepng::makeCameraTransform(
                 glm::vec3(0.0f, 2.0f, 10.0f),
                 glm::vec3(0.0f, 0.0f, 0.0f),
                 glm::vec3(1.0f, 1.0f, 1.0f)
             ),
-            Viewport {
+            pepng::makeViewport(
                 glm::vec2(0.0f, 0.0f),
                 glm::vec2(1.0f, 1.0f)
-            },
-            std::make_shared<Perspective>(
+            ),
+            pepng::makePerspective(
                 glm::radians(60.0f),
                 windowDimension.x / windowDimension.y,
                 0.01f,
@@ -166,40 +166,39 @@ int main(int argc, char *argv[]) {
     /**
      * Objects
      */
-    auto modelpath = utils::getPath("models");
+    auto modelpath = pepng::getFolderPath("models");
 
     static std::vector<std::shared_ptr<Object>> objects {
-        std::static_pointer_cast<Object>(
-            std::make_shared<Axes>(
-                std::make_shared<Transform>(
-                    glm::vec3(0.0f, 0.0f, 0.0f),
-                    glm::vec3(0.0f, 0.0f, 0.0f),
-                    glm::vec3(7.0f, 7.0f, 7.0f)
-                )
-            , lineShaderProgram)
+        pepng::makeAxes(
+            pepng::makeTransform(
+                glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(7.0f, 7.0f, 7.0f)
+            ), 
+            lineShaderProgram
         ),
-        std::static_pointer_cast<Object>(
-            std::make_shared<Grid>(
-                std::make_shared<Transform>(
-                    glm::vec3(0.0f, 0.0f, 0.0f),
-                    glm::vec3(0.0f, 0.0f, 0.0f),
-                    glm::vec3(128.0f, 128.0f, 128.0f)
-                )
-            , lineShaderProgram, 129)
+        pepng::makeGrid(
+            pepng::makeTransform(
+                glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(128.0f, 128.0f, 128.0f)
+            ), 
+            lineShaderProgram, 
+            129
         )
     };
 
     pepng::load(
         modelpath / "scene.obj", 
-        std::function<void(std::shared_ptr<Object>)>([](std::shared_ptr<Object> object) {
-            object->attach(std::make_shared<Selector>());
+        std::function([](std::shared_ptr<Object> object) {
+            object->attachComponent(pepng::makeSelector());
 
             objectAttachTransformer(object);
 
             objects.push_back(object);
         }),
         shaderProgram,
-        std::make_shared<Transform>()
+        pepng::makeTransform()
     );
 
     for(auto camera : cameras) {
@@ -207,46 +206,50 @@ int main(int argc, char *argv[]) {
     }
 
     /**
-     * Controller + Components
+     * Components
      */
-    cameras.at(0)->attach(std::make_shared<FPS>());
+    cameras.at(0)->attachComponent(pepng::makeFPS());
 
-    auto input = Input::makeInput(window)
-        ->attach(
-            Device::makeDevice(DeviceType::MOUSE)
-                ->attach(Axis::makeAxis("mouseY", AxisType::FIRST))
-                ->attach(Axis::makeAxis("mouseX", AxisType::SECOND))
-                ->attach(Button::makeButton("zoom", GLFW_MOUSE_BUTTON_5))
-                ->attach(Button::makeButton("pan", GLFW_MOUSE_BUTTON_MIDDLE))
-                ->attach(Button::makeButton("pan", GLFW_MOUSE_BUTTON_4))
-                ->attach(Button::makeButton("rotate", GLFW_MOUSE_BUTTON_RIGHT))
-        );
+    /**
+     * Controller
+     */
+    auto input = pepng::makeInput(window);
 
-    auto keyboard = Device::makeDevice(DeviceType::KEYBOARD)
-        ->attach(Button::makeButton("vertical", GLFW_KEY_W))
-        ->attach(Button::makeButton("vertical", GLFW_KEY_S, -1.0f))
-        ->attach(Button::makeButton("horizontal", GLFW_KEY_A))
-        ->attach(Button::makeButton("horizontal", GLFW_KEY_D, -1.0f))
-        ->attach(Button::makeButton("yaw", GLFW_KEY_UP))
-        ->attach(Button::makeButton("yaw", GLFW_KEY_DOWN, -1.0f))
-        ->attach(Button::makeButton("pitch", GLFW_KEY_LEFT))
-        ->attach(Button::makeButton("pitch", GLFW_KEY_RIGHT, -1.0f))
-        ->attach(Button::makeButton("triangles", GLFW_KEY_T))
-        ->attach(Button::makeButton("points", GLFW_KEY_P))
-        ->attach(Button::makeButton("lines", GLFW_KEY_L))
-        ->attach(Button::makeButton("recenter", GLFW_KEY_HOME))
-        ->attach(Button::makeButton("scale", GLFW_KEY_U))
-        ->attach(Button::makeButton("scale", GLFW_KEY_J, -1.0f));
+    auto mouse = pepng::makeDevice(DeviceType::MOUSE)
+        ->attachUnit(pepng::makeAxis("mouseY", AxisType::FIRST))
+        ->attachUnit(pepng::makeAxis("mouseX", AxisType::SECOND))
+        ->attachUnit(pepng::makeButton("zoom", GLFW_MOUSE_BUTTON_5))
+        ->attachUnit(pepng::makeButton("pan", GLFW_MOUSE_BUTTON_MIDDLE))
+        ->attachUnit(pepng::makeButton("pan", GLFW_MOUSE_BUTTON_4))
+        ->attachUnit(pepng::makeButton("rotate", GLFW_MOUSE_BUTTON_RIGHT));
+
+    auto keyboard = pepng::makeDevice(DeviceType::KEYBOARD)
+        ->attachUnit(pepng::makeButton("vertical", GLFW_KEY_W))
+        ->attachUnit(pepng::makeButton("vertical", GLFW_KEY_S, -1.0f))
+        ->attachUnit(pepng::makeButton("horizontal", GLFW_KEY_A))
+        ->attachUnit(pepng::makeButton("horizontal", GLFW_KEY_D, -1.0f))
+        ->attachUnit(pepng::makeButton("yaw", GLFW_KEY_UP))
+        ->attachUnit(pepng::makeButton("yaw", GLFW_KEY_DOWN, -1.0f))
+        ->attachUnit(pepng::makeButton("pitch", GLFW_KEY_LEFT))
+        ->attachUnit(pepng::makeButton("pitch", GLFW_KEY_RIGHT, -1.0f))
+        ->attachUnit(pepng::makeButton("triangles", GLFW_KEY_T))
+        ->attachUnit(pepng::makeButton("points", GLFW_KEY_P))
+        ->attachUnit(pepng::makeButton("lines", GLFW_KEY_L))
+        ->attachUnit(pepng::makeButton("recenter", GLFW_KEY_HOME))
+        ->attachUnit(pepng::makeButton("scale", GLFW_KEY_U))
+        ->attachUnit(pepng::makeButton("scale", GLFW_KEY_J, -1.0f));
 
     for(int i = 0; i < 10; i++) {
         std::stringstream ss;
 
         ss << "object_" << i;
 
-        keyboard->attach(Button::makeButton(ss.str(), GLFW_KEY_0 + i));
+        keyboard->attachUnit(pepng::makeButton(ss.str(), GLFW_KEY_0 + i));
     }
 
-    input->attach(keyboard);
+    input
+        ->attachDevice(keyboard)
+        ->attachDevice(mouse);
 
     /**
      * OpenGL
@@ -262,7 +265,7 @@ int main(int argc, char *argv[]) {
          * Update
          */
         for(auto camera : cameras) {
-            if(camera->viewport.render(windowDimension)) {
+            if(camera->viewport->render(windowDimension)) {
                 Camera::currentCamera = camera;
 
                 camera->projection->setAspect(windowDimension.x / windowDimension.y);

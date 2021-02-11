@@ -20,9 +20,11 @@ namespace utils {
      * @param delim
      */
     std::vector<int> splitInt(const std::string& line, const std::string& delim = " ");
+}
 
+namespace pepng {
     /**
      * Searches filesystem to find folder.
      */
-    std::filesystem::path getPath(std::filesystem::path relativePath);
+    std::filesystem::path getFolderPath(std::filesystem::path folderName);
 }

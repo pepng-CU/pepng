@@ -1,6 +1,18 @@
 #include "selector.hpp"
+#include "../io/io.hpp"
+#include "transformer.hpp"
 
 Selector::Selector() : Component("Selector"), index(0), needsUpdate(true) {}
+
+std::shared_ptr<Selector> Selector::makeSelector() {
+    std::shared_ptr<Selector> selector(new Selector());
+
+    return selector;
+}
+
+std::shared_ptr<Selector> pepng::makeSelector() {
+    return Selector::makeSelector();
+}
 
 void Selector::dfsSwitch(std::shared_ptr<Object> object, int& index) {
     if(auto move = object->getComponent<Transformer>()) {
@@ -43,6 +55,8 @@ void Selector::update(std::shared_ptr<WithComponents> parent) {
 };
 
 void Selector::imgui() {
+    Component::imgui();
+
     int prev = this->index;
 
     ImGui::InputInt("Index", &this->index);
