@@ -8,7 +8,7 @@
 #include <iostream>
 #include <glm/gtx/string_cast.hpp>
 
-#include "../component/components.hpp"
+#include "../component/transform.hpp"
 
 class Object : public WithComponents {
     public:

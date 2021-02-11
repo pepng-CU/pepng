@@ -141,29 +141,6 @@ int main(int argc, char *argv[]) {
     );
 
     /**
-     * Cameras
-     */
-    static std::vector<std::shared_ptr<Camera>> cameras {
-        pepng::makeCamera(
-            pepng::makeCameraTransform(
-                glm::vec3(0.0f, 2.0f, 10.0f),
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 1.0f, 1.0f)
-            ),
-            pepng::makeViewport(
-                glm::vec2(0.0f, 0.0f),
-                glm::vec2(1.0f, 1.0f)
-            ),
-            pepng::makePerspective(
-                glm::radians(60.0f),
-                windowDimension.x / windowDimension.y,
-                0.01f,
-                1000.0f
-            )
-        )
-    };
-
-    /**
      * Objects
      */
     auto modelpath = pepng::getFolderPath("models");
@@ -185,6 +162,23 @@ int main(int argc, char *argv[]) {
             ), 
             lineShaderProgram, 
             129
+        ),
+        pepng::makeCameraObj(
+            pepng::makeCameraTransform(
+                glm::vec3(0.0f, 2.0f, 10.0f),
+                glm::vec3(0.0f, 0.0f, 0.0f),
+                glm::vec3(1.0f, 1.0f, 1.0f)
+            ),
+            pepng::makeViewport(
+                glm::vec2(0.0f, 0.0f),
+                glm::vec2(1.0f, 1.0f)
+            ),
+            pepng::makePerspective(
+                glm::radians(60.0f),
+                windowDimension.x / windowDimension.y,
+                0.01f,
+                1000.0f
+            )
         )
     };
 
@@ -200,15 +194,6 @@ int main(int argc, char *argv[]) {
         shaderProgram,
         pepng::makeTransform()
     );
-
-    for(auto camera : cameras) {
-        objects.push_back(camera);
-    }
-
-    /**
-     * Components
-     */
-    cameras.at(0)->attachComponent(pepng::makeFPS());
 
     /**
      * Controller
@@ -264,8 +249,10 @@ int main(int argc, char *argv[]) {
         /**
          * Update
          */
-        for(auto camera : cameras) {
-            if(camera->viewport->render(windowDimension)) {
+        for(auto camera : Camera::cameras) {
+            if(camera->isActive) {
+                camera->viewport->render(windowDimension);
+
                 Camera::currentCamera = camera;
 
                 camera->projection->setAspect(windowDimension.x / windowDimension.y);

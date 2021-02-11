@@ -1,5 +1,7 @@
 #include "axes.hpp"
+#include "../component/transform.hpp"
 #include "../gl/buffer.hpp"
+#include "../gl/model.hpp"
 
 std::shared_ptr<Object> pepng::makeAxes(std::shared_ptr<Transform> transform, GLuint shaderProgram) {
     auto axes = pepng::makeObject("Axes");

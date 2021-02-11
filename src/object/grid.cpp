@@ -1,5 +1,7 @@
 #include "grid.hpp"
+#include "../component/transform.hpp"
 #include "../gl/buffer.hpp"
+#include "../gl/model.hpp"
 
 std::shared_ptr<Object> pepng::makeGrid(std::shared_ptr<Transform> transform, GLuint shaderProgram, int count, glm::vec4 color) {
     auto grid = pepng::makeObject("Grid");

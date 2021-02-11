@@ -1,4 +1,5 @@
 #include "object.hpp"
+#include "../component/renderer.hpp"
 
 Object::Object(std::string name) : 
     name(name) 

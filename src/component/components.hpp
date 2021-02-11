@@ -1,5 +1,6 @@
 #pragma once
 
+#include "camera.hpp"
 #include "fps.hpp"
 #include "renderer.hpp"
 #include "selector.hpp"
