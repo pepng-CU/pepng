@@ -1,7 +1,33 @@
 #include "texture.hpp"
 
-GLuint pepng::makeTexture(const std::filesystem::path& filePath) {
-    int width, height, numComponents;
+GLuint Texture::getIndex() {
+    if(!this->isInit) {
+        this->delayedInit();
+    }
+
+    return this->textureIndex;
+}
+
+void Texture::delayedInit() {
+    if(this->isInit) {
+        return;
+    }
+
+    this->isInit = true;
+
+    glGenTextures(1, &this->textureIndex);
+
+    glBindTexture(GL_TEXTURE_2D, this->textureIndex);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width, this->height, 0, GL_RGB, GL_UNSIGNED_BYTE, this->image);
+
+    stbi_image_free(this->image);
+}
+
+std::shared_ptr<Texture> Texture::makeTexture(const std::filesystem::path& filePath) {
+    std::shared_ptr<Texture> texture(new Texture());
 
     #ifdef _MSC_VER
         const std::string& filePathString = (const std::string&) filePath.u8string();
@@ -9,25 +35,32 @@ GLuint pepng::makeTexture(const std::filesystem::path& filePath) {
         const std::string& filePathString = (const std::string&) filePath;
     #endif
 
-    stbi_set_flip_vertically_on_load(true);
-    
-    unsigned char* image = stbi_load(filePath.c_str(), &width, &height, &numComponents, STBI_rgb);
+    stbi_set_flip_vertically_on_load_thread(true);
 
-    if (image == NULL){
+    int numComponents;
+    texture->image = stbi_load(filePathString.c_str(), &texture->width, &texture->height, &numComponents, STBI_rgb);
+
+    if (texture->image == nullptr){
         throw std::runtime_error("Cannot load texture: " + filePath.string());
     }
 
-    GLuint texture;
+    return texture;
+}
 
-    glGenTextures(1, &texture);
+std::shared_ptr<Texture> Texture::makeTexture() {
+    std::shared_ptr<Texture> texture(new Texture());
 
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-
-    stbi_image_free(image);
+    texture->isInit = true;
 
     return texture;
+}
+
+namespace pepng {
+    std::shared_ptr<Texture> makeTexture(const std::filesystem::path& filePath) {
+        return Texture::makeTexture(filePath);
+    }
+
+    std::shared_ptr<Texture> makeTexture() {
+        return Texture::makeTexture();
+    }
 }

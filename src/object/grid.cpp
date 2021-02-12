@@ -33,6 +33,8 @@ std::shared_ptr<Object> pepng::makeGrid(std::shared_ptr<Transform> transform, GL
         colors.push_back(color);
     }
 
+    auto material = pepng::makeMaterial(shaderProgram, pepng::makeTexture());
+
     grid->attachComponent(pepng::makeRenderer(
             pepng::makeModel()
                 ->attachBuffer(
@@ -60,8 +62,7 @@ std::shared_ptr<Object> pepng::makeGrid(std::shared_ptr<Transform> transform, GL
                 ->setCount(indicies.size())
                 ->setElementArray(true)
                 ->setName("Grid"),
-            shaderProgram,
-            -1,
+            material,
             GL_LINES
         )
     );

@@ -8,6 +8,8 @@ std::shared_ptr<Object> pepng::makeAxes(std::shared_ptr<Transform> transform, GL
 
     axes->attachComponent(transform);
 
+    auto material = pepng::makeMaterial(shaderProgram, pepng::makeTexture());
+
     axes->attachComponent(pepng::makeRenderer(
             pepng::makeModel()
                 ->attachBuffer(
@@ -53,8 +55,7 @@ std::shared_ptr<Object> pepng::makeAxes(std::shared_ptr<Transform> transform, GL
                 ->setElementArray(true)
                 ->setCount(6)
                 ->setName("Axes"), 
-            shaderProgram, 
-            -1, 
+            material,
             GL_LINES
         )
     );

@@ -62,15 +62,11 @@ void objectHierarchy(std::shared_ptr<Object> object, std::shared_ptr<Object>* cu
     }
 }
 
-void objectAttachRecursive(std::shared_ptr<Object> object, GLuint texture) {
+void objectAttachRecursive(std::shared_ptr<Object> object) {
     object->attachComponent(pepng::makeTransformer());
 
-    if(auto renderer = object->getComponent<Renderer>()) {
-        renderer->texture = texture;
-    }
-
     for(auto child : object->children) {
-        objectAttachRecursive(child, texture);
+        objectAttachRecursive(child);
     }
 }
 
@@ -127,8 +123,6 @@ int main(int argc, char *argv[]) {
     auto texturespath = pepng::getFolderPath("textures");
 
     static auto missingTexture = pepng::makeTexture(texturespath / "missing.jpg");
-    static auto honeyTexture = pepng::makeTexture(texturespath / "honeycomb.jpg");
-    static auto objectTexture = pepng::makeTexture(texturespath / "suzanne.png");
 
     /**
      * Shaders
@@ -169,17 +163,13 @@ int main(int argc, char *argv[]) {
             129
         )
     };
-
-    static auto mcBlockTexture = pepng::makeTexture(modelpath / "minecraft/terrain.png");
-
-    static auto mcSteveTexture = pepng::makeTexture(modelpath / "minecraft/steve.png");
-
+    
     pepng::load(
         modelpath / "minecraft/scene.dae", 
         std::function([](std::shared_ptr<Object> object) {
             object->attachComponent(pepng::makeSelector());
 
-            objectAttachRecursive(object, mcBlockTexture);
+            objectAttachRecursive(object);
 
             objects.push_back(object);
         }),

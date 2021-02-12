@@ -141,7 +141,12 @@ namespace pepng {
         }
     }
 
-    void loadObjectOBJ(std::filesystem::path path, std::function<void(std::shared_ptr<Object>)> function, GLuint shaderProgram, std::shared_ptr<Transform> transform) {
+    void loadObjectOBJ(
+        std::filesystem::path path, 
+        std::function<void(std::shared_ptr<Object>)> function, 
+        GLuint shaderProgram, 
+        std::shared_ptr<Transform> transform
+    ) {
         std::shared_ptr<Object> object = pepng::makeObject(path.filename());
 
         object->attachComponent(pepng::copyTransform(transform));
@@ -153,7 +158,16 @@ namespace pepng {
 
                 child
                     ->attachComponent(pepng::makeTransform())
-                    ->attachComponent(pepng::makeRenderer(model, shaderProgram, -1, GL_TRIANGLES));
+                    ->attachComponent(
+                        pepng::makeRenderer(
+                            model, 
+                            pepng::makeMaterial(
+                                shaderProgram, 
+                                pepng::makeTexture()
+                            ), 
+                            GL_TRIANGLES
+                        )
+                    );
 
                 object->children.push_back(child);
             })
@@ -162,7 +176,112 @@ namespace pepng {
         function(object);
     }
 
-    std::map<std::string, std::shared_ptr<Camera>> loadCameraDAE(tinyxml2::XMLElement* libraryCameras) {
+    std::map<std::string, std::shared_ptr<Texture>> loadTextureDAE(tinyxml2::XMLElement* libraryImages, std::filesystem::path path) {
+        std::map<std::string, std::shared_ptr<Texture>> textures;
+
+        auto texture = libraryImages->FirstChildElement("image");
+
+        while(texture != nullptr) {
+            std::string textureId = texture->FindAttribute("id")->Value();
+
+            std::filesystem::path texturePath = texture->FirstChildElement("init_from")->GetText();
+
+            if(texturePath.is_relative()) {
+                texturePath = path.parent_path() / texturePath;
+            }
+
+            auto textureInstance = pepng::makeTexture(texturePath);
+
+            textures[textureId] = textureInstance;
+
+            texture = texture->NextSiblingElement("image");
+        }
+
+        return textures;
+    }
+
+    std::map<std::string, std::shared_ptr<Texture>> loadEffectDAE(
+        tinyxml2::XMLElement* libraryEffects, 
+        std::map<std::string, std::shared_ptr<Texture>>& textures
+    ) {
+        std::map<std::string, std::shared_ptr<Texture>> effects;
+
+        auto effect = libraryEffects->FirstChildElement("effect");
+
+        while(effect != nullptr) {
+            std::string effectId = "#";
+            effectId += effect->FindAttribute("id")->Value();
+
+            auto profile = effect->FirstChildElement("profile_COMMON");
+
+            auto newparam = profile->FirstChildElement("newparam");
+
+            while(newparam != nullptr) {
+                auto param = newparam->FirstChildElement();
+
+                std::string paramName = param->Name();
+
+                if(paramName == "surface") {
+                    auto textureId = param->FirstChildElement("init_from")->GetText();
+
+                    auto texture = textures[textureId];
+
+                    if(texture == nullptr) {
+                        std::stringstream ss;
+
+                        ss << "Could not find texture " << textureId << std::endl;
+
+                        throw std::runtime_error(ss.str());
+                    }
+
+                    effects[effectId] = texture;
+
+                    break;
+                }
+
+                newparam = newparam->NextSiblingElement("newparam");
+            }
+
+            effect = effect->NextSiblingElement("effect");
+        }
+
+        return effects;
+    }
+
+    std::map<std::string, std::shared_ptr<Material>> loadMaterialDAE(
+        tinyxml2::XMLElement* libraryMaterials, 
+        std::map<std::string, std::shared_ptr<Texture>>& effects, 
+        GLuint shaderProgram
+    ) {
+        std::map<std::string, std::shared_ptr<Material>> materials;
+
+        auto material = libraryMaterials->FirstChildElement("material");
+
+        while(material != nullptr) {
+            std::string materialId = "#";
+            materialId += material->FindAttribute("id")->Value();
+
+            auto effect = material->FirstChildElement("instance_effect");
+
+            std::string effectId = effect->FindAttribute("url")->Value();
+
+            auto texture = effects[effectId];
+
+            if (texture == nullptr) {
+                throw std::runtime_error("Could not find effect " + effectId);
+            }
+
+            materials[materialId] = pepng::makeMaterial(shaderProgram, texture);
+
+            material = material->NextSiblingElement("material");
+        }
+
+        return materials;
+    }
+
+    std::map<std::string, std::shared_ptr<Camera>> loadCameraDAE(
+        tinyxml2::XMLElement* libraryCameras
+    ) {
         std::map<std::string, std::shared_ptr<Camera>> cameras;
 
         auto camera = libraryCameras->FirstChildElement("camera");
@@ -221,7 +340,14 @@ namespace pepng {
                 auto floatArray = utils::splitFloat(floatArrayTag->GetText());
 
                 if(floatArray.size() != floatArrayTag->FindAttribute("count")->IntValue()) {
-                    throw std::runtime_error("Expect index count to be " + std::to_string(floatArrayTag->FindAttribute("count")->IntValue()) + " but got " + std::to_string(floatArray.size()));
+                    std::stringstream ss;
+
+                    ss  << "Expect index count to be "
+                        << floatArrayTag->FindAttribute("count")->IntValue()
+                        << " but got "
+                        << floatArray.size();
+
+                    throw std::runtime_error(ss.str());
                 }
 
                 auto size = source->FirstChildElement("technique_common")->FirstChildElement("accessor")->FindAttribute("stride")->IntValue();
@@ -304,7 +430,7 @@ namespace pepng {
         tinyxml2::XMLElement* node, 
         std::map<std::string, std::shared_ptr<Model>>& geometries, 
         std::map<std::string, std::shared_ptr<Camera>>& cameras,
-        GLuint shaderProgram
+        std::map<std::string, std::shared_ptr<Material>>& materials
     ) {
         std::vector<std::shared_ptr<Object>> objects;
 
@@ -391,8 +517,6 @@ namespace pepng {
             if(auto iCamera = myNode->FirstChildElement("instance_camera")) {
                 rotation = glm::vec3(90.0f - rotation.x, -rotation.y, rotation.z);
 
-                std::cout << glm::to_string(rotation) << std::endl;
-
                 std::string cameraId = iCamera->FindAttribute("url")->Value();
 
                 auto camera = cameras[cameraId];
@@ -409,10 +533,20 @@ namespace pepng {
 
                 auto geometry = geometries[geometryId];
 
-                object->attachComponent(pepng::makeRenderer(geometry, shaderProgram));
+                auto instanceMaterial = iGeometry->FirstChildElement("bind_material")->FirstChildElement("technique_common")->FirstChildElement("instance_material");
+
+                std::string materialId = instanceMaterial->FindAttribute("target")->Value();
+
+                auto material = materials[materialId];
+
+                if (material == nullptr) {
+                    throw std::runtime_error("Could not find material " + materialId);
+                }
+
+                object->attachComponent(pepng::makeRenderer(geometry, material));
             }
 
-            object->children = loadObjectDAEDeep(myNode, geometries, cameras, shaderProgram);
+            object->children = loadObjectDAEDeep(myNode, geometries, cameras, materials);
 
             objects.push_back(object);
 
@@ -424,9 +558,9 @@ namespace pepng {
 
     std::map<std::string, std::shared_ptr<Object>> loadSceneDAE(
         tinyxml2::XMLElement* libraryScenes, 
-        std::map<std::string, std::shared_ptr<Model>> geometries, 
+        std::map<std::string, std::shared_ptr<Model>>& geometries, 
         std::map<std::string, std::shared_ptr<Camera>>& cameras,
-        GLuint shaderProgram
+        std::map<std::string, std::shared_ptr<Material>>& materials
     ) {
         std::map<std::string, std::shared_ptr<Object>> scenes;
 
@@ -439,7 +573,7 @@ namespace pepng {
 
             sceneObj->attachComponent(pepng::makeTransform());
 
-            sceneObj->children = loadObjectDAEDeep(scene, geometries, cameras, shaderProgram);
+            sceneObj->children = loadObjectDAEDeep(scene, geometries, cameras, materials);
 
             scenes[sceneName] = sceneObj;
 
@@ -449,18 +583,29 @@ namespace pepng {
         return scenes;
     }
 
-    void loadObjectDAE(std::filesystem::path path, std::function<void(std::shared_ptr<Object>)> function, GLuint shaderProgram, std::shared_ptr<Transform> transform) {
+    void loadObjectDAE(
+        std::filesystem::path path, 
+        std::function<void(std::shared_ptr<Object>)> function, 
+        GLuint shaderProgram, 
+        std::shared_ptr<Transform> transform
+    ) {
         tinyxml2::XMLDocument doc;
 
         doc.LoadFile(path.c_str());
 
         auto root = doc.RootElement();
 
+        auto textures = loadTextureDAE(root->FirstChildElement("library_images"), path);
+
+        auto effects = loadEffectDAE(root->FirstChildElement("library_effects"), textures);
+
+        auto materials = loadMaterialDAE(root->FirstChildElement("library_materials"), effects, shaderProgram);
+
         auto cameras = loadCameraDAE(root->FirstChildElement("library_cameras"));
 
         auto geometries = loadGeometryDAE(root->FirstChildElement("library_geometries"));
 
-        auto scenes = loadSceneDAE(root->FirstChildElement("library_visual_scenes"), geometries, cameras, shaderProgram);
+        auto scenes = loadSceneDAE(root->FirstChildElement("library_visual_scenes"), geometries, cameras, materials);
 
         for(auto scene : scenes) {
             function(scene.second);
@@ -468,7 +613,12 @@ namespace pepng {
     }
 
     template <>
-    void loadThread(std::filesystem::path path, std::function<void(std::shared_ptr<Object>)> function, GLuint shaderProgram, std::shared_ptr<Transform> transform) {
+    void loadThread(
+        std::filesystem::path path, 
+        std::function<void(std::shared_ptr<Object>)> function, 
+        GLuint shaderProgram, 
+        std::shared_ptr<Transform> transform
+    ) {
         if(path.extension() == ".obj") {
             loadObjectOBJ(path, function, shaderProgram, transform);
         } else if(path.extension() == ".dae") {
@@ -477,7 +627,11 @@ namespace pepng {
     }
 
     template <typename T, typename... Args>
-    void load(std::filesystem::path path, std::function<void(std::shared_ptr<T>)> function, Args... args) {
+    void load(
+        std::filesystem::path path, 
+        std::function<void(std::shared_ptr<T>)> function, 
+        Args... args
+    ) {
         if(!std::filesystem::exists(path)) {
             throw std::runtime_error("Could not find file: " + path.string());
         }

@@ -3,22 +3,21 @@
 #include "transform.hpp"
 #include "../object/camera.hpp"
 
-Renderer::Renderer(std::shared_ptr<Model> model, GLuint shaderProgram, GLuint texture, GLenum renderMode) :
+Renderer::Renderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum renderMode) :
     Component("Renderer"),
     model(model),
-    shaderProgram(shaderProgram),
-    texture(texture),
+    material(material),
     renderMode(renderMode)
 {}
 
-std::shared_ptr<Renderer> Renderer::makeRenderer(std::shared_ptr<Model> model, GLuint shaderProgram, GLuint texture, GLenum renderMode) {
-    std::shared_ptr<Renderer> renderer(new Renderer(model, shaderProgram, texture, renderMode));
+std::shared_ptr<Renderer> Renderer::makeRenderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum renderMode) {
+    std::shared_ptr<Renderer> renderer(new Renderer(model, material, renderMode));
 
     return renderer;
 }
 
-std::shared_ptr<Renderer> pepng::makeRenderer(std::shared_ptr<Model> model, GLuint shaderProgram, GLuint texture, GLenum renderMode) {
-    return Renderer::makeRenderer(model, shaderProgram, texture, renderMode);
+std::shared_ptr<Renderer> pepng::makeRenderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum renderMode) {
+    return Renderer::makeRenderer(model, material, renderMode);
 }
 
 void Renderer::update(std::shared_ptr<WithComponents> parent) {
@@ -30,11 +29,13 @@ void Renderer::update(std::shared_ptr<WithComponents> parent) {
         return;
     }
 
-    glUseProgram(this->shaderProgram);
+    auto shaderProgram = this->material->getShaderProgram();
 
-    glBindTexture(GL_TEXTURE_2D, this->texture);
+    glUseProgram(shaderProgram);
 
-    Camera::currentCamera->render(this->shaderProgram);
+    glBindTexture(GL_TEXTURE_2D, this->material->getTexture());
+
+    Camera::currentCamera->render(shaderProgram);
 
     auto transform = parent->getComponent<Transform>();
 
@@ -47,7 +48,7 @@ void Renderer::update(std::shared_ptr<WithComponents> parent) {
         throw std::runtime_error(ss.str());
     }
     
-    GLuint uWorld = glGetUniformLocation(this->shaderProgram, "u_world");
+    GLuint uWorld = glGetUniformLocation(shaderProgram, "u_world");
 
     if (uWorld >= 0) {
         glUniformMatrix4fv(
@@ -90,8 +91,6 @@ void Renderer::imgui() {
     ss << this->model->count;
 
     ImGui::LabelText("Index Count", ss.str().c_str());
-
-    ImGui::InputInt("Texture", (int*)&this->texture);
 
     const char* items[] = { "Lines", "Points", "Triangles" };
     static int item_current_idx = -1;
