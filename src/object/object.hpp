@@ -24,6 +24,8 @@ class Object : public WithComponents {
 
         virtual void update();
 
+        virtual void render();
+
         virtual std::ostream& operatorOstream(std::ostream& os) const override;
 
         friend std::ostream& operator<<(std::ostream& os, const Object& object);

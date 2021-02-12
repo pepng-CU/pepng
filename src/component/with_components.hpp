@@ -13,6 +13,8 @@ class WithComponents : public WithImGui, public std::enable_shared_from_this<Wit
 
         void updateComponents();
 
+        void renderComponents();
+
         virtual void imgui();
 
         virtual std::ostream& operatorOstream(std::ostream& os) const;

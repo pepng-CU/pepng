@@ -231,6 +231,13 @@ int main(int argc, char *argv[]) {
         /**
          * Update
          */
+        for(auto object : objects) {
+            object->update();
+        }
+
+        /**
+         * Render
+         */
         for(auto camera : Camera::cameras) {
             if(camera->isActive) {
                 camera->viewport->render(windowDimension);
@@ -240,7 +247,7 @@ int main(int argc, char *argv[]) {
                 camera->projection->setAspect(windowDimension.x / windowDimension.y);
 
                 for(auto object : objects) {
-                    object->update();
+                    object->render();
                 }
             }
         }

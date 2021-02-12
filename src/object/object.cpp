@@ -51,6 +51,14 @@ void Object::update() {
     }
 }
 
+void Object::render() {
+    WithComponents::renderComponents();
+
+    for(auto child : this->children) {
+        child->render();
+    }
+}
+
 std::ostream& Object::operatorOstream(std::ostream& os) const {
     os  << "Object { " 
         << this->name

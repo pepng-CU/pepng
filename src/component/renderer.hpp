@@ -16,7 +16,7 @@ class Renderer : public Component {
 
         static std::shared_ptr<Renderer> makeRenderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum renderMode);
 
-        virtual void update(std::shared_ptr<WithComponents> object) override;
+        virtual void render(std::shared_ptr<WithComponents> object) override;
         virtual void imgui() override;
     private:
         Renderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum renderMode);

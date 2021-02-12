@@ -28,6 +28,8 @@ class Component : public WithImGui {
 
         virtual void init(std::shared_ptr<WithComponents> parent) {};
 
+        virtual void render(std::shared_ptr<WithComponents> parent) {};
+
         virtual void update(std::shared_ptr<WithComponents> parent) {};
 
         virtual void imgui() override;

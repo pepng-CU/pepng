@@ -22,6 +22,12 @@ void WithComponents::updateComponents() {
     }
 }
 
+void WithComponents::renderComponents() {
+    for(auto component : this->getComponents()) {
+        component->render(shared_from_this());
+    }
+}
+
 std::ostream& WithComponents::operatorOstream(std::ostream& os) const {
     os << "WithComponents { ";
 

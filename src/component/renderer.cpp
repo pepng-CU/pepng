@@ -20,7 +20,7 @@ std::shared_ptr<Renderer> pepng::makeRenderer(std::shared_ptr<Model> model, std:
     return Renderer::makeRenderer(model, material, renderMode);
 }
 
-void Renderer::update(std::shared_ptr<WithComponents> parent) {
+void Renderer::render(std::shared_ptr<WithComponents> parent) {
     if(!this->model->isInit) {
         this->model->delayedInit();
     }
@@ -51,15 +51,16 @@ void Renderer::update(std::shared_ptr<WithComponents> parent) {
     GLuint uWorld = glGetUniformLocation(shaderProgram, "u_world");
 
     if (uWorld >= 0) {
+        auto worldMatrix = transform->parentMatrix
+            * glm::translate(glm::mat4(1.0f), this->model->offset)
+            * transform->getWorldMatrix()
+            * glm::translate(glm::mat4(1.0f), -this->model->offset);
+
         glUniformMatrix4fv(
             uWorld,
             1,
             GL_FALSE,
-            glm::value_ptr(transform->parentMatrix
-                * glm::translate(glm::mat4(1.0f), this->model->offset)
-                * transform->getWorldMatrix()
-                * glm::translate(glm::mat4(1.0f), -this->model->offset)
-            )
+            glm::value_ptr(worldMatrix)
         );
     }
 
