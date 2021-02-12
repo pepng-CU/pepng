@@ -163,9 +163,9 @@ int main(int argc, char *argv[]) {
             129
         )
     };
-    
+
     pepng::load(
-        modelpath / "minecraft/scene.dae", 
+        modelpath / "sponza/scene.dae", 
         std::function([](std::shared_ptr<Object> object) {
             object->attachComponent(pepng::makeSelector());
 

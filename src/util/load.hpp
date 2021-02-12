@@ -194,6 +194,8 @@ namespace pepng {
 
             textures[textureId] = textureInstance;
 
+            std::cout << "Loaded texture: " << textureId << std::endl;
+
             texture = texture->NextSiblingElement("image");
         }
 
@@ -216,6 +218,8 @@ namespace pepng {
 
             auto newparam = profile->FirstChildElement("newparam");
 
+            bool effectLoaded = false;
+
             while(newparam != nullptr) {
                 auto param = newparam->FirstChildElement();
 
@@ -236,11 +240,19 @@ namespace pepng {
 
                     effects[effectId] = texture;
 
+                    effectLoaded = true;
+
                     break;
                 }
 
                 newparam = newparam->NextSiblingElement("newparam");
             }
+
+            if(!effectLoaded) {
+                effects[effectId] = pepng::makeTexture();
+            }
+
+            std::cout << "Loaded effect: " << effectId << std::endl;
 
             effect = effect->NextSiblingElement("effect");
         }
@@ -272,6 +284,8 @@ namespace pepng {
             }
 
             materials[materialId] = pepng::makeMaterial(shaderProgram, texture);
+
+            std::cout << "Loaded material: " << materialId << std::endl;
 
             material = material->NextSiblingElement("material");
         }
@@ -308,6 +322,8 @@ namespace pepng {
             auto cameraComponent = pepng::makeCamera(pepng::makeViewport(glm::vec2(0.0f), glm::vec2(1.0f)), projection);
 
             cameras[cameraId] = cameraComponent;
+
+            std::cout << "Loaded camera: " << cameraId << std::endl;
 
             camera = camera->NextSiblingElement("camera");
         }
@@ -419,6 +435,8 @@ namespace pepng {
             }
 
             geometries[geometryId] = model;
+
+            std::cout << "Loaded geometry: " << geometryId << std::endl;
 
             geometry = geometry->NextSiblingElement("geometry");
         }
@@ -546,6 +564,8 @@ namespace pepng {
                 object->attachComponent(pepng::makeRenderer(geometry, material));
             }
 
+            std::cout << "Loaded object: " << objectName << std::endl;
+
             object->children = loadObjectDAEDeep(myNode, geometries, cameras, materials);
 
             objects.push_back(object);
@@ -577,6 +597,8 @@ namespace pepng {
 
             scenes[sceneName] = sceneObj;
 
+            std::cout << "Loaded scene: " << sceneName << std::endl;
+
             scene = scene->NextSiblingElement("visual_scene");
         }
 
@@ -592,6 +614,8 @@ namespace pepng {
         tinyxml2::XMLDocument doc;
 
         doc.LoadFile(path.c_str());
+
+        std::cout << "Loading COLLADA: " << path << std::endl;
 
         auto root = doc.RootElement();
 
