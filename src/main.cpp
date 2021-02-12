@@ -277,6 +277,21 @@ int main(int argc, char *argv[]) {
 
         ImGui::Begin("Debug");
 
+        if(ImGui::Button("Create BlockGame")) {
+            pepng::load(
+                modelpath / "minecraft/scene.dae", 
+                std::function([](std::shared_ptr<Object> object) {
+                    object->attachComponent(pepng::makeSelector());
+
+                    objectAttachRecursive(object);
+
+                    objects.push_back(object);
+                }),
+                shaderProgram,
+                pepng::makeTransform()
+            );
+        }
+
         ImGui::End();
 
         ImGui::Render();
