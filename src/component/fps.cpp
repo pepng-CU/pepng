@@ -33,7 +33,7 @@ void FPS::update(std::shared_ptr<WithComponents> parent) {
     }
 
     if(input->getButtonDown("rotate")) {
-        transform->deltaRotate(glm::vec3(mouseDelta.y, -mouseDelta.x, 0.0f) * this->rotationSpeed);
+        transform->deltaRotate(glm::vec3(mouseDelta.y, mouseDelta.x, 0.0f) * this->rotationSpeed);
     }
 
     if(input->getButtonDown("zoom")) {
