@@ -167,23 +167,6 @@ int main(int argc, char *argv[]) {
             ), 
             lineShaderProgram, 
             129
-        ),
-        pepng::makeCameraObj(
-            pepng::makeCameraTransform(
-                glm::vec3(0.0f, 2.0f, 10.0f),
-                glm::vec3(0.0f, 0.0f, 0.0f),
-                glm::vec3(1.0f, 1.0f, 1.0f)
-            ),
-            pepng::makeViewport(
-                glm::vec2(0.0f, 0.0f),
-                glm::vec2(1.0f, 1.0f)
-            ),
-            pepng::makePerspective(
-                glm::radians(60.0f),
-                windowDimension.x / windowDimension.y,
-                0.01f,
-                1000.0f
-            )
         )
     };
 

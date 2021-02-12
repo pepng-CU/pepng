@@ -21,3 +21,19 @@ void WithComponents::updateComponents() {
         component->update(shared_from_this());
     }
 }
+
+std::ostream& WithComponents::operatorOstream(std::ostream& os) const {
+    os << "WithComponents { ";
+
+    for(auto component : this->components) {
+        os << *component << ", ";
+    }
+
+    os << "}";
+
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const WithComponents& component) {
+    return component.operatorOstream(os);
+}

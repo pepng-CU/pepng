@@ -12,3 +12,13 @@ std::string Component::getName() {
 void Component::imgui() {
     ImGui::Checkbox("Active", &this->isActive);
 }
+
+std::ostream& Component::operatorOstream(std::ostream& os) const {
+    os << "Component { " << this->name << " }";
+
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const Component& component) {
+    return component.operatorOstream(os);
+}

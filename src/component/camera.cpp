@@ -28,14 +28,27 @@ void Camera::init(std::shared_ptr<WithComponents> parent) {
 }
 
 void Camera::render(GLuint shaderProgram) {
-    auto transform = parent->getComponent<Transform>();
-
     glUniformMatrix4fv(
         glGetUniformLocation(shaderProgram, "u_projection"),
         1,
         GL_FALSE,
         glm::value_ptr(this->projection->getMatrix())
     );
+
+    // TODO: Should we throw if there is no parent?
+    if(parent == nullptr) {
+        return;
+    }
+
+    auto transform = parent->getComponent<Transform>();
+
+    if(transform == nullptr) {
+        std::stringstream ss;
+
+        ss << *this->parent << " is being rendered without a transform.";
+
+        throw std::runtime_error(ss.str());
+    }
 
     glUniformMatrix4fv(
         glGetUniformLocation(shaderProgram, "u_view"),

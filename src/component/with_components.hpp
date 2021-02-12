@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <iostream>
 
 #include "component.hpp"
 #include "../ui/with_imgui.hpp"
@@ -13,6 +14,10 @@ class WithComponents : public WithImGui, public std::enable_shared_from_this<Wit
         void updateComponents();
 
         virtual void imgui();
+
+        virtual std::ostream& operatorOstream(std::ostream& os) const;
+
+        friend std::ostream& operator<<(std::ostream& os, const WithComponents& component);
 
         template<typename T>
         std::vector<std::shared_ptr<T>> getComponents() {
@@ -45,3 +50,5 @@ class WithComponents : public WithImGui, public std::enable_shared_from_this<Wit
     private:
         std::vector<std::shared_ptr<Component>> components;
 };
+
+std::ostream& operator<<(std::ostream& os, const WithComponents& component);

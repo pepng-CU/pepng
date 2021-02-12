@@ -29,18 +29,42 @@ void Object::update() {
     auto transform = this->getComponent<Transform>();
 
     if(transform == nullptr) {
-        throw std::runtime_error("This object has no transform. Make sure to object->attachComponent(Transform)");
+        std::stringstream ss;
+
+        ss << *this << " has no transform.";
+
+        throw std::runtime_error(ss.str());
     }
 
     auto parentMatrix = transform->parentMatrix * transform->getWorldMatrix();
 
     for(auto child : this->children) {
-        auto childTransform = child->getComponent<Transform>();
+        if(child == nullptr) {
+            continue;
+        }
 
-        childTransform->parentMatrix = glm::mat4(parentMatrix);
+        if(auto childTransform = child->getComponent<Transform>()) {
+            childTransform->parentMatrix = glm::mat4(parentMatrix);
+        }
 
         child->update();
     }
+}
+
+std::ostream& Object::operatorOstream(std::ostream& os) const {
+    os  << "Object { " 
+        << this->name
+        << ", "; 
+
+    WithComponents::operatorOstream(os);
+
+    os << " }";
+
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, const Object& object) {
+    return object.operatorOstream(os);
 }
 
 namespace pepng {

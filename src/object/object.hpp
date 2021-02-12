@@ -24,6 +24,10 @@ class Object : public WithComponents {
 
         virtual void update();
 
+        virtual std::ostream& operatorOstream(std::ostream& os) const override;
+
+        friend std::ostream& operator<<(std::ostream& os, const Object& object);
+
     protected:
         Object(std::string name);
 };
@@ -31,3 +35,5 @@ class Object : public WithComponents {
 namespace pepng {
     std::shared_ptr<Object> makeObject(std::string name);
 };
+
+std::ostream& operator<<(std::ostream& os, const Object& object);

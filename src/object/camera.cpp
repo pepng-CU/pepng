@@ -4,16 +4,20 @@
 #include "../component/fps.hpp"
 
 namespace pepng {
-    std::shared_ptr<Object> makeCameraObj(std::shared_ptr<CameraTransform> transform, std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection) {
-        auto camera = pepng::makeObject("Camera");
+    std::shared_ptr<Object> makeCameraObj(std::shared_ptr<CameraTransform> transform, std::shared_ptr<Camera> camera) {
+        auto cameraObj = pepng::makeObject("Camera");
         
-        camera->attachComponent(transform);
-        camera->attachComponent(pepng::makeCamera(viewport, projection));
+        cameraObj->attachComponent(transform);
+        cameraObj->attachComponent(camera);
 
         if(Camera::cameras.size() == 1) {
-            camera->attachComponent(pepng::makeFPS());
+            cameraObj->attachComponent(pepng::makeFPS());
         }
 
-        return camera;
+        return cameraObj;
+    }
+
+    std::shared_ptr<Object> makeCameraObj(std::shared_ptr<CameraTransform> transform, std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection) {
+        return makeCameraObj(transform, pepng::makeCamera(viewport, projection));
     }
 };

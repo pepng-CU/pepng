@@ -30,14 +30,23 @@ void Renderer::update(std::shared_ptr<WithComponents> parent) {
         return;
     }
 
-    auto transform = parent->getComponent<Transform>();
-
     glUseProgram(this->shaderProgram);
 
     glBindTexture(GL_TEXTURE_2D, this->texture);
 
     Camera::currentCamera->render(this->shaderProgram);
 
+    auto transform = parent->getComponent<Transform>();
+
+    // TODO: Should we just skip?
+    if(transform == nullptr) {
+        std::stringstream ss;
+
+        ss << *parent << " has no transform." << std::endl;
+
+        throw std::runtime_error(ss.str());
+    }
+    
     GLuint uWorld = glGetUniformLocation(this->shaderProgram, "u_world");
 
     if (uWorld >= 0) {

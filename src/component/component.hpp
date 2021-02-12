@@ -22,6 +22,10 @@ class Component : public WithImGui {
 
         std::string getName();
 
+        virtual std::ostream& operatorOstream(std::ostream& os) const;
+
+        friend std::ostream& operator<<(std::ostream& os, const Component& component);
+
         virtual void init(std::shared_ptr<WithComponents> parent) {};
 
         virtual void update(std::shared_ptr<WithComponents> parent) {};
@@ -31,5 +35,7 @@ class Component : public WithImGui {
     private:
         std::string name;
 };
+
+std::ostream& operator<<(std::ostream& os, const Component& component);
 
 #include "with_components.hpp"

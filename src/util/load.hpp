@@ -20,9 +20,11 @@
 #include <tinyxml2.h>
 
 #include "utils.hpp"
+#include "../component/camera.hpp"
 #include "../gl/model.hpp"
 #include "../component/transform.hpp"
 #include "../object/object.hpp"
+#include "../object/camera.hpp"
 
 namespace pepng {
     template <typename T, typename... Args>
@@ -160,121 +162,44 @@ namespace pepng {
         function(object);
     }
 
-    std::vector<std::shared_ptr<Object>> nodeTraversal(tinyxml2::XMLElement* node, std::map<std::string, std::shared_ptr<Model>>& geometries, GLuint shaderProgram) {
-        std::vector<std::shared_ptr<Object>> objects;
+    std::map<std::string, std::shared_ptr<Camera>> loadCameraDAE(tinyxml2::XMLElement* libraryCameras) {
+        std::map<std::string, std::shared_ptr<Camera>> cameras;
 
-        auto myNode = node->FirstChildElement("node");
+        auto camera = libraryCameras->FirstChildElement("camera");
 
-        while(myNode != nullptr) {
-            std::string objectName = myNode->FindAttribute("name")->Value();
+        while(camera != nullptr) {
+            std::string cameraId = "#";
+            cameraId += camera->FindAttribute("id")->Value();
 
-            auto object = pepng::makeObject(objectName);
+            auto optics = camera->FirstChildElement("optics");
 
-            glm::vec3 position = glm::vec3(0.0f);
-            glm::quat rotationQuat = glm::quat(glm::vec3(0.0f));
-            glm::vec3 scale = glm::vec3(1.0f);
+            auto techniqueCommon = optics->FirstChildElement("technique_common");
 
-            auto translate = myNode->FirstChildElement("translate");
+            std::shared_ptr<Projection> projection;
 
-            while(translate != nullptr) {
-                std::string sid = translate->FindAttribute("sid")->Value();
+            if(auto perspective = techniqueCommon->FirstChildElement("perspective")) {
+                auto fovy = glm::radians(std::stof(perspective->FirstChildElement("xfov")->GetText()));
+                auto aspect = std::stof(perspective->FirstChildElement("aspect_ratio")->GetText());
+                auto near = std::stof(perspective->FirstChildElement("znear")->GetText());
+                auto far = std::stof(perspective->FirstChildElement("zfar")->GetText());
 
-                if (sid == "location") {
-                    auto p = utils::splitFloat(translate->GetText());
-
-                    position = glm::vec3(p[0], p[1], p[2]);
-                }
-
-                translate = translate->NextSiblingElement("translate");
+                projection = pepng::makePerspective(fovy, aspect, near, far);
             }
 
-            auto scaleTag = myNode->FirstChildElement("scale");
+            auto cameraComponent = pepng::makeCamera(pepng::makeViewport(glm::vec2(0.0f), glm::vec2(1.0f)), projection);
 
-            while(scaleTag != nullptr) {
-                std::string sid = scaleTag->FindAttribute("sid")->Value();
+            cameras[cameraId] = cameraComponent;
 
-                if (sid == "scale") {
-                    auto s = utils::splitFloat(scaleTag->GetText());
-
-                    scale = glm::vec3(s[0], s[1], s[2]);
-                }
-
-                scaleTag = scaleTag->NextSiblingElement("scale");
-            }
-
-            auto rotate = myNode->FirstChildElement("rotate");
-
-            while(rotate != nullptr) {
-                auto r = utils::splitFloat(rotate->GetText());
-
-                rotationQuat *= glm::quat(r[0], r[1], r[2], r[3]);
-
-                rotate = rotate->NextSiblingElement("rotate");
-            }
-
-            auto matrix = myNode->FirstChildElement("matrix");
-
-            while(matrix != nullptr) {
-                std::string sid = matrix->FindAttribute("sid")->Value();
-
-                if(sid == "transform") {
-                    auto transformArray = utils::splitFloat(matrix->GetText());
-
-                    if(transformArray.size() != 16) {
-                        throw std::runtime_error("Expected mat4x4 but got array of size " + transformArray.size());
-                    }
-
-                    auto transformMatrix = glm::mat4(0.0f);
-
-                    for(int i = 0; i < 4; i++) {
-                        for(int j = 0; j < 4; j++) {
-                            transformMatrix[j][i] = transformArray.at(i * 4 + j);
-                        }
-                    }
-
-                    glm::vec3 skew;
-                    glm::vec4 perspective;
-
-                    glm::decompose(transformMatrix, scale, rotationQuat, position, skew, perspective);
-                }
-
-                matrix = matrix->NextSiblingElement("matrix");
-            }
-
-            auto rotation = glm::degrees(glm::eulerAngles(rotationQuat));
-
-            object->attachComponent(pepng::makeTransform(position, rotation, scale));
-
-            auto iGeometry = myNode->FirstChildElement("instance_geometry");
-
-            if(iGeometry != nullptr) {
-                std::string geometryId = iGeometry->FindAttribute("url")->Value();
-
-                auto geometry = geometries[geometryId];
-
-                object->attachComponent(pepng::makeRenderer(geometry, shaderProgram));
-            }
-
-            object->children = nodeTraversal(myNode, geometries, shaderProgram);
-
-            objects.push_back(object);
-
-            myNode = myNode->NextSiblingElement("node");
+            camera = camera->NextSiblingElement("camera");
         }
 
-        return objects;
+        return cameras;
     }
 
-    void loadObjectDAE(std::filesystem::path path, std::function<void(std::shared_ptr<Object>)> function, GLuint shaderProgram, std::shared_ptr<Transform> transform) {
-        tinyxml2::XMLDocument doc;
-
-        doc.LoadFile(path.c_str());
-
-        auto root = doc.RootElement();
-
+    std::map<std::string, std::shared_ptr<Model>> loadGeometryDAE(tinyxml2::XMLElement* libraryGeometries) {
         std::map<std::string, std::shared_ptr<Model>> geometries;
 
-        auto geometry = root->FirstChildElement("library_geometries")->FirstChildElement("geometry");
+        auto geometry = libraryGeometries->FirstChildElement("geometry");
 
         while(geometry != nullptr) {
             std::string geometryId = "#";
@@ -353,7 +278,7 @@ namespace pepng {
 
                 std::vector<float> sourceBuffer;
 
-                // Potentially bad assuming offset of 3?
+                // TODO: Potentially bad assuming offset of 3?
                 for(int i = offset; i < indicies.size(); i += 3) {
                     for(auto point : sourcePacked.at(indicies.at(i))) {
                         sourceBuffer.push_back(point);
@@ -372,7 +297,140 @@ namespace pepng {
             geometry = geometry->NextSiblingElement("geometry");
         }
 
-        auto scene = root->FirstChildElement("library_visual_scenes")->FirstChildElement("visual_scene");
+        return geometries;
+    }
+
+    std::vector<std::shared_ptr<Object>> loadObjectDAEDeep(
+        tinyxml2::XMLElement* node, 
+        std::map<std::string, std::shared_ptr<Model>>& geometries, 
+        std::map<std::string, std::shared_ptr<Camera>>& cameras,
+        GLuint shaderProgram
+    ) {
+        std::vector<std::shared_ptr<Object>> objects;
+
+        auto myNode = node->FirstChildElement("node");
+
+        while(myNode != nullptr) {
+            std::string objectName = myNode->FindAttribute("name")->Value();
+
+            glm::vec3 position = glm::vec3(0.0f);
+            glm::quat rotationQuat = glm::quat(glm::vec3(0.0f));
+            glm::vec3 scale = glm::vec3(1.0f);
+
+            auto translate = myNode->FirstChildElement("translate");
+
+            while(translate != nullptr) {
+                std::string sid = translate->FindAttribute("sid")->Value();
+
+                if (sid == "location") {
+                    auto p = utils::splitFloat(translate->GetText());
+
+                    position = glm::vec3(p[0], p[1], p[2]);
+                }
+
+                translate = translate->NextSiblingElement("translate");
+            }
+
+            auto scaleTag = myNode->FirstChildElement("scale");
+
+            while(scaleTag != nullptr) {
+                std::string sid = scaleTag->FindAttribute("sid")->Value();
+
+                if (sid == "scale") {
+                    auto s = utils::splitFloat(scaleTag->GetText());
+
+                    scale = glm::vec3(s[0], s[1], s[2]);
+                }
+
+                scaleTag = scaleTag->NextSiblingElement("scale");
+            }
+
+            auto rotate = myNode->FirstChildElement("rotate");
+
+            while(rotate != nullptr) {
+                auto r = utils::splitFloat(rotate->GetText());
+
+                rotationQuat *= glm::quat(r[0], r[1], r[2], r[3]);
+
+                rotate = rotate->NextSiblingElement("rotate");
+            }
+
+            auto matrix = myNode->FirstChildElement("matrix");
+
+            while(matrix != nullptr) {
+                std::string sid = matrix->FindAttribute("sid")->Value();
+
+                if(sid == "transform") {
+                    auto transformArray = utils::splitFloat(matrix->GetText());
+
+                    if(transformArray.size() != 16) {
+                        throw std::runtime_error("Expected mat4x4 but got array of size " + transformArray.size());
+                    }
+
+                    auto transformMatrix = glm::mat4(0.0f);
+
+                    for(int i = 0; i < 4; i++) {
+                        for(int j = 0; j < 4; j++) {
+                            transformMatrix[j][i] = transformArray.at(i * 4 + j);
+                        }
+                    }
+
+                    glm::vec3 skew;
+                    glm::vec4 perspective;
+
+                    glm::decompose(transformMatrix, scale, rotationQuat, position, skew, perspective);
+                }
+
+                matrix = matrix->NextSiblingElement("matrix");
+            }
+
+            auto rotation = glm::degrees(glm::eulerAngles(rotationQuat));
+
+            std::shared_ptr<Object> object = nullptr;
+
+            if(auto iCamera = myNode->FirstChildElement("instance_camera")) {
+                rotation = glm::vec3(90.0f - rotation.x, -rotation.y, rotation.z);
+
+                std::cout << glm::to_string(rotation) << std::endl;
+
+                std::string cameraId = iCamera->FindAttribute("url")->Value();
+
+                auto camera = cameras[cameraId];
+
+                object = pepng::makeCameraObj(pepng::makeCameraTransform(position, rotation, scale), camera);
+            } else {
+                object = pepng::makeObject(objectName);
+
+                object->attachComponent(pepng::makeTransform(position, rotation, scale));
+            }
+
+            if(auto iGeometry = myNode->FirstChildElement("instance_geometry")) {
+                std::string geometryId = iGeometry->FindAttribute("url")->Value();
+
+                auto geometry = geometries[geometryId];
+
+                object->attachComponent(pepng::makeRenderer(geometry, shaderProgram));
+            }
+
+            object->children = loadObjectDAEDeep(myNode, geometries, cameras, shaderProgram);
+
+            objects.push_back(object);
+
+            myNode = myNode->NextSiblingElement("node");
+        }
+
+        return objects;
+    }
+
+    std::map<std::string, std::shared_ptr<Object>> loadSceneDAE(
+        tinyxml2::XMLElement* libraryScenes, 
+        std::map<std::string, std::shared_ptr<Model>> geometries, 
+        std::map<std::string, std::shared_ptr<Camera>>& cameras,
+        GLuint shaderProgram
+    ) {
+        std::map<std::string, std::shared_ptr<Object>> scenes;
+
+        auto scene = libraryScenes->FirstChildElement("visual_scene");
 
         while(scene != nullptr) {
             std::string sceneName = scene->FindAttribute("name")->Value();
@@ -381,11 +439,31 @@ namespace pepng {
 
             sceneObj->attachComponent(pepng::makeTransform());
 
-            sceneObj->children = nodeTraversal(scene, geometries, shaderProgram);
+            sceneObj->children = loadObjectDAEDeep(scene, geometries, cameras, shaderProgram);
 
-            function(sceneObj);
+            scenes[sceneName] = sceneObj;
 
             scene = scene->NextSiblingElement("visual_scene");
+        }
+
+        return scenes;
+    }
+
+    void loadObjectDAE(std::filesystem::path path, std::function<void(std::shared_ptr<Object>)> function, GLuint shaderProgram, std::shared_ptr<Transform> transform) {
+        tinyxml2::XMLDocument doc;
+
+        doc.LoadFile(path.c_str());
+
+        auto root = doc.RootElement();
+
+        auto cameras = loadCameraDAE(root->FirstChildElement("library_cameras"));
+
+        auto geometries = loadGeometryDAE(root->FirstChildElement("library_geometries"));
+
+        auto scenes = loadSceneDAE(root->FirstChildElement("library_visual_scenes"), geometries, cameras, shaderProgram);
+
+        for(auto scene : scenes) {
+            function(scene.second);
         }
     }
 
