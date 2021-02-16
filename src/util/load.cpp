@@ -108,7 +108,8 @@ void pepng::loadObjectOBJ(
     GLuint shaderProgram, 
     std::shared_ptr<Transform> transform
 ) {
-    std::shared_ptr<Object> object = pepng::makeObject(path.filename());
+    std::string name = path.filename().string();
+    std::shared_ptr<Object> object = pepng::makeObject(name);
 
     object->attachComponent(pepng::copyTransform(transform));
 
@@ -590,7 +591,7 @@ void pepng::loadObjectDAE(
 
     tinyxml2::XMLDocument doc;
 
-    doc.LoadFile(path.c_str());
+    doc.LoadFile(path.string().c_str());
 
     const clock_t beginTime = clock();
 
