@@ -22,13 +22,14 @@ class DeviceUnit : public std::enable_shared_from_this<DeviceUnit> {
         friend Device;
         friend Input;
 
-        float getValue();
+        virtual float getValue();
 
     protected:
         float value;
+        float strength;
         std::shared_ptr<Device> device;
 
-        DeviceUnit(std::string name); 
+        DeviceUnit(std::string name, float strength); 
 
     private:
         std::string name;
@@ -55,13 +56,16 @@ class Axis : public DeviceUnit, public std::enable_shared_from_this<Axis> {
     public:
         friend Input;
         
-        static std::shared_ptr<Axis> makeAxis(std::string name, AxisType axisType);
+        static std::shared_ptr<Axis> makeAxis(std::string name, AxisType axisType, float strength, bool needsReset);
+
+        virtual float getValue() override;
 
     protected:
-        Axis(std::string name, AxisType axisType);
+        Axis(std::string name, AxisType axisType, float strength, bool needsReset);
 
     private:
         AxisType axisType;
+        bool needsReset;
         static std::vector<std::shared_ptr<Axis>> axes;
         static glm::vec2 cursorPosition;
         static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
@@ -115,6 +119,6 @@ class Input : public std::enable_shared_from_this<Input> {
 namespace pepng {
     std::shared_ptr<Input> makeInput(GLFWwindow* window);
     std::shared_ptr<Device> makeDevice(DeviceType deviceType);
-    std::shared_ptr<Axis> makeAxis(std::string name, AxisType axisType);
+    std::shared_ptr<Axis> makeAxis(std::string name, AxisType axisType, float strength = 1, bool needsReset = false);
     std::shared_ptr<Button> makeButton(std::string name, int buttonId, float strength = 1);
 }

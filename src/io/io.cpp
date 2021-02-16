@@ -1,12 +1,12 @@
 #include "io.hpp"
 
-DeviceUnit::DeviceUnit(std::string name) : name(name), value(0.0f), device(nullptr) {}
+DeviceUnit::DeviceUnit(std::string name, float strength) : name(name), value(0.0f), device(nullptr), strength(strength) {}
 
 float DeviceUnit::getValue() {
-    return this->value;
+    return this->value * this->strength;
 }
 
-Button::Button(std::string name, int buttonId, float strength) : DeviceUnit(name), buttonId(buttonId), strength(strength) {}
+Button::Button(std::string name, int buttonId, float strength) : DeviceUnit(name, strength), buttonId(buttonId) {}
 
 std::vector<std::shared_ptr<Button>> Button::buttons = std::vector<std::shared_ptr<Button>>();
 
@@ -25,7 +25,7 @@ void Button::keyboardCallback(GLFWwindow* window, int key, int scancode, int act
 
     for(auto button : buttons) {
         if(button->buttonId == key) {
-            button->value = (float) (action == GLFW_PRESS) * button->strength;
+            button->value = (float) (action == GLFW_PRESS);
         }
     }
 }
@@ -34,13 +34,17 @@ void Button::mouseButtonCallback(GLFWwindow* window, int button, int action, int
     keyboardCallback(window, button, -1, action, mods);
 }
 
-Axis::Axis(std::string name, AxisType axisType) : DeviceUnit(name), axisType(axisType) {}
+Axis::Axis(std::string name, AxisType axisType, float strength, bool needsReset) : 
+    DeviceUnit(name, strength), 
+    axisType(axisType),  
+    needsReset(needsReset)
+{}
 
 glm::vec2 Axis::cursorPosition = glm::vec2(-1.0f);
 std::vector<std::shared_ptr<Axis>> Axis::axes = std::vector<std::shared_ptr<Axis>>();
 
-std::shared_ptr<Axis> Axis::makeAxis(std::string name, AxisType axisType) {
-    std::shared_ptr<Axis> axis (new Axis(name, axisType));
+std::shared_ptr<Axis> Axis::makeAxis(std::string name, AxisType axisType, float strength, bool needsReset) {
+    std::shared_ptr<Axis> axis (new Axis(name, axisType, strength, needsReset));
 
     axes.push_back(axis);
 
@@ -83,6 +87,16 @@ void Axis::cursorPositionCallback(GLFWwindow* window, double xpos, double ypos) 
     }
 
     cursorPosition = newCursorPosition;
+}
+
+float Axis::getValue() {
+    float currentValue = DeviceUnit::getValue();
+
+    if(this->needsReset) {
+        this->value = 0.0f;
+    }
+
+    return currentValue;
 }
 
 Device::Device(DeviceType deviceType) : deviceType(deviceType) {}
@@ -177,8 +191,8 @@ namespace pepng {
         return Device::makeDevice(deviceType);
     }
 
-    std::shared_ptr<Axis> makeAxis(std::string name, AxisType axisType) {
-        return Axis::makeAxis(name, axisType);
+    std::shared_ptr<Axis> makeAxis(std::string name, AxisType axisType, float strength, bool needsResets) {
+        return Axis::makeAxis(name, axisType, strength, needsResets);
     }
 
     std::shared_ptr<Button> makeButton(std::string name, int buttonId, float strength) {

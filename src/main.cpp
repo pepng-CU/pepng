@@ -185,7 +185,7 @@ int main(int argc, char *argv[]) {
     auto mouse = pepng::makeDevice(DeviceType::MOUSE)
         ->attachUnit(pepng::makeAxis("mouseY", AxisType::FIRST))
         ->attachUnit(pepng::makeAxis("mouseX", AxisType::SECOND))
-        ->attachUnit(pepng::makeButton("zoom", GLFW_MOUSE_BUTTON_5))
+        ->attachUnit(pepng::makeAxis("zoom", AxisType::THIRD, 25.0f, true))
         ->attachUnit(pepng::makeButton("pan", GLFW_MOUSE_BUTTON_MIDDLE))
         ->attachUnit(pepng::makeButton("pan", GLFW_MOUSE_BUTTON_4))
         ->attachUnit(pepng::makeButton("rotate", GLFW_MOUSE_BUTTON_RIGHT));
