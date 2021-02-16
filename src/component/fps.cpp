@@ -32,13 +32,11 @@ void FPS::update(std::shared_ptr<WithComponents> parent) {
         transform->position += transform->getUp() * mouseDelta.y * this->panSpeed + transform->getRight() * mouseDelta.x * this->panSpeed;
     }
 
-    if(input->getButtonDown("rotate")) {
-        transform->deltaRotate(glm::vec3(mouseDelta.y, mouseDelta.x, 0.0f) * this->rotationSpeed);
-    }
+    auto rotation = glm::vec3(mouseDelta.y, mouseDelta.x, 0.0f);
 
-    // if(input->getButtonDown("zoom")) {
-    //     transform->position += transform->getForward() * input->getAxis("mouseY") * this->panSpeed;
-    // }
+    if(input->getButtonDown("rotate") && glm::length(rotation) > 0.25f) {
+        transform->deltaRotate(rotation * this->rotationSpeed);
+    }
 
     transform->position -= transform->getForward() * input->getAxis("zoom") * this->panSpeed;
 }

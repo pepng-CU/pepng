@@ -2,6 +2,9 @@
 
 #include <sstream>
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 #include "component.hpp"
 
 class Object;
@@ -9,6 +12,8 @@ class Object;
 class Selector : public Component {
     public:
         int index;
+
+        GLenum renderMode;
 
         static std::shared_ptr<Selector> makeSelector();
 

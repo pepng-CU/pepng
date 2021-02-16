@@ -4,7 +4,7 @@
 
 class FPS : public Component {
     public:
-        static std::shared_ptr<FPS> makeFPS(float panSpeed = 0.025f, float rotationSpeed = 0.25f);
+        static std::shared_ptr<FPS> makeFPS(float panSpeed, float rotationSpeed);
 
         virtual void update(std::shared_ptr<WithComponents> parent) override;
 
@@ -17,5 +17,5 @@ class FPS : public Component {
 };
 
 namespace pepng {
-    std::shared_ptr<FPS> makeFPS(float panSpeed = 0.025f, float rotationSpeed = 0.25f);
+    std::shared_ptr<FPS> makeFPS(float panSpeed = 0.025f, float rotationSpeed = 0.5f);
 }

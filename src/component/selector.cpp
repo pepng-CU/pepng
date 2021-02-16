@@ -1,8 +1,9 @@
 #include "selector.hpp"
 #include "../io/io.hpp"
 #include "transformer.hpp"
+#include "renderer.hpp"
 
-Selector::Selector() : Component("Selector"), index(0), needsUpdate(true) {}
+Selector::Selector() : Component("Selector"), index(0), renderMode(GL_TRIANGLES), needsUpdate(true) {}
 
 std::shared_ptr<Selector> Selector::makeSelector() {
     std::shared_ptr<Selector> selector(new Selector());
@@ -15,8 +16,12 @@ std::shared_ptr<Selector> pepng::makeSelector() {
 }
 
 void Selector::dfsSwitch(std::shared_ptr<Object> object, int& index) {
-    if(auto move = object->getComponent<Transformer>()) {
-        move->isActive = index == this->index;
+    if(auto transform = object->getComponent<Transformer>()) {
+        transform->isActive = index == this->index;
+    }
+
+    if(auto renderer = object->getComponent<Renderer>()) {
+        renderer->renderMode = this->renderMode;
     }
 
     for(auto child : object->children) {
@@ -30,6 +35,17 @@ void Selector::update(std::shared_ptr<WithComponents> parent) {
     }
 
     auto input = Input::get();
+
+    if(input->getButtonDown("triangles")) {
+        this->renderMode = GL_TRIANGLES;
+        this->needsUpdate = true;
+    } else if(input->getButtonDown("points")) {
+        this->renderMode = GL_POINTS;
+        this->needsUpdate = true;
+    } else if(input->getButtonDown("lines")) {
+        this->renderMode = GL_LINES;
+        this->needsUpdate = true;
+    }
 
     if (this->needsUpdate) {
         this->needsUpdate = false;
@@ -63,5 +79,53 @@ void Selector::imgui() {
 
     if(prev != this->index) {
         this->needsUpdate = true;
+    }
+
+    // TODO: This is identifical to renderer.cpp - must be a way to reuse!
+    const char* items[] = { "Lines", "Points", "Triangles" };
+    static int item_current_idx = -1;
+
+    if (item_current_idx == -1) {
+        switch(this->renderMode) {
+            case GL_TRIANGLES:
+                item_current_idx = 2;
+                break;
+            case GL_POINTS:
+                item_current_idx = 1;
+                break;
+            case GL_LINES:
+                item_current_idx = 0;
+        }
+    }
+
+    const char* combo_label = items[item_current_idx];
+
+    if (ImGui::BeginCombo("Render Mode", combo_label)) {
+        for (int n = 0; n < IM_ARRAYSIZE(items); n++) {
+            const bool is_selected = (item_current_idx == n);
+            
+            if (ImGui::Selectable(items[n], is_selected)) {
+                item_current_idx = n;
+
+                switch(item_current_idx) {
+                    case 2:
+                        this->renderMode = GL_TRIANGLES;
+                        break;
+                    case 1:
+                        this->renderMode = GL_POINTS;
+                        break;
+                    case 0:
+                        this->renderMode = GL_LINES;
+                        break;
+                }
+
+                this->needsUpdate = true;
+            }
+
+            if (is_selected) {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+        ImGui::EndCombo();
     }
 };
