@@ -1,9 +1,3 @@
-/**
- * COMP371 Final Project
- * 
- * @author Alexandre Lavoie (40129457), Antoine Poulin (40131102), Rhys Rosenberg (400719895), Arman Jahanpour (40075912)
- */
-
 #define GLEW_STATIC 1
 #define STB_IMAGE_IMPLEMENTATION
 
