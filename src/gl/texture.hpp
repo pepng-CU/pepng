@@ -20,6 +20,7 @@ class Texture : public DelayedInit {
         GLuint getIndex();
 
     private:
+        
         Texture() {};
 
         GLuint textureIndex;

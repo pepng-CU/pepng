@@ -51,6 +51,7 @@ std::shared_ptr<Texture> Texture::makeTexture() {
     std::shared_ptr<Texture> texture(new Texture());
 
     texture->isInit = true;
+    texture->textureIndex = 1;
 
     return texture;
 }

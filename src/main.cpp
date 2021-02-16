@@ -117,6 +117,7 @@ int main(int argc, char *argv[]) {
     auto texturespath = pepng::getFolderPath("textures");
 
     static auto missingTexture = pepng::makeTexture(texturespath / "missing.jpg");
+    missingTexture->delayedInit();
 
     /**
      * Shaders
