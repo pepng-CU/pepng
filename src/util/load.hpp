@@ -71,14 +71,16 @@ namespace pepng {
         tinyxml2::XMLElement* node, 
         std::map<std::string, std::shared_ptr<Model>>& geometries, 
         std::map<std::string, std::shared_ptr<Camera>>& cameras,
-        std::map<std::string, std::shared_ptr<Material>>& materials
+        std::map<std::string, std::shared_ptr<Material>>& materials,
+        GLuint shaderProgram
     );
 
     std::map<std::string, std::shared_ptr<Object>> loadScenesDAE(
         tinyxml2::XMLElement* libraryScenes, 
         std::map<std::string, std::shared_ptr<Model>>& geometries, 
         std::map<std::string, std::shared_ptr<Camera>>& cameras,
-        std::map<std::string, std::shared_ptr<Material>>& materials
+        std::map<std::string, std::shared_ptr<Material>>& materials,
+        GLuint shaderProgram
     );
 
     void loadObjectDAE(

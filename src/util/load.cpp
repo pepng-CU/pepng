@@ -414,7 +414,8 @@ std::shared_ptr<Object> loadObjectDataDAE(
     tinyxml2::XMLElement* node, 
     std::map<std::string, std::shared_ptr<Model>>& geometries, 
     std::map<std::string, std::shared_ptr<Camera>>& cameras,
-    std::map<std::string, std::shared_ptr<Material>>& materials
+    std::map<std::string, std::shared_ptr<Material>>& materials,
+    GLuint shaderProgram
 ) {
     std::string objectName = node->FindAttribute("name")->Value();
 
@@ -512,22 +513,26 @@ std::shared_ptr<Object> loadObjectDataDAE(
 
         auto geometry = geometries[geometryId];
 
-        auto instanceMaterial = iGeometry->FirstChildElement("bind_material")->FirstChildElement("technique_common")->FirstChildElement("instance_material");
+        if(auto bindMaterial = iGeometry->FirstChildElement("bind_material")) {
+            auto instanceMaterial = bindMaterial->FirstChildElement("technique_common")->FirstChildElement("instance_material");
 
-        std::string materialId = instanceMaterial->FindAttribute("target")->Value();
+            std::string materialId = instanceMaterial->FindAttribute("target")->Value();
 
-        auto material = materials[materialId];
+            auto material = materials[materialId];
 
-        if (material == nullptr) {
-            throw std::runtime_error("Could not find material " + materialId);
+            if (material == nullptr) {
+                throw std::runtime_error("Could not find material " + materialId);
+            }
+
+            object->attachComponent(pepng::makeRenderer(geometry, material));
+        } else {
+            object->attachComponent(pepng::makeRenderer(geometry, pepng::makeMaterial(shaderProgram, pepng::makeTexture())));
         }
-
-        object->attachComponent(pepng::makeRenderer(geometry, material));
     }
 
     std::cout << "Loaded object: " << objectName << std::endl;
 
-    object->children = pepng::loadObjectsDAE(node, geometries, cameras, materials);
+    object->children = pepng::loadObjectsDAE(node, geometries, cameras, materials, shaderProgram);
 
     return object;
 }
@@ -536,14 +541,15 @@ std::vector<std::shared_ptr<Object>> pepng::loadObjectsDAE(
     tinyxml2::XMLElement* node, 
     std::map<std::string, std::shared_ptr<Model>>& geometries, 
     std::map<std::string, std::shared_ptr<Camera>>& cameras,
-    std::map<std::string, std::shared_ptr<Material>>& materials
+    std::map<std::string, std::shared_ptr<Material>>& materials,
+    GLuint shaderProgram
 ) {
     std::vector<std::shared_ptr<Object>> objects;
 
     auto objNode = node->FirstChildElement("node");
 
     while(objNode != nullptr) {
-        objects.push_back(loadObjectDataDAE(objNode, geometries, cameras, materials));
+        objects.push_back(loadObjectDataDAE(objNode, geometries, cameras, materials, shaderProgram));
 
         objNode = objNode->NextSiblingElement("node");
     }
@@ -555,7 +561,8 @@ std::map<std::string, std::shared_ptr<Object>> pepng::loadScenesDAE(
     tinyxml2::XMLElement* libraryScenes, 
     std::map<std::string, std::shared_ptr<Model>>& geometries, 
     std::map<std::string, std::shared_ptr<Camera>>& cameras,
-    std::map<std::string, std::shared_ptr<Material>>& materials
+    std::map<std::string, std::shared_ptr<Material>>& materials,
+    GLuint shaderProgram
 ) {
     std::map<std::string, std::shared_ptr<Object>> scenes;
 
@@ -568,7 +575,7 @@ std::map<std::string, std::shared_ptr<Object>> pepng::loadScenesDAE(
 
         sceneObj->attachComponent(pepng::makeTransform());
 
-        sceneObj->children = loadObjectsDAE(scene, geometries, cameras, materials);
+        sceneObj->children = loadObjectsDAE(scene, geometries, cameras, materials, shaderProgram);
 
         scenes[sceneName] = sceneObj;
 
@@ -610,7 +617,7 @@ void pepng::loadObjectDAE(
 
     auto geometries = futureGeometries.get();
 
-    auto scenes = loadScenesDAE(root->FirstChildElement("library_visual_scenes"), geometries, cameras, materials);
+    auto scenes = loadScenesDAE(root->FirstChildElement("library_visual_scenes"), geometries, cameras, materials, shaderProgram);
 
     for(auto scene : scenes) {
         function(scene.second);
