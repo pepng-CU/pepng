@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
         )
     };
 
-    pepng::load(
+    pepng::loadObjectDAE(
         modelpath / "pa1/scene.dae", 
         std::function([](std::shared_ptr<Object> object) {
             object->attachComponent(pepng::makeSelector());
