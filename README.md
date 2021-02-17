@@ -1,4 +1,4 @@
-# PEPNG
+# PEPNG - Group 9
 
 | Student ID | First Name | Last Name |
 | ---        | ---        | ---       |
