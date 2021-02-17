@@ -30,6 +30,9 @@
 *.out
 *.app
 
+# ImGui ini
+imgui.ini
+
 CMakeCache.txt
 build
 CMakeFiles
