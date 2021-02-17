@@ -42,7 +42,6 @@ include(BuildGLM)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/imgui-cmake)
 
-set(BUILD_TESTS OFF)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/tinyxml2)
 
