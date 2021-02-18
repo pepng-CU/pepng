@@ -129,15 +129,39 @@ int main(int argc, char *argv[]) {
         pepng::makeShader(shaderpath / "object/fragment.glsl", GL_FRAGMENT_SHADER)
     );
 
+    glUseProgram(shaderProgram);
+
+    glUniform1i(glGetUniformLocation(shaderProgram, "u_texture"), 0);
+    glUniform1i(glGetUniformLocation(shaderProgram, "u_shadow"), 1);
+
     static auto lineShaderProgram = pepng::makeShaderProgram(
         pepng::makeShader(shaderpath / "line/vertex.glsl", GL_VERTEX_SHADER),
         pepng::makeShader(shaderpath / "line/fragment.glsl", GL_FRAGMENT_SHADER)
+    );
+
+    static auto shadowShaderProgram = pepng::makeShaderProgram(
+        pepng::makeShader(shaderpath / "shadow/vertex.glsl", GL_VERTEX_SHADER),
+        pepng::makeShader(shaderpath / "shadow/fragment.glsl", GL_FRAGMENT_SHADER)
+    );
+
+    static auto textureShaderProgram = pepng::makeShaderProgram(
+        pepng::makeShader(shaderpath / "texture/vertex.glsl", GL_VERTEX_SHADER),
+        pepng::makeShader(shaderpath / "texture/fragment.glsl", GL_FRAGMENT_SHADER)
     );
 
     /**
      * Objects
      */
     auto modelpath = pepng::getFolderPath("models");
+
+    auto light = pepng::makeObject("Light");
+
+    light
+        ->attachComponent(pepng::makeCameraTransform(
+            glm::vec3(0.0f, -30.0f, 0.0f),
+            glm::vec3(265.0f, 0.0f, 0.0f)
+        ))
+        ->attachComponent(pepng::makeLight(shadowShaderProgram, glm::vec3(1.0f)));
 
     static std::vector<std::shared_ptr<Object>> objects {
         pepng::makeAxes(
@@ -156,7 +180,8 @@ int main(int argc, char *argv[]) {
             ), 
             lineShaderProgram, 
             129
-        )
+        ),
+        light
     };
 
     pepng::load(
@@ -223,8 +248,6 @@ int main(int argc, char *argv[]) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     while(!glfwWindowShouldClose(window)) {
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
         /**
          * Update
          */
@@ -233,8 +256,25 @@ int main(int argc, char *argv[]) {
         }
 
         /**
+         * Shadow
+         */
+        for(auto light : Light::lights) {
+            if(light->isActive) {
+                light->initFBO();
+
+                for(auto object : objects) {
+                    object->render(light->shaderProgram);
+                }
+
+                light->updateFBO();
+            }
+        }
+
+        /**
          * Render
          */
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
         for(auto camera : Camera::cameras) {
             if(camera->isActive) {
                 camera->viewport->render(windowDimension);

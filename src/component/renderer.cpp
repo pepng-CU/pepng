@@ -20,7 +20,7 @@ std::shared_ptr<Renderer> pepng::makeRenderer(std::shared_ptr<Model> model, std:
     return Renderer::makeRenderer(model, material, renderMode);
 }
 
-void Renderer::render(std::shared_ptr<WithComponents> parent) {
+void Renderer::render(std::shared_ptr<WithComponents> parent, GLuint shaderProgram) {
     if(!this->model->isInit) {
         this->model->delayedInit();
     }
@@ -29,13 +29,11 @@ void Renderer::render(std::shared_ptr<WithComponents> parent) {
         return;
     }
 
-    auto shaderProgram = this->material->getShaderProgram();
-
     glUseProgram(shaderProgram);
+    
+    glActiveTexture(GL_TEXTURE0);
 
     glBindTexture(GL_TEXTURE_2D, this->material->getTexture());
-
-    Camera::currentCamera->render(shaderProgram);
 
     auto transform = parent->getComponent<Transform>();
 
@@ -80,6 +78,17 @@ void Renderer::render(std::shared_ptr<WithComponents> parent) {
             this->model->count
         );
     }
+}
+
+void Renderer::render(std::shared_ptr<WithComponents> parent) {
+    auto shaderProgram = this->material->getShaderProgram();
+
+    glUseProgram(shaderProgram);
+
+    Camera::currentCamera->render(shaderProgram);
+    Light::lights.at(0)->render(shaderProgram);
+
+    this->render(parent, shaderProgram);
 }
 
 void Renderer::imgui() {

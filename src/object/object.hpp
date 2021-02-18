@@ -9,6 +9,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "../component/transform.hpp"
+#include "../component/renderer.hpp"
 
 class Object : public WithComponents {
     public:
@@ -25,6 +26,8 @@ class Object : public WithComponents {
         virtual void update();
 
         virtual void render();
+
+        void render(GLuint shaderProgram);
 
         virtual std::ostream& operatorOstream(std::ostream& os) const override;
 

@@ -2,6 +2,7 @@
 
 #include "camera.hpp"
 #include "fps.hpp"
+#include "light.hpp"
 #include "renderer.hpp"
 #include "selector.hpp"
 #include "transform.hpp"
