@@ -144,11 +144,6 @@ int main(int argc, char *argv[]) {
         pepng::makeShader(shaderpath / "shadow/fragment.glsl", GL_FRAGMENT_SHADER)
     );
 
-    static auto textureShaderProgram = pepng::makeShaderProgram(
-        pepng::makeShader(shaderpath / "texture/vertex.glsl", GL_VERTEX_SHADER),
-        pepng::makeShader(shaderpath / "texture/fragment.glsl", GL_FRAGMENT_SHADER)
-    );
-
     /**
      * Objects
      */
