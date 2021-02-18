@@ -21,7 +21,7 @@ void Texture::delayedInit() {
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->width, this->height, 0, GL_RGB, GL_UNSIGNED_BYTE, this->image);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->width, this->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, this->image);
 
     stbi_image_free(this->image);
 }
@@ -38,7 +38,7 @@ std::shared_ptr<Texture> Texture::makeTexture(const std::filesystem::path& fileP
     stbi_set_flip_vertically_on_load_thread(true);
 
     int numComponents;
-    texture->image = stbi_load(filePathString.c_str(), &texture->width, &texture->height, &numComponents, STBI_rgb);
+    texture->image = stbi_load(filePathString.c_str(), &texture->width, &texture->height, &numComponents, STBI_rgb_alpha);
 
     if (texture->image == nullptr){
         throw std::runtime_error("Cannot load texture: " + filePath.string());
