@@ -1,6 +1,10 @@
 #include "shader.hpp"
 
 const std::string pepng::readShader(std::filesystem::path filepath) {
+    if(!std::filesystem::exists(filepath)) {
+        throw std::runtime_error("Could not find shader: " + filepath.string());
+    }
+
     std::ifstream in(filepath);
     
     std::string contents((std::istreambuf_iterator<char>(in)), 
