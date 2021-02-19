@@ -3,7 +3,19 @@
 #include "transformer.hpp"
 #include "renderer.hpp"
 
-Selector::Selector() : Component("Selector"), index(0), renderMode(GL_TRIANGLES), needsUpdate(true) {}
+Selector::Selector() : 
+    Component("Selector"), 
+    index(0), 
+    renderMode(GL_TRIANGLES), 
+    needsUpdate(true) 
+{}
+
+Selector::Selector(const Selector& selector) :
+    Component(selector),
+    index(selector.index),
+    renderMode(selector.renderMode),
+    needsUpdate(selector.needsUpdate)
+{}
 
 std::shared_ptr<Selector> Selector::makeSelector() {
     std::shared_ptr<Selector> selector(new Selector());
@@ -15,14 +27,24 @@ std::shared_ptr<Selector> pepng::makeSelector() {
     return Selector::makeSelector();
 }
 
-void Selector::dfsSwitch(std::shared_ptr<Object> object, int& index) {
-    if(auto transform = object->getComponent<Transformer>()) {
-        transform->isActive = index == this->index;
-    }
+std::shared_ptr<Component> Selector::clone() {
+    return this->clone1();
+}
 
-    if(auto renderer = object->getComponent<Renderer>()) {
-        renderer->renderMode = this->renderMode;
-    }
+std::shared_ptr<Selector> Selector::clone1() {
+    std::shared_ptr<Selector> renderer(new Selector(*this));
+
+    return renderer;
+}
+
+void Selector::dfsSwitch(std::shared_ptr<Object> object, int& index) {
+    try {
+        object->getComponent<Transformer>()->isActive = index == this->index;
+    } catch(...) {}
+
+    try {
+        object->getComponent<Renderer>()->renderMode = this->renderMode;
+    } catch(...) {}
 
     for(auto child : object->children) {
         dfsSwitch(child, ++index);

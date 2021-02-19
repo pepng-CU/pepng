@@ -5,6 +5,11 @@ Component::Component(std::string name) :
     isActive(true)
 {}
 
+Component::Component(const Component& component) : 
+    name(component.name),
+    isActive(component.isActive)
+{}
+
 std::string Component::getName() {
     return this->name;
 }

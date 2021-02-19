@@ -72,8 +72,12 @@ class Model : public std::enable_shared_from_this<Model>, public DelayedInit  {
             return shared_from_this();
         }
 
+        virtual std::shared_ptr<DelayedInit> clone() override;
+        virtual std::shared_ptr<Model> clone1();
+
     private:
         Model();
+        Model(const Model& model);
 
         // Keeps count of the number of faces.
         int count;

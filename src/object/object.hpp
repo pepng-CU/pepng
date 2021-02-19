@@ -30,6 +30,8 @@ class Object : public WithComponents {
          */
         static std::shared_ptr<Object> makeObject(std::string name);
 
+        virtual std::shared_ptr<Object> clone();
+
         /**
          * Attaches a child to this object.
          */
@@ -47,6 +49,7 @@ class Object : public WithComponents {
 
     protected:
         Object(std::string name);
+        Object(const Object& object);
 };
 
 namespace pepng {

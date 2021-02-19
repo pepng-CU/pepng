@@ -25,7 +25,7 @@ class Renderer : public Component {
          * Pointer to the material.
          */
         std::shared_ptr<Material> material;
-        
+
         /**
          * Shared_ptr constructor for Renderer.
          */
@@ -33,8 +33,12 @@ class Renderer : public Component {
 
         virtual void render(std::shared_ptr<WithComponents> object) override;
         virtual void imgui() override;
+
+        virtual std::shared_ptr<Component> clone() override;
+        virtual std::shared_ptr<Renderer> clone1();
     private:
         Renderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum renderMode);
+        Renderer(const Renderer& renderer);
 };
 
 namespace pepng {

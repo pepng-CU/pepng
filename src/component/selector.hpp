@@ -32,8 +32,13 @@ class Selector : public Component {
         virtual void update(std::shared_ptr<WithComponents> parent) override;
 
         virtual void imgui() override;
+
+        virtual std::shared_ptr<Component> clone() override;
+
+        virtual std::shared_ptr<Selector> clone1();
     private:
         Selector();
+        Selector(const Selector& selector);
 
         void dfsSwitch(std::shared_ptr<Object> object, int& index);
 

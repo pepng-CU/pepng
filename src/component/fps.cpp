@@ -8,6 +8,12 @@ FPS::FPS(float panSpeed, float rotationSpeed) :
     rotationSpeed(rotationSpeed)
 {}
 
+FPS::FPS(const FPS& fps) : 
+    Component(fps),
+    panSpeed(fps.panSpeed),
+    rotationSpeed(fps.rotationSpeed)
+{}
+
 std::shared_ptr<FPS> FPS::makeFPS(float panSpeed, float rotationSpeed) {
     std::shared_ptr<FPS> fps(new FPS(panSpeed, rotationSpeed));
 
@@ -16,6 +22,16 @@ std::shared_ptr<FPS> FPS::makeFPS(float panSpeed, float rotationSpeed) {
 
 std::shared_ptr<FPS> pepng::makeFPS(float panSpeed, float rotationSpeed) {
     return FPS::makeFPS(panSpeed, rotationSpeed);
+}
+
+std::shared_ptr<Component> FPS::clone() {
+    return this->clone1();
+}
+
+std::shared_ptr<FPS> FPS::clone1() {
+    std::shared_ptr<FPS> fps(new FPS(*this));
+
+    return fps;
 }
 
 void FPS::update(std::shared_ptr<WithComponents> parent) {

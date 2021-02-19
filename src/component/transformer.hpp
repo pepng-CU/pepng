@@ -12,8 +12,13 @@ class Transformer : public Component {
         virtual void update(std::shared_ptr<WithComponents> parent) override;
 
         virtual void imgui() override;
+
+        virtual std::shared_ptr<Component> clone() override;
+
+        virtual std::shared_ptr<Transformer> clone1();
     private:
         Transformer(float positionSpeed, float rotationSpeed, float scaleSpeed);
+        Transformer(const Transformer& transformer);
 
         /**
          * The translation speed to apply.

@@ -2,11 +2,27 @@
 #include "../component/renderer.hpp"
 
 Object::Object(std::string name) : 
-    name(name) 
+    WithComponents(),
+    name(name)
 {}
+
+Object::Object(const Object& object) : 
+    WithComponents(object),
+    name(object.name)
+{
+    for(auto child : object.children) {
+        this->children.push_back(child->clone());
+    }
+}
 
 std::shared_ptr<Object> Object::makeObject(std::string name) {
     std::shared_ptr<Object> object(new Object(name));
+
+    return object;
+}
+
+std::shared_ptr<Object> Object::clone() {
+    std::shared_ptr<Object> object(new Object(*this));
 
     return object;
 }

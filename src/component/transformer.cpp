@@ -9,6 +9,13 @@ Transformer::Transformer(float positionSpeed, float rotationSpeed, float scaleSp
     scaleSpeed(scaleSpeed)
 {}
 
+Transformer::Transformer(const Transformer& transformer) :
+    Component(transformer),
+    positionSpeed(transformer.positionSpeed),
+    rotationSpeed(transformer.rotationSpeed),
+    scaleSpeed(transformer.scaleSpeed)
+{}
+
 std::shared_ptr<Transformer> Transformer::makeTransformer(float positionSpeed, float rotationSpeed, float scaleSpeed) {
     std::shared_ptr<Transformer> transformer(new Transformer(positionSpeed, rotationSpeed, scaleSpeed));
 
@@ -17,6 +24,16 @@ std::shared_ptr<Transformer> Transformer::makeTransformer(float positionSpeed, f
 
 std::shared_ptr<Transformer> pepng::makeTransformer(float positionSpeed, float rotationSpeed, float scaleSpeed) {
     return Transformer::makeTransformer(positionSpeed, rotationSpeed, scaleSpeed);
+}
+
+std::shared_ptr<Component> Transformer::clone() {
+    return this->clone1();
+}
+
+std::shared_ptr<Transformer> Transformer::clone1() {
+    std::shared_ptr<Transformer> transformer(new Transformer(*this));
+
+    return transformer;
 }
 
 void Transformer::update(std::shared_ptr<WithComponents> parent) {

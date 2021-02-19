@@ -24,8 +24,6 @@ class Component : public WithImGui {
          */
         bool isActive;
 
-        Component(std::string name);
-
         /**
          * Accessor for the component name.
          */
@@ -45,6 +43,13 @@ class Component : public WithImGui {
         virtual void update(std::shared_ptr<WithComponents> parent) {};
 
         virtual void imgui() override;
+
+        virtual std::shared_ptr<Component> clone() = 0;
+
+    protected:
+        Component(std::string name);
+
+        Component(const Component& component);
 
     private:
         /**

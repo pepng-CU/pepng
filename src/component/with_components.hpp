@@ -70,6 +70,10 @@ class WithComponents : public WithImGui, public std::enable_shared_from_this<Wit
             return this->components;
         }
 
+    protected:
+        WithComponents();
+        WithComponents(const WithComponents& withComponents);
+
     private:
         /**
          * Components attached to this.

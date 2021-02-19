@@ -5,8 +5,14 @@ Camera::Camera(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> p
     viewport(viewport),
     projection(projection),
     parent(nullptr)
-{
-}
+{}
+
+Camera::Camera(const Camera& camera) :
+    Component(camera),
+    viewport(camera.viewport->clone()),
+    projection(camera.projection->clone()),
+    parent(camera.parent)
+{}
 
 std::shared_ptr<Camera> Camera::currentCamera = nullptr;
 std::vector<std::shared_ptr<Camera>> Camera::cameras;
@@ -21,6 +27,16 @@ std::shared_ptr<Camera> Camera::makeCamera(std::shared_ptr<Viewport> viewport, s
 
 std::shared_ptr<Camera> pepng::makeCamera(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection) {
     return Camera::makeCamera(viewport, projection);
+}
+
+std::shared_ptr<Component> Camera::clone() {
+    return this->clone1();
+}
+
+std::shared_ptr<Camera> Camera::clone1() {
+    std::shared_ptr<Camera> camera(new Camera(*this));
+
+    return camera;
 }
 
 void Camera::init(std::shared_ptr<WithComponents> parent) {
@@ -65,7 +81,17 @@ void Camera::imgui() {
     this->projection->imgui();
 }
 
-Viewport::Viewport(glm::vec2 position, glm::vec2 scale) : position(position), scale(scale), isActive(true) {}
+Viewport::Viewport(glm::vec2 position, glm::vec2 scale) : 
+    position(position), 
+    scale(scale), 
+    isActive(true) 
+{}
+
+Viewport::Viewport(const Viewport& viewport) : 
+    position(viewport.position), 
+    scale(viewport.scale),
+    isActive(viewport.isActive) 
+{}
 
 std::shared_ptr<Viewport> Viewport::makeViewport(glm::vec2 position, glm::vec2 scale) {
     std::shared_ptr<Viewport> viewport(new Viewport(position, scale));
@@ -75,6 +101,12 @@ std::shared_ptr<Viewport> Viewport::makeViewport(glm::vec2 position, glm::vec2 s
 
 std::shared_ptr<Viewport> pepng::makeViewport(glm::vec2 position, glm::vec2 scale) {
     return Viewport::makeViewport(position, scale);
+}
+
+std::shared_ptr<Viewport> Viewport::clone() {
+    std::shared_ptr<Viewport> viewport(new Viewport(*this));
+
+    return viewport;
 }
 
 bool Viewport::render(glm::vec2 windowDimension) {
@@ -98,12 +130,25 @@ void Viewport::imgui() {
 }
 
 Projection::Projection(float aspect) : aspect(aspect) {}
+Projection::Projection(const Projection& projection) : aspect(projection.aspect) {}
 
 void Projection::setAspect(float aspect) {
     this->aspect = aspect;
 }
 
-Perspective::Perspective(float fovy, float aspect, float near, float far) : Projection(aspect), fovy(fovy), near(near), far(far) {}
+Perspective::Perspective(float fovy, float aspect, float near, float far) : 
+    Projection(aspect), 
+    fovy(fovy),
+    near(near), 
+    far(far) 
+{}
+
+Perspective::Perspective(const Perspective& perspective) : 
+    Projection(perspective),
+    fovy(perspective.fovy),
+    near(perspective.near),
+    far(perspective.far)
+{}
 
 std::shared_ptr<Perspective> Perspective::makePerspective(float fovy, float aspect, float near, float far) {
     std::shared_ptr<Perspective> perspective(new Perspective(fovy, aspect, near, far));
@@ -113,6 +158,16 @@ std::shared_ptr<Perspective> Perspective::makePerspective(float fovy, float aspe
 
 std::shared_ptr<Perspective> pepng::makePerspective(float fovy, float aspect, float near, float far) {
     return Perspective::makePerspective(fovy, aspect, near, far);
+}
+
+std::shared_ptr<Projection> Perspective::clone() {
+    return this->clone1();
+}
+
+std::shared_ptr<Perspective> Perspective::clone1() {
+    std::shared_ptr<Perspective> perspective(new Perspective(*this));
+
+    return perspective;
 }
 
 glm::mat4 Perspective::getMatrix() {

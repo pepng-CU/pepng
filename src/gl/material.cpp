@@ -5,8 +5,19 @@ Material::Material(GLuint shaderProgram, std::shared_ptr<Texture> texture) :
     texture(texture)
 {}
 
+Material::Material(const Material& material) : 
+    shaderProgram(material.shaderProgram),
+    texture(material.texture)
+{}
+
 std::shared_ptr<Material> Material::makeMaterial(GLuint shaderProgram, std::shared_ptr<Texture> texture) {
     std::shared_ptr<Material> material(new Material(shaderProgram, texture));
+
+    return material;
+}
+
+std::shared_ptr<Material> Material::clone() {
+    std::shared_ptr<Material> material(new Material(*this));
 
     return material;
 }

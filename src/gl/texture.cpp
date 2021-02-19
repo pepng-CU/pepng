@@ -1,5 +1,22 @@
 #include "texture.hpp"
 
+Texture::Texture() :
+    DelayedInit(),
+    textureIndex(0),
+    width(0),
+    height(0),
+    image(nullptr)
+{}
+
+// TODO: Make a deep clone of the image?
+Texture::Texture(const Texture& texture) : 
+    DelayedInit(texture),
+    textureIndex(texture.textureIndex),
+    width(texture.width),
+    height(texture.height),
+    image(texture.image)
+{}
+
 GLuint Texture::getIndex() {
     if(!this->isInit) {
         this->delayedInit();
@@ -52,6 +69,16 @@ std::shared_ptr<Texture> Texture::makeTexture() {
 
     texture->isInit = true;
     texture->textureIndex = 1;
+
+    return texture;
+}
+
+std::shared_ptr<DelayedInit> Texture::clone() {
+    return this->clone1();
+}
+
+std::shared_ptr<Texture> Texture::clone1() {
+    std::shared_ptr<Texture> texture(new Texture(*this));
 
     return texture;
 }

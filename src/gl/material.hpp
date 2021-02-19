@@ -25,8 +25,11 @@ class Material {
          */
         GLuint getTexture();
 
+        virtual std::shared_ptr<Material> clone();
+
     private:
         Material(GLuint shaderProgram, std::shared_ptr<Texture> texture);
+        Material(const Material& material);
 
         /**
          * The OpenGL shaderProgram used.

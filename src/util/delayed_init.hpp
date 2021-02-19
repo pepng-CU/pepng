@@ -8,8 +8,6 @@
  */
 class DelayedInit {
     public:
-        DelayedInit() : isInit(false) {}
-
         /**
          * Delayed the initialization to the main thread.
          */
@@ -32,6 +30,8 @@ class DelayedInit {
             this->delayedChildren.push_back(delayedInit);
         }
 
+        virtual std::shared_ptr<DelayedInit> clone() = 0;
+
     protected:
         /**
          * Variable to check if the component is init.
@@ -42,4 +42,11 @@ class DelayedInit {
          * Child delayed components.
          */
         std::vector<std::shared_ptr<DelayedInit>> delayedChildren;
+
+        DelayedInit() : isInit(false) {}
+        DelayedInit(const DelayedInit& delayedInit) : isInit(delayedInit.isInit) {
+            for(auto child : delayedInit.delayedChildren) {
+                this->delayedChildren.push_back(child->clone());
+            }
+        }
 };  

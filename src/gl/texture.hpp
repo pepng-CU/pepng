@@ -31,8 +31,13 @@ class Texture : public DelayedInit {
          */
         GLuint getIndex();
 
+        virtual std::shared_ptr<DelayedInit> clone();
+
+        virtual std::shared_ptr<Texture> clone1();
+
     private:
-        Texture() {};
+        Texture();
+        Texture(const Texture& texutre);
 
         /**
          * The OpenGL texture index.

@@ -47,9 +47,17 @@ class Buffer : public DelayedInit {
             }
         }
 
+        virtual std::shared_ptr<DelayedInit> clone() override {
+            return this->clone1();
+        }
+
+        virtual std::shared_ptr<Buffer> clone1() {
+            std::shared_ptr<Buffer> buffer(new Buffer(*this));
+
+            return buffer;
+        }
+
     private:
-        Buffer(std::vector<T> vectors, GLenum type, int index = -1, int size = -1) : vectors(vectors), type(type), index(index), size(size) {}
-        
         /**
          * The OpenGL buffer type.
          */
@@ -66,6 +74,24 @@ class Buffer : public DelayedInit {
          * The raw vector of points for the buffer.
          */
         std::vector<T> vectors;
+
+        Buffer(std::vector<T> vectors, GLenum type, int index = -1, int size = -1) : 
+            vectors(vectors), 
+            type(type), 
+            index(index), 
+            size(size) 
+        {}
+
+        Buffer(const Buffer& buffer) :
+            DelayedInit(buffer),
+            type(buffer.type),
+            index(buffer.index),
+            size(buffer.size)
+        {
+            for(auto e : buffer.vectors) {
+                this->vectors.push_back(e);
+            }
+        }
 };
 
 namespace pepng {

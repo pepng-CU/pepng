@@ -41,8 +41,11 @@ class Viewport : public WithImGui {
         bool render(glm::vec2 windowDimension);
 
         virtual void imgui() override;
+
+        virtual std::shared_ptr<Viewport> clone();
     private:
         Viewport(glm::vec2 position, glm::vec2 scale);
+        Viewport(const Viewport& viewport);
 };
 
 /**
@@ -50,7 +53,7 @@ class Viewport : public WithImGui {
  */
 class Projection : public WithImGui {
     public:
-        Projection(float aspect);
+        virtual std::shared_ptr<Projection> clone() = 0;
 
         /**
          * Generates the projection matrix.
@@ -63,7 +66,11 @@ class Projection : public WithImGui {
          * @param aspect The aspect ratio to set.
          */
         void setAspect(float aspect);
+        
     protected:
+        Projection(float aspect);
+        Projection(const Projection& projection);
+
         /**
          * The current window aspect ratio.
          */
@@ -80,12 +87,17 @@ class Perspective : public Projection {
          */
         static std::shared_ptr<Perspective> makePerspective(float fovy, float aspect, float near, float far);
 
+        virtual std::shared_ptr<Projection> clone() override;
+
+        virtual std::shared_ptr<Perspective> clone1();
+
         virtual glm::mat4 getMatrix() override;
 
         virtual void imgui() override;
 
     private:
         Perspective(float fovy, float aspect, float near, float far);
+        Perspective(const Perspective& perspective);
 
         /**
          * The field of view of the camera.
@@ -121,6 +133,10 @@ class Camera : public Component {
          */
         static std::shared_ptr<Camera> makeCamera(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection);
 
+        virtual std::shared_ptr<Component> clone() override;
+
+        virtual std::shared_ptr<Camera> clone1();
+
         /**
          * Pointer to the projection used for the camera.
          */
@@ -145,6 +161,7 @@ class Camera : public Component {
         std::shared_ptr<WithComponents> parent;
 
         Camera(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection);
+        Camera(const Camera& camera);
 };
 
 namespace pepng {

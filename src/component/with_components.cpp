@@ -1,5 +1,12 @@
 #include "with_components.hpp"
 
+WithComponents::WithComponents() {}
+WithComponents::WithComponents(const WithComponents& withComponents) {
+    for(auto component : withComponents.components) {
+        this->components.push_back(component->clone());
+    }
+}
+
 std::shared_ptr<WithComponents> WithComponents::attachComponent(std::shared_ptr<Component> component) {
     this->components.push_back(component);
 
