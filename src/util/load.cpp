@@ -148,6 +148,10 @@ std::map<std::string, std::future<std::shared_ptr<Texture>>> pepng::loadTextures
 ) {
     std::map<std::string, std::future<std::shared_ptr<Texture>>> textures;
 
+    if(libraryImages == nullptr) {
+        return textures;
+    }
+
     auto texture = libraryImages->FirstChildElement("image");
 
     while(texture != nullptr) {
@@ -174,6 +178,10 @@ std::map<std::string, std::shared_ptr<Texture>> pepng::loadEffectDAE(
     std::map<std::string, std::future<std::shared_ptr<Texture>>>& textures
 ) {
     std::map<std::string, std::shared_ptr<Texture>> effects;
+
+    if(libraryEffects == nullptr) {
+        return effects;
+    }
 
     auto effect = libraryEffects->FirstChildElement("effect");
 
@@ -232,6 +240,10 @@ std::map<std::string, std::shared_ptr<Material>> pepng::loadMaterialsDAE(
 ) {
     std::map<std::string, std::shared_ptr<Material>> materials;
 
+    if(libraryMaterials == nullptr) {
+        return materials;
+    }
+
     auto material = libraryMaterials->FirstChildElement("material");
 
     while(material != nullptr) {
@@ -262,6 +274,10 @@ std::map<std::string, std::shared_ptr<Camera>> pepng::loadCamerasDAE(
     tinyxml2::XMLElement* libraryCameras
 ) {
     std::map<std::string, std::shared_ptr<Camera>> cameras;
+
+    if(libraryCameras == nullptr) {
+        return cameras;
+    }
 
     auto camera = libraryCameras->FirstChildElement("camera");
 
@@ -300,6 +316,10 @@ std::map<std::string, std::shared_ptr<Model>> pepng::loadGeometriesDAE(
     tinyxml2::XMLElement* libraryGeometries
 ) {
     std::map<std::string, std::shared_ptr<Model>> geometries;
+
+    if(libraryGeometries == nullptr) {
+        return geometries;
+    }
 
     auto geometry = libraryGeometries->FirstChildElement("geometry");
 
