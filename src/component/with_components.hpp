@@ -60,7 +60,7 @@ class WithComponents : public WithImGui, public std::enable_shared_from_this<Wit
                 }
             }
 
-            return nullptr;
+            throw std::runtime_error("Could not find Component.");
         }
 
         /**
