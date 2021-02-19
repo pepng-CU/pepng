@@ -2,6 +2,9 @@
 
 #include "component.hpp"
 
+/**
+ * Component that applies IO based transformation on Transform.
+ */
 class Transformer : public Component {
     public:
         static std::shared_ptr<Transformer> makeTransformer(float positionSpeed = 0.1f, float rotationSpeed = 1.0f, float scaleSpeed = 0.01f);
@@ -12,8 +15,17 @@ class Transformer : public Component {
     private:
         Transformer(float positionSpeed, float rotationSpeed, float scaleSpeed);
 
+        /**
+         * The translation speed to apply.
+         */
         float positionSpeed;
+        /**
+         * The scale speed to apply.
+         */
         float scaleSpeed;
+        /**
+         * The rotation speed to apply.
+         */
         float rotationSpeed;
 };
 

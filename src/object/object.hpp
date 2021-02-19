@@ -10,14 +10,29 @@
 
 #include "../component/transform.hpp"
 
+/**
+ * A generic hold of components with child/parent relationship.
+ */
 class Object : public WithComponents {
     public:
+        /**
+         * The name of the object.
+         */
         std::string name;
 
+        /**
+         * The children attached to this object.
+         */
         std::vector<std::shared_ptr<Object>> children;
 
+        /**
+         * Shared_ptr constructor for Object.
+         */
         static std::shared_ptr<Object> makeObject(std::string name);
 
+        /**
+         * Attaches a child to this object.
+         */
         std::shared_ptr<Object> attachChild(std::shared_ptr<Object> object);
 
         virtual void imgui();

@@ -9,12 +9,24 @@
 
 class Object;
 
+/**
+ * Component that select the currently active object.
+ */
 class Selector : public Component {
     public:
+        /**
+         * The currently select child (0 is the current parent).
+         */
         int index;
 
+        /**
+         * The OpenGL render mode that children with renderers will render with.
+         */
         GLenum renderMode;
 
+        /**
+         * Shared_ptr constructor for Selector.
+         */
         static std::shared_ptr<Selector> makeSelector();
 
         virtual void update(std::shared_ptr<WithComponents> parent) override;

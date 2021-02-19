@@ -31,6 +31,9 @@ namespace pepng {
      */
     GLuint makeShader(std::filesystem::path filepath, GLenum shaderType);
 
+    /**
+     * Creates a shader program from a list of shaders.
+     */
     template<typename... Args>
     GLuint makeShaderProgram(Args... shaders) {
         GLuint shaderProgram = glCreateProgram();

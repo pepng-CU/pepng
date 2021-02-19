@@ -10,6 +10,11 @@
 
 #include "component.hpp"
 
+/**
+ * Component to store position, scale, and rotation.
+ * 
+ * Helper classes to generate the various matricies for these components.
+ */
 class Transform : public Component {
     public:
         glm::vec3 position;

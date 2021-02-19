@@ -6,15 +6,24 @@
 
 #include "../util/delayed_init.hpp"
 
+/**
+ * Generic OpenGL buffer.
+ */
 template <typename T>
 class Buffer : public DelayedInit {
     public:
+        /**
+         * Shared_ptr constructor of Buffer.
+         */
         static std::shared_ptr<Buffer<T>> makeBuffer(std::vector<T> vectors, GLenum type, int index = -1, int size = -1) {
             std::shared_ptr<Buffer<T>> buffer(new Buffer<T>(vectors, type, index, size));
 
             return buffer;
         }
 
+        /**
+         * Generates the OpenGL buffer (this is delayed to run when back on parent thread).
+         */
         virtual void delayedInit() override {
             DelayedInit::delayedInit();
 
@@ -41,9 +50,21 @@ class Buffer : public DelayedInit {
     private:
         Buffer(std::vector<T> vectors, GLenum type, int index = -1, int size = -1) : vectors(vectors), type(type), index(index), size(size) {}
         
+        /**
+         * The OpenGL buffer type.
+         */
         GLenum type;
+        /**
+         * The vertex attrib pointer index (this is only really used for GL_ARRAY_BUFFER).
+         */
         int index;
+        /**
+         * The buffer type size.
+         */
         int size;
+        /**
+         * The raw vector of points for the buffer.
+         */
         std::vector<T> vectors;
 };
 

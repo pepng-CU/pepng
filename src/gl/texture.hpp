@@ -9,26 +9,49 @@
 
 #include "../util/delayed_init.hpp"
 
+/**
+ * Handler to read/generate textures.
+ */
 class Texture : public DelayedInit {
     public:
+        /**
+         * Default shared_ptr constructor Texture.
+         */
         static std::shared_ptr<Texture> makeTexture();
 
+        /**
+         * Shared_ptr constructor Texture.
+         */
         static std::shared_ptr<Texture> makeTexture(const std::filesystem::path& filePath);
 
         virtual void delayedInit() override;
 
+        /**
+         * Accessor for OpenGL texture index.
+         */
         GLuint getIndex();
 
     private:
-        
         Texture() {};
 
+        /**
+         * The OpenGL texture index.
+         */
         GLuint textureIndex;
 
+        /**
+         * Pointer to STB image array.
+         */
         stbi_uc* image;
 
+        /**
+         * Width of image.
+         */
         int width;
         
+        /**
+         * Height of image.
+         */
         int height;
 };
 
