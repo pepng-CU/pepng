@@ -172,4 +172,22 @@ namespace pepng {
 
         thread.detach();
     }
+
+    /**
+     * Generic load sync class.
+     */
+    template <typename T, typename... Args>
+    void loadSync(
+        std::filesystem::path path, 
+        std::function<void(std::shared_ptr<T>)> function, 
+        Args... args
+    ) {
+        if(!std::filesystem::exists(path)) {
+            throw std::runtime_error("Could not find file: " + path.string());
+        }
+
+        std::thread thread(loadThread<T, Args...>, path, function, args...);
+
+        thread.join();
+    }
 }  
