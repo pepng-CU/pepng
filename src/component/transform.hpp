@@ -10,6 +10,11 @@
 
 #include "component.hpp"
 
+/**
+ * Component to store position, scale, and rotation.
+ * 
+ * Helper classes to generate the various matricies for these components.
+ */
 class Transform : public Component {
     public:
         glm::vec3 position;
@@ -19,8 +24,6 @@ class Transform : public Component {
         static std::shared_ptr<Transform> makeTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
 
         static std::shared_ptr<Transform> makeTransform(glm::vec3 position, glm::quat rotation, glm::vec3 scale);
-
-        static std::shared_ptr<Transform> copyTransform(std::shared_ptr<Transform> transform);
 
         glm::highp_mat4 getScaleMatrix(glm::highp_mat4 &matrix);
 
@@ -79,6 +82,10 @@ class Transform : public Component {
 
         virtual void imgui() override;
 
+        virtual std::shared_ptr<Component> clone() override;
+
+        virtual std::shared_ptr<Transform> clone1();
+
         friend std::ostream& operator<<(std::ostream& os, const Transform& transform);
     protected:
         Transform(const Transform &transform);
@@ -113,8 +120,6 @@ class CameraTransform : public Transform {
 
         static std::shared_ptr<CameraTransform> makeCameraTransform(glm::vec3 position, glm::quat rotation, glm::vec3 scale);
 
-        static std::shared_ptr<CameraTransform> copyCameraTransform(std::shared_ptr<CameraTransform> transform);
-
         virtual glm::quat getRotation() override;
 
         virtual glm::vec3 getForward() override;
@@ -122,8 +127,14 @@ class CameraTransform : public Transform {
         virtual glm::vec3 getUp() override;
 
         virtual glm::vec3 getRight() override;
+
+        virtual std::shared_ptr<Component> clone() override;
+
+        virtual std::shared_ptr<Transform> clone1() override;
+
+        virtual std::shared_ptr<CameraTransform> clone2();
     private:
-        CameraTransform(const Transform &transform);
+        CameraTransform(const CameraTransform &transform);
 
         CameraTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
 
@@ -139,8 +150,4 @@ namespace pepng {
     std::shared_ptr<CameraTransform> makeCameraTransform(glm::vec3 position = glm::vec3(0.0f), glm::vec3 rotation = glm::vec3(0.0f), glm::vec3 scale = glm::vec3(1.0f));
 
     std::shared_ptr<CameraTransform> makeCameraTransform(glm::vec3 position, glm::quat rotation, glm::vec3 scale);
-
-    std::shared_ptr<Transform> copyTransform(std::shared_ptr<Transform> transform);
-
-    std::shared_ptr<CameraTransform> copyCameraTransform(std::shared_ptr<CameraTransform> transform);
 }

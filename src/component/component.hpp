@@ -14,14 +14,24 @@
 
 class WithComponents;
 
+/**
+ * Abstract Component definition that is binded to an object/component holder.
+ */
 class Component : public WithImGui {
     public:
+        /**
+         * Used to check if this component will update.
+         */
         bool isActive;
 
-        Component(std::string name);
-
+        /**
+         * Accessor for the component name.
+         */
         std::string getName();
 
+        /**
+         * Virtual operator<< to allow for child class redefine.
+         */
         virtual std::ostream& operatorOstream(std::ostream& os) const;
 
         friend std::ostream& operator<<(std::ostream& os, const Component& component);
@@ -34,7 +44,17 @@ class Component : public WithImGui {
 
         virtual void imgui() override;
 
+        virtual std::shared_ptr<Component> clone() = 0;
+
+    protected:
+        Component(std::string name);
+
+        Component(const Component& component);
+
     private:
+        /**
+         * Name of the component (the child class will define this in the constructor).
+         */
         std::string name;
 };
 

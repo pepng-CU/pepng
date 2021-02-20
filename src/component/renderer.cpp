@@ -10,6 +10,13 @@ Renderer::Renderer(std::shared_ptr<Model> model, std::shared_ptr<Material> mater
     renderMode(renderMode)
 {}
 
+Renderer::Renderer(const Renderer& renderer) :
+    Component(renderer),
+    model(renderer.model->clone1()),
+    material(renderer.material->clone()),
+    renderMode(renderer.renderMode)
+{}
+
 std::shared_ptr<Renderer> Renderer::makeRenderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum renderMode) {
     std::shared_ptr<Renderer> renderer(new Renderer(model, material, renderMode));
 
@@ -18,6 +25,16 @@ std::shared_ptr<Renderer> Renderer::makeRenderer(std::shared_ptr<Model> model, s
 
 std::shared_ptr<Renderer> pepng::makeRenderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum renderMode) {
     return Renderer::makeRenderer(model, material, renderMode);
+}
+
+std::shared_ptr<Component> Renderer::clone() {
+    return this->clone1();
+}
+
+std::shared_ptr<Renderer> Renderer::clone1() {
+    std::shared_ptr<Renderer> renderer(new Renderer(*this));
+
+    return renderer;
 }
 
 void Renderer::render(std::shared_ptr<WithComponents> parent, GLuint shaderProgram) {

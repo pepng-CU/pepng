@@ -9,6 +9,15 @@ Model::Model() :
     name("Model")
 {}
 
+Model::Model(const Model& model) : 
+    DelayedInit(model),
+    count(model.count),
+    vao(model.vao),
+    offset(model.offset),
+    hasElementArray(model.hasElementArray),
+    name(model.name)
+{}
+
 std::shared_ptr<Model> Model::makeModel() {
     std::shared_ptr<Model> model(new Model());
 
@@ -17,6 +26,16 @@ std::shared_ptr<Model> Model::makeModel() {
 
 std::shared_ptr<Model> pepng::makeModel() {
     return Model::makeModel();
+}
+
+std::shared_ptr<DelayedInit> Model::clone() {
+    return this->clone1();
+}
+
+std::shared_ptr<Model> Model::clone1() {
+    std::shared_ptr<Model> model(new Model(*this));
+
+    return model;
 }
 
 void Model::delayedInit() {

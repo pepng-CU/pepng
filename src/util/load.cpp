@@ -110,8 +110,8 @@ void pepng::loadObjectOBJ(
 ) {
     std::string name = path.filename().string();
     std::shared_ptr<Object> object = pepng::makeObject(name);
-
-    object->attachComponent(pepng::copyTransform(transform));
+    
+    object->attachComponent(transform->clone1());
 
     loadThread(
         path,
@@ -147,6 +147,10 @@ std::map<std::string, std::future<std::shared_ptr<Texture>>> pepng::loadTextures
     std::filesystem::path path
 ) {
     std::map<std::string, std::future<std::shared_ptr<Texture>>> textures;
+
+    if(libraryImages == nullptr) {
+        return textures;
+    }
 
     auto texture = libraryImages->FirstChildElement("image");
 

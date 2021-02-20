@@ -7,12 +7,24 @@
 #include "component.hpp"
 #include "../ui/with_imgui.hpp"
 
+/**
+ * Interface to hold Components.
+ */
 class WithComponents : public WithImGui, public std::enable_shared_from_this<WithComponents> {
     public:
+        /**
+         * Attaches a Component to this.
+         */
         std::shared_ptr<WithComponents> attachComponent(std::shared_ptr<Component> component);
 
+        /**
+         * Updates all the components.
+         */
         void updateComponents();
 
+        /**
+         * Updates the components that need rendering.
+         */
         void renderComponents();
 
         virtual void imgui();
@@ -21,6 +33,9 @@ class WithComponents : public WithImGui, public std::enable_shared_from_this<Wit
 
         friend std::ostream& operator<<(std::ostream& os, const WithComponents& component);
 
+        /**
+         * Generic method to get shared_ptr component of certain type.
+         */
         template<typename T>
         std::vector<std::shared_ptr<T>> getComponents() {
             std::vector<std::shared_ptr<T>> components;
@@ -34,6 +49,9 @@ class WithComponents : public WithImGui, public std::enable_shared_from_this<Wit
             return components;
         }
 
+        /**
+         * Generic method to get component of certain type.
+         */
         template<typename T>
         std::shared_ptr<T> getComponent() {
             for (auto component : this->components) {
@@ -42,14 +60,24 @@ class WithComponents : public WithImGui, public std::enable_shared_from_this<Wit
                 }
             }
 
-            return nullptr;
+            throw std::runtime_error("Could not find Component.");
         }
 
+        /**
+         * Returns all attached components to this.
+         */
         std::vector<std::shared_ptr<Component>> getComponents() {
             return this->components;
         }
 
+    protected:
+        WithComponents();
+        WithComponents(const WithComponents& withComponents);
+
     private:
+        /**
+         * Components attached to this.
+         */
         std::vector<std::shared_ptr<Component>> components;
 };
 

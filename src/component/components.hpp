@@ -1,5 +1,8 @@
 #pragma once
 
+/**
+ * This is the module hpp that you can import for all components.
+ */
 #include "camera.hpp"
 #include "fps.hpp"
 #include "light.hpp"

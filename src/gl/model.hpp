@@ -21,20 +21,43 @@ class Renderer;
 
 class Renderer;
 
+/**
+ * The geometry for a Renderer.
+ * 
+ * This is essentially just a VAO constructor that hold the points.
+ */
 class Model : public std::enable_shared_from_this<Model>, public DelayedInit  {
     public:
         friend Renderer;
 
+        /**
+         * Shared_ptr constructor for Model.
+         */
         static std::shared_ptr<Model> makeModel();
 
+        /**
+         * Mutator for name.
+         */
         std::shared_ptr<Model> setName(std::string name);
 
+        /**
+         * Accessor for name.
+         */
         std::string getName();
 
+        /**
+         * Mutator for the number of indices (if the model uses indices).
+         */
         std::shared_ptr<Model> setCount(unsigned int count);
 
+        /**
+         * Mutator that sets if this uses an element array.
+         */
         std::shared_ptr<Model> setElementArray(bool hasElementArray);
 
+        /**
+         * Calculates the geometry average position as an offset to the object.
+         */
         std::shared_ptr<Model> calculateOffset(std::vector<glm::vec3> vertexArray, std::vector<unsigned int> faceArray);
 
         virtual void delayedInit() override;
@@ -49,8 +72,12 @@ class Model : public std::enable_shared_from_this<Model>, public DelayedInit  {
             return shared_from_this();
         }
 
+        virtual std::shared_ptr<DelayedInit> clone() override;
+        virtual std::shared_ptr<Model> clone1();
+
     private:
         Model();
+        Model(const Model& model);
 
         // Keeps count of the number of faces.
         int count;
