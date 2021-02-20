@@ -66,6 +66,12 @@ void Camera::render(GLuint shaderProgram) {
         throw std::runtime_error(ss.str());
     }
 
+    glUniform3fv(
+        glGetUniformLocation(shaderProgram, "u_camera_pos"),
+        1,
+        glm::value_ptr(transform->position)
+    );
+
     glUniformMatrix4fv(
         glGetUniformLocation(shaderProgram, "u_view"),
         1,

@@ -67,6 +67,18 @@ void Object::update() {
     }
 }
 
+void Object::render(GLuint shaderProgram) {
+    for(auto component : this->getComponents()) {
+        if(auto renderer = std::dynamic_pointer_cast<Renderer>(component)) {
+            renderer->render(shared_from_this(), shaderProgram);
+        }
+    }
+
+    for(auto child : this->children) {
+        child->render(shaderProgram);
+    }
+}
+
 void Object::render() {
     WithComponents::renderComponents();
 

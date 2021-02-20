@@ -9,13 +9,17 @@ uniform mat4 u_world;
 uniform mat4 u_view;
 uniform mat4 u_normal;
 
-out vec2 tex_coord;
-out float light;
+uniform mat4 u_light_space_matrix;
 
-void main(void) {
-    vec3 light_pos = vec3(0.0, 10.0, 1.0);
-    vec4 normal = normalize(transpose(inverse(u_world)) * vec4(a_normal, 1.0));
-    light = normal.y;
+out vec2 tex_coord;
+out vec3 frag_pos;
+out vec3 normal;
+out vec4 frag_pos_light_space;
+
+void main() {
+    frag_pos = vec3(u_world * vec4(a_position, 1.0));
+    normal = normalize(transpose(inverse(mat3(u_world))) * a_normal);
+    frag_pos_light_space = u_light_space_matrix * vec4(frag_pos, 1.0);
     tex_coord = a_tex_coord;
-    gl_Position = u_projection * u_view * u_world * vec4(a_position, 1.0);
+    gl_Position = u_projection * u_view * vec4(frag_pos, 1.0);
 }
