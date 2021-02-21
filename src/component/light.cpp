@@ -6,7 +6,7 @@ Light::Light(GLuint shaderProgram, glm::vec3 color) :
     near(0.1f),
     far(50.0f),
     dimension(10.0f),
-    textureDimension(1024),
+    textureDimension(2048),
     color(color)
 {}
 
@@ -44,7 +44,6 @@ void Light::delayedInit() {
         GL_FLOAT, 
         NULL
     );
-    
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); 

@@ -4,3 +4,4 @@
 #include "axes.hpp"
 #include "camera.hpp"
 #include "grid.hpp"
+#include "texture.hpp"

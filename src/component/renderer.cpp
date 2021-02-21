@@ -96,6 +96,10 @@ void Renderer::render(std::shared_ptr<WithComponents> parent) {
 
     glUseProgram(shaderProgram);
 
+    if(Camera::currentCamera == nullptr) {
+        throw std::runtime_error("No current camera set.");
+    }
+
     Camera::currentCamera->render(shaderProgram);
 
     /**

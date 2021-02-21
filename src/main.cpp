@@ -144,6 +144,16 @@ int main(int argc, char *argv[]) {
         pepng::makeShader(shaderpath / "shadow/fragment.glsl", GL_FRAGMENT_SHADER)
     );
 
+    static auto textureShaderProgram = pepng::makeShaderProgram(
+        pepng::makeShader(shaderpath / "texture/vertex.glsl", GL_VERTEX_SHADER),
+        pepng::makeShader(shaderpath / "texture/fragment.glsl", GL_FRAGMENT_SHADER)
+    );
+
+    glUseProgram(textureShaderProgram);
+
+    glUniform1i(glGetUniformLocation(textureShaderProgram, "u_texture"), 0);
+    glUniform1i(glGetUniformLocation(textureShaderProgram, "u_shadow"), 1);
+
     /**
      * Objects
      */
@@ -153,8 +163,8 @@ int main(int argc, char *argv[]) {
 
     light
         ->attachComponent(pepng::makeCameraTransform(
-            glm::vec3(0.0f, -30.0f, 0.0f),
-            glm::vec3(265.0f, 0.0f, 0.0f)
+            glm::vec3(5.0f, 10.0f, 0.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f)
         ))
         ->attachComponent(pepng::makeLight(shadowShaderProgram, glm::vec3(1.0f)));
 
@@ -180,7 +190,7 @@ int main(int argc, char *argv[]) {
     };
 
     pepng::load(
-        modelpath / "sponza/scene.dae", 
+        modelpath / "lighting/scene.dae", 
         std::function([](std::shared_ptr<Object> object) {
             object->attachComponent(pepng::makeSelector());
 
@@ -233,6 +243,8 @@ int main(int argc, char *argv[]) {
         ->attachDevice(keyboard)
         ->attachDevice(mouse);
 
+    auto textureObj = pepng::makeTextureObj(pepng::makeTransform(), textureShaderProgram);
+
     /**
      * OpenGL
      */
@@ -249,6 +261,8 @@ int main(int argc, char *argv[]) {
         for(auto object : objects) {
             object->update();
         }
+
+        light->getComponent<Transform>()->deltaRotate(glm::vec3(1.0f, 0.0f, 0.0f));
 
         /**
          * Shadow
@@ -283,6 +297,12 @@ int main(int argc, char *argv[]) {
                 }
             }
         }
+
+        // for(auto camera : Camera::cameras) {
+        //     Camera::currentCamera = camera;
+
+        //     textureObj->render();
+        // }
 
         /**
          * ImGui
