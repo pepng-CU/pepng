@@ -97,7 +97,13 @@ void Renderer::render(std::shared_ptr<WithComponents> parent) {
     glUseProgram(shaderProgram);
 
     Camera::currentCamera->render(shaderProgram);
-    Light::lights.at(0)->render(shaderProgram);
+
+    /**
+     * TODO: This is a hacky way to select the current light.
+     */
+    if(Light::lights.size() > 0) {
+        Light::lights.at(0)->render(shaderProgram);
+    }
 
     this->render(parent, shaderProgram);
 }
