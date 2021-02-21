@@ -4,11 +4,12 @@
 #include <GL/glew.h>
 
 #include "texture.hpp"
+#include "../util/cloneable.hpp"
 
 /**
  * The component that hold rendering properties.
  */
-class Material {
+class Material : public Cloneable<Material> {
     public:
         /**
          * Shared_ptr of Material.
@@ -25,7 +26,8 @@ class Material {
          */
         GLuint getTexture();
 
-        virtual std::shared_ptr<Material> clone();
+    protected:
+        virtual Material* cloneImplementation() override;
 
     private:
         Material(GLuint shaderProgram, std::shared_ptr<Texture> texture);

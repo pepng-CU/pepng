@@ -10,6 +10,16 @@ Light::Light(GLuint shaderProgram, glm::vec3 color) :
     color(color)
 {}
 
+Light::Light(const Light& light) : 
+    Component(light), 
+    shaderProgram(light.shaderProgram),
+    near(light.near),
+    far(light.far),
+    dimension(light.dimension),
+    textureDimension(light.textureDimension),
+    color(light.color)
+{}
+
 std::vector<std::shared_ptr<Light>> Light::lights;
 
 void Light::delayedInit() {
@@ -76,6 +86,10 @@ std::shared_ptr<Light> Light::makeLight(GLuint shaderProgram, glm::vec3 color) {
     lights.push_back(light);
 
     return light;
+}
+
+Light* Light::cloneImplementation() {
+    return new Light(*this);
 }
 
 glm::mat4 Light::getProjection() {

@@ -10,11 +10,12 @@
 
 #include "../component/transform.hpp"
 #include "../component/renderer.hpp"
+#include "../util/cloneable.hpp"
 
 /**
  * A generic hold of components with child/parent relationship.
  */
-class Object : public WithComponents {
+class Object : public WithComponents, public Cloneable<Object> {
     public:
         /**
          * The name of the object.
@@ -30,8 +31,6 @@ class Object : public WithComponents {
          * Shared_ptr constructor for Object.
          */
         static std::shared_ptr<Object> makeObject(std::string name);
-
-        virtual std::shared_ptr<Object> clone();
 
         /**
          * Attaches a child to this object.
@@ -53,6 +52,8 @@ class Object : public WithComponents {
     protected:
         Object(std::string name);
         Object(const Object& object);
+
+        virtual Object* cloneImplementation() override;
 };
 
 namespace pepng {

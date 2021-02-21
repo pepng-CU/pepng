@@ -13,9 +13,9 @@ class FPS : public Component {
 
         virtual void imgui() override;
 
-        virtual std::shared_ptr<Component> clone() override;
-
-        virtual std::shared_ptr<FPS> clone1();
+    protected:
+        virtual FPS* cloneImplementation() override;
+        
     private:
         FPS(float panSpeed, float rotationSpeed);
         FPS(const FPS& fps);

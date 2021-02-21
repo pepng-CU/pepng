@@ -26,6 +26,9 @@ class Light : public Component, public DelayedInit {
 
     protected:
         Light(GLuint shaderProgram, glm::vec3 color);
+        Light(const Light& light);
+
+        virtual Light* cloneImplementation() override;
 
         glm::mat4 getProjection();
 

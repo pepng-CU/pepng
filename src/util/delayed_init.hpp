@@ -3,10 +3,12 @@
 #include <vector>
 #include <memory>
 
+#include "cloneable.hpp"
+
 /**
  * Delays the initialization to the main thread.
  */
-class DelayedInit {
+class DelayedInit : public Cloneable<DelayedInit> {
     public:
         /**
          * Delayed the initialization to the main thread.
@@ -29,8 +31,6 @@ class DelayedInit {
         void attachDelayed(std::shared_ptr<DelayedInit> delayedInit) {
             this->delayedChildren.push_back(delayedInit);
         }
-
-        virtual std::shared_ptr<DelayedInit> clone() = 0;
 
     protected:
         /**

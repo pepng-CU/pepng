@@ -16,10 +16,8 @@ std::shared_ptr<Material> Material::makeMaterial(GLuint shaderProgram, std::shar
     return material;
 }
 
-std::shared_ptr<Material> Material::clone() {
-    std::shared_ptr<Material> material(new Material(*this));
-
-    return material;
+Material* Material::cloneImplementation() {
+    return new Material(*this);
 }
 
 GLuint Material::getShaderProgram() {

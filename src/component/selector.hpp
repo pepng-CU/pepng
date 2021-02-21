@@ -33,9 +33,9 @@ class Selector : public Component {
 
         virtual void imgui() override;
 
-        virtual std::shared_ptr<Component> clone() override;
-
-        virtual std::shared_ptr<Selector> clone1();
+    protected:
+        virtual Selector* cloneImplementation() override;
+        
     private:
         Selector();
         Selector(const Selector& selector);

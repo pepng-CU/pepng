@@ -27,14 +27,8 @@ std::shared_ptr<Selector> pepng::makeSelector() {
     return Selector::makeSelector();
 }
 
-std::shared_ptr<Component> Selector::clone() {
-    return this->clone1();
-}
-
-std::shared_ptr<Selector> Selector::clone1() {
-    std::shared_ptr<Selector> renderer(new Selector(*this));
-
-    return renderer;
+Selector* Selector::cloneImplementation() {
+    return new Selector(*this);
 }
 
 void Selector::dfsSwitch(std::shared_ptr<Object> object, int& index) {

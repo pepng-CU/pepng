@@ -82,12 +82,12 @@ class Transform : public Component {
 
         virtual void imgui() override;
 
-        virtual std::shared_ptr<Component> clone() override;
-
-        virtual std::shared_ptr<Transform> clone1();
-
         friend std::ostream& operator<<(std::ostream& os, const Transform& transform);
     protected:
+        glm::quat rotationX;
+        glm::quat rotationY;
+        glm::quat rotationZ;
+
         Transform(const Transform &transform);
 
         Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
@@ -102,9 +102,7 @@ class Transform : public Component {
             glm::vec3 scale
         );
 
-        glm::quat rotationX;
-        glm::quat rotationY;
-        glm::quat rotationZ;
+        virtual Transform* cloneImplementation() override;
 };
 
 std::ostream& operator<<(std::ostream& os, const Transform& transform);
@@ -127,12 +125,9 @@ class CameraTransform : public Transform {
         virtual glm::vec3 getUp() override;
 
         virtual glm::vec3 getRight() override;
-
-        virtual std::shared_ptr<Component> clone() override;
-
-        virtual std::shared_ptr<Transform> clone1() override;
-
-        virtual std::shared_ptr<CameraTransform> clone2();
+    protected:
+        virtual CameraTransform* cloneImplementation() override;
+    
     private:
         CameraTransform(const CameraTransform &transform);
 

@@ -133,10 +133,6 @@ class Camera : public Component {
          */
         static std::shared_ptr<Camera> makeCamera(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection);
 
-        virtual std::shared_ptr<Component> clone() override;
-
-        virtual std::shared_ptr<Camera> clone1();
-
         /**
          * Pointer to the projection used for the camera.
          */
@@ -152,6 +148,9 @@ class Camera : public Component {
         virtual void init(std::shared_ptr<WithComponents> parent) override;
 
         virtual void imgui() override;
+        
+    protected:
+        virtual Camera* cloneImplementation() override;
 
     private:
         /**

@@ -111,7 +111,7 @@ void pepng::loadObjectOBJ(
     std::string name = path.filename().string();
     std::shared_ptr<Object> object = pepng::makeObject(name);
     
-    object->attachComponent(transform->clone1());
+    object->attachComponent(transform->clone());
 
     loadThread(
         path,

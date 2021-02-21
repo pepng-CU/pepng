@@ -21,10 +21,8 @@ std::shared_ptr<Object> Object::makeObject(std::string name) {
     return object;
 }
 
-std::shared_ptr<Object> Object::clone() {
-    std::shared_ptr<Object> object(new Object(*this));
-
-    return object;
+Object* Object::cloneImplementation() {
+    return new Object(*this);
 }
 
 std::shared_ptr<Object> Object::attachChild(std::shared_ptr<Object> object) {

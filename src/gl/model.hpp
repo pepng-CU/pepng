@@ -26,7 +26,7 @@ class Renderer;
  * 
  * This is essentially just a VAO constructor that hold the points.
  */
-class Model : public std::enable_shared_from_this<Model>, public DelayedInit  {
+class Model : public std::enable_shared_from_this<Model>, public DelayedInit, public Cloneable2<Model>  {
     public:
         friend Renderer;
 
@@ -72,8 +72,8 @@ class Model : public std::enable_shared_from_this<Model>, public DelayedInit  {
             return shared_from_this();
         }
 
-        virtual std::shared_ptr<DelayedInit> clone() override;
-        virtual std::shared_ptr<Model> clone1();
+    protected:
+        virtual Model* cloneImplementation() override;
 
     private:
         Model();

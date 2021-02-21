@@ -73,14 +73,8 @@ std::shared_ptr<Texture> Texture::makeTexture() {
     return texture;
 }
 
-std::shared_ptr<DelayedInit> Texture::clone() {
-    return this->clone1();
-}
-
-std::shared_ptr<Texture> Texture::clone1() {
-    std::shared_ptr<Texture> texture(new Texture(*this));
-
-    return texture;
+Texture* Texture::cloneImplementation() {
+    return new Texture(*this);
 }
 
 namespace pepng {

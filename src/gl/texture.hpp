@@ -31,9 +31,8 @@ class Texture : public DelayedInit {
          */
         GLuint getIndex();
 
-        virtual std::shared_ptr<DelayedInit> clone();
-
-        virtual std::shared_ptr<Texture> clone1();
+    protected:
+        virtual Texture* cloneImplementation() override;
 
     private:
         Texture();

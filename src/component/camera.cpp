@@ -29,14 +29,8 @@ std::shared_ptr<Camera> pepng::makeCamera(std::shared_ptr<Viewport> viewport, st
     return Camera::makeCamera(viewport, projection);
 }
 
-std::shared_ptr<Component> Camera::clone() {
-    return this->clone1();
-}
-
-std::shared_ptr<Camera> Camera::clone1() {
-    std::shared_ptr<Camera> camera(new Camera(*this));
-
-    return camera;
+Camera* Camera::cloneImplementation() {
+    return new Camera(*this);
 }
 
 void Camera::init(std::shared_ptr<WithComponents> parent) {

@@ -26,14 +26,8 @@ std::shared_ptr<Transformer> pepng::makeTransformer(float positionSpeed, float r
     return Transformer::makeTransformer(positionSpeed, rotationSpeed, scaleSpeed);
 }
 
-std::shared_ptr<Component> Transformer::clone() {
-    return this->clone1();
-}
-
-std::shared_ptr<Transformer> Transformer::clone1() {
-    std::shared_ptr<Transformer> transformer(new Transformer(*this));
-
-    return transformer;
+Transformer* Transformer::cloneImplementation() {
+    return new Transformer(*this);
 }
 
 void Transformer::update(std::shared_ptr<WithComponents> parent) {

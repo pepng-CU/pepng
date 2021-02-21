@@ -28,14 +28,8 @@ std::shared_ptr<Model> pepng::makeModel() {
     return Model::makeModel();
 }
 
-std::shared_ptr<DelayedInit> Model::clone() {
-    return this->clone1();
-}
-
-std::shared_ptr<Model> Model::clone1() {
-    std::shared_ptr<Model> model(new Model(*this));
-
-    return model;
+Model* Model::cloneImplementation() {
+    return new Model(*this);
 }
 
 void Model::delayedInit() {

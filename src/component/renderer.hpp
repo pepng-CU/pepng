@@ -36,8 +36,7 @@ class Renderer : public Component {
         virtual void render(std::shared_ptr<WithComponents> object) override;
         virtual void imgui() override;
 
-        virtual std::shared_ptr<Component> clone() override;
-        virtual std::shared_ptr<Renderer> clone1();
+        virtual Renderer* cloneImplementation() override;
     private:
         Renderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum renderMode);
         Renderer(const Renderer& renderer);

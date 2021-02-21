@@ -13,9 +13,9 @@ class Transformer : public Component {
 
         virtual void imgui() override;
 
-        virtual std::shared_ptr<Component> clone() override;
+    protected:
+        virtual Transformer* cloneImplementation() override;
 
-        virtual std::shared_ptr<Transformer> clone1();
     private:
         Transformer(float positionSpeed, float rotationSpeed, float scaleSpeed);
         Transformer(const Transformer& transformer);

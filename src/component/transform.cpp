@@ -60,14 +60,8 @@ std::shared_ptr<Transform> Transform::makeTransform(glm::vec3 position, glm::qua
     return transform;
 }
 
-std::shared_ptr<Component> Transform::clone() {
-    return this->clone1();
-}
-
-std::shared_ptr<Transform> Transform::clone1() {
-    std::shared_ptr<Transform> transform(new Transform(*this));
-
-    return transform;
+Transform* Transform::cloneImplementation() {
+    return new Transform(*this);
 }
 
 glm::quat Transform::getRotation() {
@@ -188,18 +182,8 @@ std::shared_ptr<CameraTransform> CameraTransform::makeCameraTransform(glm::vec3 
     return transform;
 }
 
-std::shared_ptr<Component> CameraTransform::clone() {
-    return this->clone1();
-}
-
-std::shared_ptr<Transform> CameraTransform::clone1() {
-    return this->clone2();
-}
-
-std::shared_ptr<CameraTransform> CameraTransform::clone2() {
-    std::shared_ptr<CameraTransform> transform(new CameraTransform(*this));
-
-    return transform;
+CameraTransform* CameraTransform::cloneImplementation() {
+    return new CameraTransform(*this);
 }
 
 glm::vec3 CameraTransform::getRight() {

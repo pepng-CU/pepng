@@ -11,13 +11,14 @@
 #include <string>
 
 #include "../ui/with_imgui.hpp"
+#include "../util/cloneable.hpp"
 
 class WithComponents;
 
 /**
  * Abstract Component definition that is binded to an object/component holder.
  */
-class Component : public WithImGui {
+class Component : public WithImGui, public Cloneable<Component> {
     public:
         /**
          * Used to check if this component will update.
@@ -43,8 +44,6 @@ class Component : public WithImGui {
         virtual void update(std::shared_ptr<WithComponents> parent) {};
 
         virtual void imgui() override;
-
-        virtual std::shared_ptr<Component> clone() = 0;
 
     protected:
         Component(std::string name);

@@ -46,15 +46,10 @@ class Buffer : public DelayedInit {
                 glEnableVertexAttribArray(index);
             }
         }
-
-        virtual std::shared_ptr<DelayedInit> clone() override {
-            return this->clone1();
-        }
-
-        virtual std::shared_ptr<Buffer> clone1() {
-            std::shared_ptr<Buffer> buffer(new Buffer(*this));
-
-            return buffer;
+    
+    protected:
+        virtual Buffer* cloneImplementation() override {
+            return new Buffer(*this);
         }
 
     private:
