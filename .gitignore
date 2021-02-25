@@ -42,3 +42,4 @@ Makefile
 bin
 lib
 _deps
+models/*
