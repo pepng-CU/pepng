@@ -6,7 +6,7 @@ Light::Light(GLuint shaderProgram, glm::vec3 color) :
     near(0.1f),
     far(50.0f),
     dimension(10.0f),
-    textureDimension(2048),
+    textureDimension(1024),
     color(color)
 {}
 
@@ -32,22 +32,9 @@ void Light::delayedInit() {
     glGenFramebuffers(1, &this->fbo);
 
     glGenTextures(1, &this->texture);
-    glBindTexture(GL_TEXTURE_2D, this->texture);
-    glTexImage2D(
-        GL_TEXTURE_2D, 
-        0, 
-        GL_DEPTH_COMPONENT, 
-        this->textureDimension, 
-        this->textureDimension, 
-        0, 
-        GL_DEPTH_COMPONENT, 
-        GL_FLOAT, 
-        NULL
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); 
+    glBindTexture(GL_TEXTURE_CUBE_MAP, this->texture);
+
+    
 }
 
 void Light::initFBO() {
@@ -119,12 +106,6 @@ void Light::render(GLuint shaderProgram) {
         glGetUniformLocation(shaderProgram, "u_light_pos"),
         1,
         glm::value_ptr(this->transform->position)
-    );
-
-    glUniform3fv(
-        glGetUniformLocation(shaderProgram, "u_light_dir"),
-        1,
-        glm::value_ptr(this->transform->getForward())
     );
 
     glUniform3fv(

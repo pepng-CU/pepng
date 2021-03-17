@@ -162,9 +162,8 @@ int main(int argc, char *argv[]) {
     auto light = pepng::makeObject("Light");
 
     light
-        ->attachComponent(pepng::makeCameraTransform(
-            glm::vec3(5.0f, 10.0f, 0.0f),
-            glm::vec3(0.0f, 0.0f, 0.0f)
+        ->attachComponent(pepng::makeTransform(
+            glm::vec3(0.0f, -30.0f, 0.0f)
         ))
         ->attachComponent(pepng::makeLight(shadowShaderProgram, glm::vec3(1.0f)));
 
@@ -261,8 +260,6 @@ int main(int argc, char *argv[]) {
         for(auto object : objects) {
             object->update();
         }
-
-        light->getComponent<Transform>()->deltaRotate(glm::vec3(1.0f, 0.0f, 0.0f));
 
         /**
          * Shadow

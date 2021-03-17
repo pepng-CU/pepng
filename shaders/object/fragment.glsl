@@ -2,8 +2,8 @@
 
 uniform sampler2D u_texture;
 uniform sampler2D u_shadow;
+
 uniform vec3 u_light_pos;
-uniform vec3 u_light_dir;
 uniform vec3 u_light_color;
 uniform vec3 u_camera_pos;
 
@@ -25,26 +25,55 @@ float calculate_shadow(vec4 fpls, float bias) {
     return shadow_value;
 }
 
-void main() {
-    vec4 texture_point = texture(u_texture, tex_coord);
+vec3 calculate_light_dir() {
+    return normalize(frag_pos.xyz - u_light_pos);
+}
 
+vec3 calculate_ambient(float Ka) {
+    vec4 texture_point = texture(u_texture, tex_coord);
     vec3 base_color = texture_point.rgb;
 
-    vec3 ambient = 0.15 * base_color;
+    return Ka * base_color;
+}
 
-    vec3 light_dir = normalize(u_light_dir);
+vec3 calculate_diffuse(float Kd, vec3 light_dir) {
     float diff = max(dot(light_dir, normal), 0.0);
-    vec3 diffuse = diff * u_light_color;
 
+    return Kd * diff * u_light_color;
+}
+
+vec3 calculate_specular(float Ks, float shine, vec3 light_dir) {
     vec3 view_dir = normalize(u_camera_pos - frag_pos.xyz);
-    float spec = 0.0;
     vec3 halfway_dir = normalize(light_dir + view_dir);  
-    spec = pow(max(dot(normal, halfway_dir), 0.0), 64.0);
-    vec3 specular = spec * u_light_color;    
+    float spec = pow(max(dot(normal, halfway_dir), 0.0), shine);
+
+    return Ks * spec * u_light_color;  
+}
+
+vec3 calculate_phong(vec3 light_dir) {
+    vec3 ambient = calculate_ambient(0.15);
+    vec3 diffuse = calculate_diffuse(1.0, light_dir);
+    vec3 specular = calculate_specular(1.0, 128, light_dir);
+
+    return ambient + diffuse + specular;
+}
+
+vec3 calculate_light() {
+    vec3 light_dir = calculate_light_dir();
+    vec3 light = calculate_phong(light_dir);
 
     float bias = max(0.05 * (1.0 - dot(normal, light_dir)), 0.005); 
-    float shadow = calculate_shadow(frag_pos_light_space, bias);  
-    vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular)) * base_color;    
-    
-    color = vec4(lighting, texture_point.a);
+    float shadow = 1.0 - calculate_shadow(frag_pos_light_space, bias);
+
+    return light * shadow; 
+}
+
+vec4 calculate_color() {
+    vec4 texture_point = texture(u_texture, tex_coord);
+
+    return vec4(calculate_light() * texture_point.rgb, texture_point.a); 
+}
+
+void main() {
+    color = calculate_color();
 }
