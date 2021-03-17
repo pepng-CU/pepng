@@ -1,6 +1,8 @@
 #pragma once
 
 #include <sstream>
+#include <vector>
+#include <queue>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -50,7 +52,17 @@ class Selector : public Component {
         Selector();
         Selector(const Selector& selector);
 
+        /**
+         * Selects a child object through DFS.
+         * 
+         * @deprecated Assignment seems to want the bfsSwitch.
+         */
         void dfsSwitch(std::shared_ptr<Object> object, int& index);
+
+        /**
+         * Selects a child object through BFS.
+         */
+        void bfsSwitch(std::shared_ptr<Object> object);
 
         bool needsUpdate;
 };

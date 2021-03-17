@@ -53,6 +53,44 @@ void Selector::dfsSwitch(std::shared_ptr<Object> object, int& index) {
     }
 }
 
+void Selector::bfsSwitch(std::shared_ptr<Object> object) {
+    int index = 0;
+
+    std::queue<std::shared_ptr<Object>> currentQueue;
+
+    currentQueue.push(object);
+
+    std::queue<std::shared_ptr<Object>> nextQueue;
+
+    while(true) {
+        while(!currentQueue.empty()) {
+            auto object = currentQueue.front();
+            currentQueue.pop();
+
+            for(auto child : object->children) {
+                nextQueue.push(child);
+            }
+            
+            try {
+                object->getComponent<Transformer>()->isActive = index == this->index;
+            } catch(...) {}
+
+            try {
+                auto renderer = object->getComponent<Renderer>();
+
+                renderer->renderMode = this->renderMode;
+                renderer->receiveShadow = this->receiveShadow;
+                renderer->displayTexture = this->displayTexture;
+            } catch(...) {}
+        }
+
+        if(nextQueue.empty()) break;
+
+        currentQueue = nextQueue;
+        nextQueue = std::queue<std::shared_ptr<Object>>();
+    }
+}
+
 void Selector::update(std::shared_ptr<WithComponents> parent) {
     if (!this->isActive) {
         return;
@@ -85,9 +123,7 @@ void Selector::update(std::shared_ptr<WithComponents> parent) {
         this->needsUpdate = false;
 
         if(auto object = std::dynamic_pointer_cast<Object>(parent)) {
-            int index = 0;
-
-            dfsSwitch(object, index);
+            bfsSwitch(object);
         }
     }
 

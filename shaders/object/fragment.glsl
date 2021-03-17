@@ -80,7 +80,7 @@ vec3 calculate_light(vec4 texture_point) {
 
     // Shadow
     if(u_receive_shadow) {
-        float bias = max(0.05 * (1.0 - dot(normal, light_dir)), 0.005); 
+        float bias = max(0.15 * (1.0 - dot(normal, light_dir)), 0.15); 
         float shadow = calculate_shadow(bias);
 
         return (ambient + (1.0 - shadow) * (diffuse + specular)) * base_color; 
