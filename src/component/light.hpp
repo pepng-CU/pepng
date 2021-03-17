@@ -36,7 +36,6 @@ class Light : public Component, public DelayedInit {
         GLuint texture;
         float near;
         float far;
-        float dimension;
         float textureDimension;
         glm::vec3 color;
         std::shared_ptr<Transform> transform;

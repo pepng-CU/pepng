@@ -125,8 +125,8 @@ int main(int argc, char *argv[]) {
     auto shaderpath = pepng::getFolderPath("shaders");
 
     static auto shaderProgram = pepng::makeShaderProgram(
-        pepng::makeShader(shaderpath / "object/vertex.glsl", GL_VERTEX_SHADER),
-        pepng::makeShader(shaderpath / "object/fragment.glsl", GL_FRAGMENT_SHADER)
+        pepng::makeShader(shaderpath / "object" / "vertex.glsl", GL_VERTEX_SHADER),
+        pepng::makeShader(shaderpath / "object" / "fragment.glsl", GL_FRAGMENT_SHADER)
     );
 
     glUseProgram(shaderProgram);
@@ -135,18 +135,19 @@ int main(int argc, char *argv[]) {
     glUniform1i(glGetUniformLocation(shaderProgram, "u_shadow"), 1);
 
     static auto lineShaderProgram = pepng::makeShaderProgram(
-        pepng::makeShader(shaderpath / "line/vertex.glsl", GL_VERTEX_SHADER),
-        pepng::makeShader(shaderpath / "line/fragment.glsl", GL_FRAGMENT_SHADER)
+        pepng::makeShader(shaderpath / "line" / "vertex.glsl", GL_VERTEX_SHADER),
+        pepng::makeShader(shaderpath / "line" / "fragment.glsl", GL_FRAGMENT_SHADER)
     );
 
     static auto shadowShaderProgram = pepng::makeShaderProgram(
-        pepng::makeShader(shaderpath / "shadow/vertex.glsl", GL_VERTEX_SHADER),
-        pepng::makeShader(shaderpath / "shadow/fragment.glsl", GL_FRAGMENT_SHADER)
+        pepng::makeShader(shaderpath / "shadow" / "vertex.glsl", GL_VERTEX_SHADER),
+        pepng::makeShader(shaderpath / "shadow" / "fragment.glsl", GL_FRAGMENT_SHADER),
+        pepng::makeShader(shaderpath / "shadow" / "geometry.glsl", GL_GEOMETRY_SHADER)
     );
 
     static auto textureShaderProgram = pepng::makeShaderProgram(
-        pepng::makeShader(shaderpath / "texture/vertex.glsl", GL_VERTEX_SHADER),
-        pepng::makeShader(shaderpath / "texture/fragment.glsl", GL_FRAGMENT_SHADER)
+        pepng::makeShader(shaderpath / "texture" / "vertex.glsl", GL_VERTEX_SHADER),
+        pepng::makeShader(shaderpath / "texture" / "fragment.glsl", GL_FRAGMENT_SHADER)
     );
 
     glUseProgram(textureShaderProgram);
@@ -163,7 +164,7 @@ int main(int argc, char *argv[]) {
 
     light
         ->attachComponent(pepng::makeTransform(
-            glm::vec3(0.0f, -30.0f, 0.0f)
+            glm::vec3(0.0f, 0.0f, 0.0f)
         ))
         ->attachComponent(pepng::makeLight(shadowShaderProgram, glm::vec3(1.0f)));
 
@@ -189,7 +190,7 @@ int main(int argc, char *argv[]) {
     };
 
     pepng::load(
-        modelpath / "lighting/scene.dae", 
+        modelpath / "sponza" / "scene.dae", 
         std::function([](std::shared_ptr<Object> object) {
             object->attachComponent(pepng::makeSelector());
 

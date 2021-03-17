@@ -5,8 +5,7 @@ Light::Light(GLuint shaderProgram, glm::vec3 color) :
     shaderProgram(shaderProgram),
     near(0.1f),
     far(50.0f),
-    dimension(10.0f),
-    textureDimension(1024),
+    textureDimension(2048),
     color(color)
 {}
 
@@ -15,7 +14,6 @@ Light::Light(const Light& light) :
     shaderProgram(light.shaderProgram),
     near(light.near),
     far(light.far),
-    dimension(light.dimension),
     textureDimension(light.textureDimension),
     color(light.color)
 {}
@@ -34,24 +32,77 @@ void Light::delayedInit() {
     glGenTextures(1, &this->texture);
     glBindTexture(GL_TEXTURE_CUBE_MAP, this->texture);
 
-    
+    for(int i = 0; i < 6; i++) {
+        glTexImage2D(
+            GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
+            0, 
+            GL_DEPTH_COMPONENT, 
+            this->textureDimension,
+            this->textureDimension,
+            0,
+            GL_DEPTH_COMPONENT,
+            GL_FLOAT,
+            NULL
+        );
+    }
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);  
+
+    glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->texture, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Light::initFBO() {
     this->delayedInit();
 
+    glViewport(0, 0, this->textureDimension, this->textureDimension);
     glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, this->texture, 0);
 
     glUseProgram(this->shaderProgram);
 
-    glUniformMatrix4fv(
-        glGetUniformLocation(this->shaderProgram, "u_light_space_matrix"),
+    glUniform3fv(
+        glGetUniformLocation(shaderProgram, "u_light_pos"),
         1,
-        GL_FALSE,
-        glm::value_ptr(this->getMatrix())
+        glm::value_ptr(this->transform->position)
     );
+
+    glUniform1f(
+        glGetUniformLocation(shaderProgram, "u_far"),
+        this->far
+    );
+
+    auto shadowProj = this->getProjection();
+    auto lightPos = this->transform->position;
+
+    std::vector<glm::mat4> shadowTransforms;
+    
+    shadowTransforms.push_back(shadowProj * 
+                    glm::lookAt(lightPos, lightPos + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)));
+    shadowTransforms.push_back(shadowProj * 
+                    glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0,-1.0, 0.0)));
+    shadowTransforms.push_back(shadowProj * 
+                    glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
+    shadowTransforms.push_back(shadowProj * 
+                    glm::lookAt(lightPos, lightPos + glm::vec3(0.0,-1.0, 0.0), glm::vec3(0.0, 0.0,-1.0)));
+    shadowTransforms.push_back(shadowProj * 
+                    glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0,-1.0, 0.0)));
+    shadowTransforms.push_back(shadowProj * 
+                    glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0,-1.0), glm::vec3(0.0,-1.0, 0.0)));
+    
+    for(int i = 0; i < 6; i++) {
+        glUniformMatrix4fv(
+            glGetUniformLocation(shaderProgram, "u_shadow_matrices"),
+            6,
+            GL_FALSE,
+            glm::value_ptr(shadowTransforms[0])
+        );
+    }
 }
 
 void Light::updateFBO() {
@@ -80,7 +131,8 @@ Light* Light::cloneImplementation() {
 }
 
 glm::mat4 Light::getProjection() {
-    return glm::ortho(-this->dimension, this->dimension, -this->dimension, this->dimension, this->near, this->far);
+    float aspect = 1.0;
+    return glm::perspective(glm::radians(90.0f), aspect, this->near, this->far); 
 }
 
 glm::mat4 Light::getMatrix() {
@@ -92,15 +144,10 @@ void Light::render(GLuint shaderProgram) {
         return;
     }
 
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, this->texture);
+    //glUseProgram(this->shaderProgram);
 
-    glUniformMatrix4fv(
-        glGetUniformLocation(shaderProgram, "u_light_space_matrix"),
-        1,
-        GL_FALSE,
-        glm::value_ptr(this->getMatrix())
-    );
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, this->texture);
 
     glUniform3fv(
         glGetUniformLocation(shaderProgram, "u_light_pos"),
@@ -113,12 +160,16 @@ void Light::render(GLuint shaderProgram) {
         1,
         glm::value_ptr(this->color)
     );
+
+    glUniform1f(
+        glGetUniformLocation(shaderProgram, "u_far"),
+        this->far
+    );
 }
 
 void Light::imgui() {
     ImGui::InputFloat("Near", &this->near);
     ImGui::InputFloat("Far", &this->far);
-    ImGui::InputFloat("Box Dimension", &this->dimension);
     ImGui::ColorPicker3("Color", glm::value_ptr(this->color));
 }
 
