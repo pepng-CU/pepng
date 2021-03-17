@@ -7,14 +7,18 @@ Renderer::Renderer(std::shared_ptr<Model> model, std::shared_ptr<Material> mater
     Component("Renderer"),
     model(model),
     material(material),
-    renderMode(renderMode)
+    renderMode(renderMode),
+    receiveShadow(true),
+    displayTexture(true)
 {}
 
 Renderer::Renderer(const Renderer& renderer) :
     Component(renderer),
     model(renderer.model->clone2()),
     material(renderer.material->clone()),
-    renderMode(renderer.renderMode)
+    renderMode(renderer.renderMode),
+    receiveShadow(renderer.receiveShadow),
+    displayTexture(renderer.displayTexture)
 {}
 
 std::shared_ptr<Renderer> Renderer::makeRenderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum renderMode) {
@@ -70,6 +74,24 @@ void Renderer::render(std::shared_ptr<WithComponents> parent, GLuint shaderProgr
             1,
             GL_FALSE,
             glm::value_ptr(worldMatrix)
+        );
+    }
+
+    GLuint uReceiveShadow = glGetUniformLocation(shaderProgram, "u_receive_shadow");
+
+    if(uReceiveShadow >= 0) {
+        glUniform1f(
+            uReceiveShadow,
+            this->receiveShadow
+        );
+    }
+
+    GLuint uDisplayTexture = glGetUniformLocation(shaderProgram, "u_display_texture");
+
+    if(uDisplayTexture >= 0) {
+        glUniform1f(
+            uDisplayTexture,
+            this->displayTexture
         );
     }
 
@@ -167,4 +189,7 @@ void Renderer::imgui() {
         }
         ImGui::EndCombo();
     }
+
+    ImGui::Checkbox("Texture", &this->displayTexture);
+    ImGui::Checkbox("Shadow", &this->receiveShadow);
 }

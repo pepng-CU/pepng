@@ -25,6 +25,16 @@ class Selector : public Component {
         GLenum renderMode;
 
         /**
+         * Does model receive shadow?
+         */
+        bool receiveShadow;
+        
+        /**
+         * Does model display texture?
+         */
+        bool displayTexture;
+
+        /**
          * Shared_ptr constructor for Selector.
          */
         static std::shared_ptr<Selector> makeSelector();

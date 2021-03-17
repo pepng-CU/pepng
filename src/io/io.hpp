@@ -151,7 +151,12 @@ class Device : public std::enable_shared_from_this<Device> {
         float getAxis(std::string name);
 
         /**
-         * Get an Button device unit value by name.
+         * Get a Button device unit value by name.
+         */
+        bool getButton(std::string name);
+
+        /**
+         * Get a Button device unit value by name (reset to zero once called).
          */
         bool getButtonDown(std::string name);
 
@@ -194,6 +199,11 @@ class Input : public std::enable_shared_from_this<Input> {
 
         /**
          * Gets a Button value from all attached devices by name.
+         */
+        bool getButton(std::string name);
+
+        /**
+         * Get a Button device unit value by name (reset to zero once called).
          */
         bool getButtonDown(std::string name);
 
