@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
 
     light
         ->attachComponent(pepng::makeTransform(
-            glm::vec3(0.0f, 0.0f, 0.0f)
+            glm::vec3(0.0f, -10.0f, 0.0f)
         ))
         ->attachComponent(pepng::makeLight(shadowShaderProgram, glm::vec3(1.0f)));
 
@@ -228,6 +228,8 @@ int main(int argc, char *argv[]) {
         ->attachUnit(pepng::makeButton("points", GLFW_KEY_P))
         ->attachUnit(pepng::makeButton("lines", GLFW_KEY_L))
         ->attachUnit(pepng::makeButton("recenter", GLFW_KEY_HOME))
+        ->attachUnit(pepng::makeButton("shadow", GLFW_KEY_B))
+        ->attachUnit(pepng::makeButton("texture", GLFW_KEY_X))
         ->attachUnit(pepng::makeButton("scale", GLFW_KEY_U))
         ->attachUnit(pepng::makeButton("scale", GLFW_KEY_J, -1.0f));
 

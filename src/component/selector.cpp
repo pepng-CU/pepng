@@ -7,14 +7,18 @@ Selector::Selector() :
     Component("Selector"), 
     index(0), 
     renderMode(GL_TRIANGLES), 
-    needsUpdate(true) 
+    needsUpdate(true),
+    receiveShadow(true),
+    displayTexture(true)
 {}
 
 Selector::Selector(const Selector& selector) :
     Component(selector),
     index(selector.index),
     renderMode(selector.renderMode),
-    needsUpdate(selector.needsUpdate)
+    needsUpdate(selector.needsUpdate),
+    receiveShadow(selector.receiveShadow),
+    displayTexture(selector.displayTexture)
 {}
 
 std::shared_ptr<Selector> Selector::makeSelector() {
@@ -37,7 +41,11 @@ void Selector::dfsSwitch(std::shared_ptr<Object> object, int& index) {
     } catch(...) {}
 
     try {
-        object->getComponent<Renderer>()->renderMode = this->renderMode;
+        auto renderer = object->getComponent<Renderer>();
+
+        renderer->renderMode = this->renderMode;
+        renderer->receiveShadow = this->receiveShadow;
+        renderer->displayTexture = this->displayTexture;
     } catch(...) {}
 
     for(auto child : object->children) {
@@ -63,6 +71,16 @@ void Selector::update(std::shared_ptr<WithComponents> parent) {
         this->needsUpdate = true;
     }
 
+    if(input->getButtonDown("shadow")) {
+        this->receiveShadow = !this->receiveShadow;
+        this->needsUpdate = true;
+    }
+
+    if(input->getButtonDown("texture")) {
+        this->displayTexture = !this->displayTexture;
+        this->needsUpdate = true;
+    }
+
     if (this->needsUpdate) {
         this->needsUpdate = false;
 
@@ -78,7 +96,7 @@ void Selector::update(std::shared_ptr<WithComponents> parent) {
 
         ss << "object_" << i;
 
-        if (input->getButtonDown(ss.str())) {
+        if (input->getButton(ss.str())) {
             this->index = i;
 
             this->needsUpdate = true;
@@ -144,4 +162,7 @@ void Selector::imgui() {
         }
         ImGui::EndCombo();
     }
+
+    if (ImGui::Checkbox("Texture", &this->displayTexture)) this->needsUpdate = true;
+    if (ImGui::Checkbox("Shadow", &this->receiveShadow)) this->needsUpdate = true;
 };

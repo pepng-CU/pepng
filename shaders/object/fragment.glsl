@@ -7,6 +7,8 @@ uniform vec3 u_light_pos;
 uniform vec3 u_light_color;
 uniform vec3 u_camera_pos;
 uniform float u_far;
+uniform bool u_receive_shadow;
+uniform bool u_display_texture;
 
 in vec2 tex_coord;
 in vec3 position;
@@ -66,8 +68,7 @@ vec3 calculate_specular(float Ks, float shine, vec3 light_dir) {
     return Ks * spec * u_light_color;  
 }
 
-vec3 calculate_light() {
-    vec4 texture_point = texture(u_texture, tex_coord);
+vec3 calculate_light(vec4 texture_point) {
     vec3 base_color = texture_point.rgb;
 
     // Phong
@@ -78,16 +79,22 @@ vec3 calculate_light() {
     vec3 specular = calculate_specular(1.0, 64, light_dir);
 
     // Shadow
-    float bias = max(0.05 * (1.0 - dot(normal, light_dir)), 0.005); 
-    float shadow = calculate_shadow(bias);
+    if(u_receive_shadow) {
+        float bias = max(0.05 * (1.0 - dot(normal, light_dir)), 0.005); 
+        float shadow = calculate_shadow(bias);
 
-    return (ambient + (1.0 - shadow) * (diffuse + specular)) * base_color; 
+        return (ambient + (1.0 - shadow) * (diffuse + specular)) * base_color; 
+    } else {
+        return (ambient + diffuse + specular) * base_color; 
+    }
 }
 
-vec4 calculate_color() {
-    vec4 texture_point = texture(u_texture, tex_coord);
+vec4 calculate_color() { 
+    vec4 texture_point = vec4(1.0);
 
-    return vec4(calculate_light(), texture_point.a); 
+    if(u_display_texture) texture_point = texture(u_texture, tex_coord);
+    
+    return vec4(calculate_light(texture_point), texture_point.a); 
 }
 
 void main() {

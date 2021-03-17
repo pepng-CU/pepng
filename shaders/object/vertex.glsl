@@ -18,5 +18,5 @@ void main() {
     frag_pos = u_world * vec4(a_position, 1.0);
     normal = transpose(inverse(mat3(u_world))) * a_normal;
     tex_coord = a_tex_coord;
-    gl_Position = u_projection * u_view * frag_pos, 1.0;
+    gl_Position = u_projection * u_view * frag_pos;
 }

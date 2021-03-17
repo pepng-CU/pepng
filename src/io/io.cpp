@@ -127,10 +127,23 @@ float Device::getAxis(std::string name) {
     return total;
 }
 
-bool Device::getButtonDown(std::string name) {
+bool Device::getButton(std::string name) {
     float value = this->getAxis(name);
 
     return std::abs(value) > 0.5f;
+}
+
+bool Device::getButtonDown(std::string name) {
+    for(auto unit : this->units) {
+        if(name == unit->name && unit->value != 0.0f) {
+            auto value = unit->getValue();
+            unit->value = 0.0f;
+
+            return std::abs(value) > 0.5f;
+        }
+    }
+
+    return false;
 }
 
 Input::Input(GLFWwindow* window) : window(window) {}
@@ -168,10 +181,20 @@ float Input::getAxis(std::string name) {
     return total;
 }
 
-bool Input::getButtonDown(std::string name) {
+bool Input::getButton(std::string name) {
     float value = this->getAxis(name);
 
     return std::abs(value) > 0.5f;
+}
+
+bool Input::getButtonDown(std::string name) {
+    for(auto device : this->devices) {
+        if(device->getButtonDown(name)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 GLFWwindow* Input::getWindow() {

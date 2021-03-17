@@ -26,6 +26,14 @@ class Renderer : public Component {
          * Pointer to the material.
          */
         std::shared_ptr<Material> material;
+        /**
+         * Does model receive shadow?
+         */
+        bool receiveShadow;
+        /**
+         * Does model display texture?
+         */
+        bool displayTexture;
 
         /**
          * Shared_ptr constructor for Renderer.
