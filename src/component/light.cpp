@@ -168,6 +168,8 @@ void Light::render(GLuint shaderProgram) {
 }
 
 void Light::imgui() {
+    Component::imgui();
+
     ImGui::InputFloat("Near", &this->near);
     ImGui::InputFloat("Far", &this->far);
     ImGui::ColorPicker3("Color", glm::value_ptr(this->color));

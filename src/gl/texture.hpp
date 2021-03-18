@@ -20,6 +20,11 @@ class Texture : public DelayedInit {
         static std::shared_ptr<Texture> makeTexture();
 
         /**
+         * Texture from index.
+         */
+        static std::shared_ptr<Texture> makeTexture(GLuint textureIndex);
+
+        /**
          * Shared_ptr constructor Texture.
          */
         static std::shared_ptr<Texture> makeTexture(const std::filesystem::path& filePath);
@@ -69,4 +74,9 @@ namespace pepng {
      * Creates empty void texture.
      */
     std::shared_ptr<Texture> makeTexture();
+
+    /**
+     * Creates texture from textureIndex.
+     */
+    std::shared_ptr<Texture> makeTexture(GLuint textureIndex);
 }

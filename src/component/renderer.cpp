@@ -48,12 +48,13 @@ void Renderer::render(std::shared_ptr<WithComponents> parent, GLuint shaderProgr
     
     glActiveTexture(GL_TEXTURE0);
 
-    glBindTexture(GL_TEXTURE_2D, this->material->getTexture());
+    glBindTexture(GL_TEXTURE_2D, this->material->texture->getIndex());
 
-    auto transform = parent->getComponent<Transform>();
+    std::shared_ptr<Transform> transform;
 
-    // TODO: Should we just skip?
-    if(transform == nullptr) {
+    try {
+        transform = parent->getComponent<Transform>();
+    } catch(...) {
         std::stringstream ss;
 
         ss << *parent << " has no transform." << std::endl;

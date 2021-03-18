@@ -59,6 +59,11 @@ void objectHierarchy(std::shared_ptr<Object> object, std::shared_ptr<Object>* cu
 void objectAttachRecursive(std::shared_ptr<Object> object) {
     object->attachComponent(pepng::makeTransformer());
 
+    // Adds DynamicTexture to the screen.
+    if(object->name == "Display") {
+        object->attachComponent(pepng::makeDynamicTexture(2, 10));
+    }
+
     for(auto child : object->children) {
         objectAttachRecursive(child);
     }

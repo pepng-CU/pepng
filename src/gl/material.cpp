@@ -24,10 +24,6 @@ GLuint Material::getShaderProgram() {
     return this->shaderProgram;
 }
 
-GLuint Material::getTexture() {
-    return this->texture->getIndex();
-}
-
 namespace pepng {
     std::shared_ptr<Material> makeMaterial(GLuint shaderProgram, std::shared_ptr<Texture> texture) {
         return Material::makeMaterial(shaderProgram, texture);

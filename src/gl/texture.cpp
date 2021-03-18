@@ -73,6 +73,15 @@ std::shared_ptr<Texture> Texture::makeTexture() {
     return texture;
 }
 
+std::shared_ptr<Texture> Texture::makeTexture(GLuint textureIndex) {
+    std::shared_ptr<Texture> texture(new Texture());
+
+    texture->isInit = true;
+    texture->textureIndex = textureIndex;
+
+    return texture;
+}
+
 Texture* Texture::cloneImplementation() {
     return new Texture(*this);
 }
@@ -84,5 +93,9 @@ namespace pepng {
 
     std::shared_ptr<Texture> makeTexture() {
         return Texture::makeTexture();
+    }
+
+    std::shared_ptr<Texture> makeTexture(GLuint textureIndex) {
+        return Texture::makeTexture(textureIndex);
     }
 }

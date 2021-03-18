@@ -72,7 +72,7 @@ void Selector::bfsSwitch(std::shared_ptr<Object> object) {
             }
             
             try {
-                object->getComponent<Transformer>()->isActive = index == this->index;
+                object->getComponent<Transformer>()->isActive = index++ == this->index;
             } catch(...) {}
 
             try {

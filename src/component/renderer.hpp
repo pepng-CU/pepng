@@ -5,7 +5,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "component.hpp"
-#include "../component/light.hpp"
+#include "light.hpp"
 #include "../gl/model.hpp"
 #include "../gl/material.hpp"
 
