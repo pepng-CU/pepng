@@ -61,7 +61,7 @@ void objectAttachRecursive(std::shared_ptr<Object> object) {
 
     // Adds DynamicTexture to the screen.
     if(object->name == "Display") {
-        object->attachComponent(pepng::makeDynamicTexture(2, 10));
+        object->attachComponent(pepng::makeDynamicTexture(2, 4));
     }
 
     for(auto child : object->children) {
@@ -117,18 +117,27 @@ int main(int argc, char *argv[]) {
     ImGui_ImplOpenGL3_Init((char*)glGetString(GL_NUM_SHADING_LANGUAGE_VERSIONS));
 
     /**
-     * Textures
+     * Paths
      */
     auto texturespath = pepng::getFolderPath("textures");
+    auto modelpath = pepng::getFolderPath("models");
+    auto shaderpath = pepng::getFolderPath("shaders");
+
+    /**
+     * Textures
+     */
 
     static auto missingTexture = pepng::makeTexture(texturespath / "missing.jpg");
     missingTexture->delayedInit();
 
+    // Loadings screen for stage.
+    for(int i = 1; i <= 3; i++) {
+        pepng::makeTexture(modelpath / "pa2" / "screens" / (std::to_string(i) + ".jpg"))->delayedInit();
+    }
+
     /**
      * Shaders
      */
-    auto shaderpath = pepng::getFolderPath("shaders");
-
     static auto shaderProgram = pepng::makeShaderProgram(
         pepng::makeShader(shaderpath / "object" / "vertex.glsl", GL_VERTEX_SHADER),
         pepng::makeShader(shaderpath / "object" / "fragment.glsl", GL_FRAGMENT_SHADER)
@@ -155,16 +164,9 @@ int main(int argc, char *argv[]) {
         pepng::makeShader(shaderpath / "texture" / "fragment.glsl", GL_FRAGMENT_SHADER)
     );
 
-    glUseProgram(textureShaderProgram);
-
-    glUniform1i(glGetUniformLocation(textureShaderProgram, "u_texture"), 0);
-    glUniform1i(glGetUniformLocation(textureShaderProgram, "u_shadow"), 1);
-
     /**
      * Objects
      */
-    auto modelpath = pepng::getFolderPath("models");
-
     auto light = pepng::makeObject("Light");
 
     light

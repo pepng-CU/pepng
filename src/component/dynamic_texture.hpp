@@ -37,7 +37,7 @@ class DynamicTexture : public Component {
         /**
          * Number of ticks for texture to switch.
          */
-        static const int MAX_COUNT = 100;
+        static const int MAX_COUNT = 1000;
 
         /**
          * Shared_ptr constructor for DynamicTexture.
