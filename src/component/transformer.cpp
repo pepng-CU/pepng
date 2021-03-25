@@ -45,6 +45,12 @@ void Transformer::update(std::shared_ptr<WithComponents> parent) {
         transform->position += glm::vec3(transform->getRotationMatrix() * deltaPosition) * this->positionSpeed;
     }
 
+    auto deltaShear = glm::vec3(input->getAxis("shorizontal"), 0.0f, input->getAxis("svertical"));
+
+    if (glm::length(deltaShear) > 0.0f) {
+        transform->shear += deltaShear * this->positionSpeed;
+    }
+
     auto deltaRotation = glm::vec3(input->getAxis("yaw"), 0.0f, input->getAxis("pitch"));
 
     if (glm::length(deltaRotation) > 0.0f) {
@@ -61,6 +67,7 @@ void Transformer::update(std::shared_ptr<WithComponents> parent) {
         transform->position = glm::vec3(0.0f);
         transform->setRotation(glm::vec3(0.0f));
         transform->scale = glm::vec3(1.0f);
+        transform->shear = glm::vec3(0.0f);
     }
 }
 

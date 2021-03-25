@@ -6,29 +6,32 @@ Transform::Transform(const Transform &transform) :
         transform.rotationX,
         transform.rotationY,
         transform.rotationZ,
-        transform.scale
+        transform.scale,
+        transform.shear
     )
 {
     this->parentMatrix = glm::mat4(transform.parentMatrix);
 }
 
-Transform::Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) : 
+Transform::Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, glm::vec3 shear) : 
     Transform(
         position,
         glm::quat(glm::vec3(0.0f)),
         glm::quat(glm::vec3(0.0f)),
         glm::quat(glm::vec3(0.0f)),
-        scale
+        scale,
+        shear
     )
 {
     this->setRotation(rotation);
 }
 
-Transform::Transform(glm::vec3 position, glm::quat rotation, glm::vec3 scale) : 
+Transform::Transform(glm::vec3 position, glm::quat rotation, glm::vec3 scale, glm::vec3 shear) : 
     Transform(
         position,
         glm::eulerAngles(rotation),
-        scale
+        scale,
+        shear
     )
 {}
 
@@ -37,7 +40,8 @@ Transform::Transform(
     glm::quat rotationX, 
     glm::quat rotationY,
     glm::quat rotationZ, 
-    glm::vec3 scale
+    glm::vec3 scale,
+    glm::vec3 shear
 ) : 
     Component("Transform"),
     position(position), 
@@ -45,17 +49,18 @@ Transform::Transform(
     rotationY(rotationY),
     rotationZ(rotationZ),
     scale(scale),
+    shear(shear),
     parentMatrix(glm::mat4(1.0f))
 {}
 
-std::shared_ptr<Transform> Transform::makeTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) {
-    std::shared_ptr<Transform> transform(new Transform(position, rotation, scale));
+std::shared_ptr<Transform> Transform::makeTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, glm::vec3 shear) {
+    std::shared_ptr<Transform> transform(new Transform(position, rotation, scale, shear));
 
     return transform;
 }
 
-std::shared_ptr<Transform> Transform::makeTransform(glm::vec3 position, glm::quat rotation, glm::vec3 scale) {
-    std::shared_ptr<Transform> transform(new Transform(position, rotation, scale));
+std::shared_ptr<Transform> Transform::makeTransform(glm::vec3 position, glm::quat rotation, glm::vec3 scale, glm::vec3 shear) {
+    std::shared_ptr<Transform> transform(new Transform(position, rotation, scale, shear));
 
     return transform;
 }
@@ -80,12 +85,19 @@ glm::highp_mat4 Transform::getRotationMatrix() {
     return glm::toMat4(this->getRotation());
 }
 
+glm::highp_mat4 Transform::getShearMatrix(glm::highp_mat4 &matrix) {
+    // TODO
+
+    return glm::shearX3D(matrix, this->shear.x, this->shear.z);
+}
+
 glm::highp_mat4 Transform::getWorldMatrix() {
     auto matrix = glm::mat4(1.0f);
 
     matrix = this->getTranslateMatrix(matrix);
     matrix *= this->getRotationMatrix();
     matrix = this->getScaleMatrix(matrix);
+    matrix = this->getShearMatrix(matrix);
 
     return matrix;
 }
@@ -150,6 +162,7 @@ void Transform::imgui() {
     ImGui::InputFloat3("Position", glm::value_ptr(this->position));
     ImGui::InputFloat3("Rotation", glm::value_ptr(rotation));
     ImGui::InputFloat3("Scale", glm::value_ptr(this->scale));
+    ImGui::InputFloat3("Shear", glm::value_ptr(this->shear));
 }
 
 std::ostream& operator<<(std::ostream& os, const Transform& transform) {
@@ -166,18 +179,18 @@ std::ostream& operator<<(std::ostream& os, const Transform& transform) {
 
 CameraTransform::CameraTransform(const CameraTransform &transform) : Transform(transform) {}
 
-CameraTransform::CameraTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) : Transform(position, rotation, scale) {}
+CameraTransform::CameraTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, glm::vec3 shear) : Transform(position, rotation, scale, shear) {}
 
-CameraTransform::CameraTransform(glm::vec3 position, glm::quat rotation, glm::vec3 scale) : Transform(position, rotation, scale) {}
+CameraTransform::CameraTransform(glm::vec3 position, glm::quat rotation, glm::vec3 scale, glm::vec3 shear) : Transform(position, rotation, scale, shear) {}
 
-std::shared_ptr<CameraTransform> CameraTransform::makeCameraTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) {
-    std::shared_ptr<CameraTransform> transform(new CameraTransform(position, rotation, scale));
+std::shared_ptr<CameraTransform> CameraTransform::makeCameraTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, glm::vec3 shear) {
+    std::shared_ptr<CameraTransform> transform(new CameraTransform(position, rotation, scale, shear));
 
     return transform;
 }
 
-std::shared_ptr<CameraTransform> CameraTransform::makeCameraTransform(glm::vec3 position, glm::quat rotation, glm::vec3 scale) {
-    std::shared_ptr<CameraTransform> transform(new CameraTransform(position, rotation, scale));
+std::shared_ptr<CameraTransform> CameraTransform::makeCameraTransform(glm::vec3 position, glm::quat rotation, glm::vec3 scale, glm::vec3 shear) {
+    std::shared_ptr<CameraTransform> transform(new CameraTransform(position, rotation, scale, shear));
 
     return transform;
 }
@@ -209,19 +222,19 @@ glm::quat CameraTransform::getRotation() {
 }
 
 namespace pepng {
-    std::shared_ptr<Transform> makeTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) {
-        return Transform::makeTransform(position, rotation, scale);
+    std::shared_ptr<Transform> makeTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, glm::vec3 shear) {
+        return Transform::makeTransform(position, rotation, scale, shear);
     }
 
-    std::shared_ptr<Transform> makeTransform(glm::vec3 position, glm::quat rotation, glm::vec3 scale) {
-        return Transform::makeTransform(position, rotation, scale);
+    std::shared_ptr<Transform> makeTransform(glm::vec3 position, glm::quat rotation, glm::vec3 scale, glm::vec3 shear) {
+        return Transform::makeTransform(position, rotation, scale, shear);
     }
 
-    std::shared_ptr<CameraTransform> makeCameraTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale) {
-        return CameraTransform::makeCameraTransform(position, rotation, scale);
+    std::shared_ptr<CameraTransform> makeCameraTransform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale, glm::vec3 shear) {
+        return CameraTransform::makeCameraTransform(position, rotation, scale, shear);
     }
 
-    std::shared_ptr<CameraTransform> makeCameraTransform(glm::vec3 position, glm::quat rotation, glm::vec3 scale) {
-        return CameraTransform::makeCameraTransform(position, rotation, scale);
+    std::shared_ptr<CameraTransform> makeCameraTransform(glm::vec3 position, glm::quat rotation, glm::vec3 scale, glm::vec3 shear) {
+        return CameraTransform::makeCameraTransform(position, rotation, scale, shear);
     }
 }
