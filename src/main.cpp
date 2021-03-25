@@ -167,14 +167,6 @@ int main(int argc, char *argv[]) {
     /**
      * Objects
      */
-    auto light = pepng::makeObject("Light");
-
-    light
-        ->attachComponent(pepng::makeTransform(
-            glm::vec3(0.0f, 30.0f, 0.0f)
-        ))
-        ->attachComponent(pepng::makeLight(shadowShaderProgram, glm::vec3(1.0f)));
-
     static std::vector<std::shared_ptr<Object>> objects {
         pepng::makeAxes(
             pepng::makeTransform(
@@ -192,8 +184,7 @@ int main(int argc, char *argv[]) {
             ), 
             lineShaderProgram, 
             129
-        ),
-        light
+        )
     };
 
     pepng::load(
@@ -206,7 +197,8 @@ int main(int argc, char *argv[]) {
             objects.push_back(object);
         }),
         shaderProgram,
-        pepng::makeTransform()
+        pepng::makeTransform(),
+        shadowShaderProgram
     );
 
     /**
@@ -336,25 +328,6 @@ int main(int argc, char *argv[]) {
             currentObject->imgui();
         }
         
-        ImGui::End();
-
-        ImGui::Begin("Debug");
-
-        if(ImGui::Button("Create BlockGame")) {
-            pepng::load(
-                modelpath / "minecraft/scene.dae", 
-                std::function([](std::shared_ptr<Object> object) {
-                    object->attachComponent(pepng::makeSelector());
-
-                    objectAttachRecursive(object);
-
-                    objects.push_back(object);
-                }),
-                shaderProgram,
-                pepng::makeTransform()
-            );
-        }
-
         ImGui::End();
 
         ImGui::Render();

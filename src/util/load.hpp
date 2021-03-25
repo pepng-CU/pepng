@@ -99,7 +99,8 @@ namespace pepng {
         std::map<std::string, std::shared_ptr<Model>>& geometries, 
         std::map<std::string, std::shared_ptr<Camera>>& cameras,
         std::map<std::string, std::shared_ptr<Material>>& materials,
-        GLuint shaderProgram
+        GLuint shaderProgram,
+        GLuint shadowShaderProgram
     );
 
     /**
@@ -110,7 +111,8 @@ namespace pepng {
         std::map<std::string, std::shared_ptr<Model>>& geometries, 
         std::map<std::string, std::shared_ptr<Camera>>& cameras,
         std::map<std::string, std::shared_ptr<Material>>& materials,
-        GLuint shaderProgram
+        GLuint shaderProgram,
+        GLuint shadowShaderProgram
     );
 
     /**
@@ -120,7 +122,8 @@ namespace pepng {
         std::filesystem::path path, 
         std::function<void(std::shared_ptr<Object>)> function, 
         GLuint shaderProgram, 
-        std::shared_ptr<Transform> transform
+        std::shared_ptr<Transform> transform,
+        GLuint shadowShaderProgram
     );
 
     /**
@@ -146,12 +149,13 @@ namespace pepng {
         std::filesystem::path path, 
         std::function<void(std::shared_ptr<Object>)> function, 
         GLuint shaderProgram, 
-        std::shared_ptr<Transform> transform
+        std::shared_ptr<Transform> transform,
+        GLuint shadowShaderProgram
     ) {
         if(path.extension() == ".obj") {
             loadObjectOBJ(path, function, shaderProgram, transform);
         } else if(path.extension() == ".dae") {
-            loadObjectDAE(path, function, shaderProgram, transform);
+            loadObjectDAE(path, function, shaderProgram, transform, shadowShaderProgram);
         }
     }
 

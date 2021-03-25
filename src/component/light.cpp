@@ -68,10 +68,12 @@ void Light::initFBO() {
 
     glUseProgram(this->shaderProgram);
 
+    auto lightPos = this->transform->position;
+
     glUniform3fv(
         glGetUniformLocation(shaderProgram, "u_light_pos"),
         1,
-        glm::value_ptr(this->transform->position)
+        glm::value_ptr(lightPos)
     );
 
     glUniform1f(
@@ -80,7 +82,6 @@ void Light::initFBO() {
     );
 
     auto shadowProj = this->getProjection();
-    auto lightPos = this->transform->position;
 
     std::vector<glm::mat4> shadowTransforms;
     

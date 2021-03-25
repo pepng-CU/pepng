@@ -436,7 +436,8 @@ std::shared_ptr<Object> loadObjectDataDAE(
     std::map<std::string, std::shared_ptr<Model>>& geometries, 
     std::map<std::string, std::shared_ptr<Camera>>& cameras,
     std::map<std::string, std::shared_ptr<Material>>& materials,
-    GLuint shaderProgram
+    GLuint shaderProgram,
+    GLuint shadowShaderProgram
 ) {
     std::string objectName = node->FindAttribute("name")->Value();
 
@@ -529,6 +530,11 @@ std::shared_ptr<Object> loadObjectDataDAE(
         object->attachComponent(pepng::makeTransform(position, rotation, scale));
     }
 
+    if(auto iLight = node->FirstChildElement("instance_light")) {
+        // TODO: Import actual light values instead of default.
+        object->attachComponent(pepng::makeLight(shadowShaderProgram, glm::vec3(1.0f)));
+    }
+
     if(auto iGeometry = node->FirstChildElement("instance_geometry")) {
         std::string geometryId = iGeometry->FindAttribute("url")->Value();
 
@@ -553,7 +559,7 @@ std::shared_ptr<Object> loadObjectDataDAE(
 
     std::cout << "Loaded object: " << objectName << std::endl;
 
-    object->children = pepng::loadObjectsDAE(node, geometries, cameras, materials, shaderProgram);
+    object->children = pepng::loadObjectsDAE(node, geometries, cameras, materials, shaderProgram, shadowShaderProgram);
 
     return object;
 }
@@ -563,14 +569,15 @@ std::vector<std::shared_ptr<Object>> pepng::loadObjectsDAE(
     std::map<std::string, std::shared_ptr<Model>>& geometries, 
     std::map<std::string, std::shared_ptr<Camera>>& cameras,
     std::map<std::string, std::shared_ptr<Material>>& materials,
-    GLuint shaderProgram
+    GLuint shaderProgram,
+    GLuint shadowShaderProgram
 ) {
     std::vector<std::shared_ptr<Object>> objects;
 
     auto objNode = node->FirstChildElement("node");
 
     while(objNode != nullptr) {
-        objects.push_back(loadObjectDataDAE(objNode, geometries, cameras, materials, shaderProgram));
+        objects.push_back(loadObjectDataDAE(objNode, geometries, cameras, materials, shaderProgram, shadowShaderProgram));
 
         objNode = objNode->NextSiblingElement("node");
     }
@@ -583,7 +590,8 @@ std::map<std::string, std::shared_ptr<Object>> pepng::loadScenesDAE(
     std::map<std::string, std::shared_ptr<Model>>& geometries, 
     std::map<std::string, std::shared_ptr<Camera>>& cameras,
     std::map<std::string, std::shared_ptr<Material>>& materials,
-    GLuint shaderProgram
+    GLuint shaderProgram,
+    GLuint shadowShaderProgram
 ) {
     std::map<std::string, std::shared_ptr<Object>> scenes;
 
@@ -596,7 +604,7 @@ std::map<std::string, std::shared_ptr<Object>> pepng::loadScenesDAE(
 
         sceneObj->attachComponent(pepng::makeTransform());
 
-        sceneObj->children = loadObjectsDAE(scene, geometries, cameras, materials, shaderProgram);
+        sceneObj->children = loadObjectsDAE(scene, geometries, cameras, materials, shaderProgram, shadowShaderProgram);
 
         scenes[sceneName] = sceneObj;
 
@@ -612,7 +620,8 @@ void pepng::loadObjectDAE(
     std::filesystem::path path, 
     std::function<void(std::shared_ptr<Object>)> function, 
     GLuint shaderProgram, 
-    std::shared_ptr<Transform> transform
+    std::shared_ptr<Transform> transform,
+    GLuint shadowShaderProgram
 ) {
     std::cout << "Loading COLLADA: " << path << std::endl;
 
@@ -638,7 +647,7 @@ void pepng::loadObjectDAE(
 
     auto geometries = futureGeometries.get();
 
-    auto scenes = loadScenesDAE(root->FirstChildElement("library_visual_scenes"), geometries, cameras, materials, shaderProgram);
+    auto scenes = loadScenesDAE(root->FirstChildElement("library_visual_scenes"), geometries, cameras, materials, shaderProgram, shadowShaderProgram);
 
     for(auto scene : scenes) {
         function(scene.second);
