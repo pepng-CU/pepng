@@ -6,9 +6,11 @@ uniform samplerCube u_shadow;
 uniform vec3 u_light_pos;
 uniform vec3 u_light_color;
 uniform vec3 u_camera_pos;
+uniform mat4 u_view;
 uniform float u_far;
 uniform bool u_receive_shadow;
 uniform bool u_display_texture;
+uniform float u_intensity;
 
 in vec2 tex_coord;
 in vec3 position;
@@ -62,10 +64,16 @@ vec3 calculate_diffuse(float Kd, vec3 light_dir) {
 
 vec3 calculate_specular(float Ks, float shine, vec3 light_dir) {
     vec3 view_dir = normalize(u_camera_pos - frag_pos.xyz);
-    vec3 halfway_dir = normalize(light_dir + view_dir);  
-    float spec = pow(max(dot(normal, halfway_dir), 0.0), shine);
+    vec3 reflect_dir = reflect(-light_dir, normal);
+    float spec = pow(clamp(dot(view_dir, reflect_dir), 0.0, 1.0), shine);
 
     return Ks * spec * u_light_color;  
+}
+
+float calculate_intensity() {
+    float dist = length(u_light_pos - frag_pos.xyz);
+
+    return min(1.0, u_intensity / (dist * dist));
 }
 
 vec3 calculate_light(vec4 texture_point) {
@@ -75,17 +83,18 @@ vec3 calculate_light(vec4 texture_point) {
     vec3 light_dir = calculate_light_dir();
 
     vec3 ambient = calculate_ambient(0.3, base_color);
-    vec3 diffuse = calculate_diffuse(1.0, light_dir);
-    vec3 specular = calculate_specular(1.0, 64, light_dir);
+    vec3 diffuse = calculate_diffuse(0.5, light_dir);
+    vec3 specular = calculate_specular(0.5, 128, light_dir);
+    float intensity = calculate_intensity();
 
     // Shadow
     if(u_receive_shadow) {
         float bias = max(0.15 * (1.0 - dot(normal, light_dir)), 0.15); 
         float shadow = calculate_shadow(bias);
 
-        return (ambient + (1.0 - shadow) * (diffuse + specular)) * base_color; 
+        return (ambient + (1.0 - shadow) * (diffuse + specular) * intensity) * base_color; 
     } else {
-        return (ambient + diffuse + specular) * base_color; 
+        return (ambient + (diffuse + specular) * intensity) * base_color; 
     }
 }
 

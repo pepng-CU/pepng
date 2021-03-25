@@ -4,9 +4,10 @@ Light::Light(GLuint shaderProgram, glm::vec3 color) :
     Component("Light"), 
     shaderProgram(shaderProgram),
     near(0.1f),
-    far(50.0f),
+    far(100.0f),
     textureDimension(2048),
-    color(color)
+    color(color),
+    intensity(1000)
 {}
 
 Light::Light(const Light& light) : 
@@ -15,7 +16,8 @@ Light::Light(const Light& light) :
     near(light.near),
     far(light.far),
     textureDimension(light.textureDimension),
-    color(light.color)
+    color(light.color),
+    intensity(light.intensity)
 {}
 
 std::vector<std::shared_ptr<Light>> Light::lights;
@@ -165,6 +167,11 @@ void Light::render(GLuint shaderProgram) {
         glGetUniformLocation(shaderProgram, "u_far"),
         this->far
     );
+
+    glUniform1f(
+        glGetUniformLocation(shaderProgram, "u_intensity"),
+        this->intensity
+    );
 }
 
 void Light::imgui() {
@@ -172,6 +179,7 @@ void Light::imgui() {
 
     ImGui::InputFloat("Near", &this->near);
     ImGui::InputFloat("Far", &this->far);
+    ImGui::InputFloat("Intensity", &this->intensity);
     ImGui::ColorPicker3("Color", glm::value_ptr(this->color));
 }
 

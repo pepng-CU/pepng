@@ -36,6 +36,7 @@ Mouse (Camera controls)
 
 Keyboard (World controls)
 - WASD: Relative forward/right move the selected object.
+- QECV: Relative skew the selected object.
 - Arrows: Relative yaw/pitch rotate the selected object.
 - UJ: Relative scale of selected object.
 - 0: Selects the top-level scene/"world" object.
@@ -43,6 +44,8 @@ Keyboard (World controls)
 - T: Applies GL_TRIANGLES render to all objects in scene.
 - L: Applies GL_LINES render to all objects in scene.
 - P: Applies GL_POINTS render to all objects in scene.
+- B: Toggle Shadows.
+- X: Toggle Textures.
 ```
 
 ## Features
