@@ -1,7 +1,6 @@
 #include "camera.hpp"
 #include "../component/transform.hpp"
 #include "../component/camera.hpp"
-#include "../component/fps.hpp"
 #include "../component/light.hpp"
 
 namespace pepng {
@@ -10,10 +9,6 @@ namespace pepng {
         
         cameraObj->attach_component(transform);
         cameraObj->attach_component(camera);
-
-        if(Camera::cameras.size() == 1) {
-            cameraObj->attach_component(pepng::make_fps());
-        }
 
         return cameraObj;
     }

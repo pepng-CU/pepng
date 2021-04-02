@@ -1,7 +1,7 @@
 #include "transformer.hpp"
 
-#include "../io/io.hpp"
-#include "transform.hpp"
+#include "../../io/io.hpp"
+#include "../transform.hpp"
 
 Transformer::Transformer(float positionSpeed, float rotationSpeed, float scaleSpeed) :
     Component("Transformer"),
@@ -36,7 +36,7 @@ void Transformer::update(std::shared_ptr<WithComponents> parent) {
         return;
     }
 
-    auto transform = parent->get_component<Transform>();
+    auto transform = parent->try_get_component<Transform>();
 
     auto input = Input::get();
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "component.hpp"
+#include "../component.hpp"
 
 /**
  * Component that applies IO based transformation on Transform.

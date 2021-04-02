@@ -31,10 +31,12 @@ namespace pepng {
      * Load from thread.
      */
     template <typename T, typename... Args>
-    void load_thread(std::filesystem::path path, std::function<void(std::shared_ptr<T>)> function, Args... args);
+    void load_model_file_thread(std::filesystem::path path, std::function<void(std::shared_ptr<T>)> function, Args... args);
 
     /**
      * Loads model geometry from OBJ file.
+     * 
+     * @deprecated Use obj_load instead.
      */
     void obj_load_model(
         std::filesystem::path path, 
@@ -44,7 +46,7 @@ namespace pepng {
     /**
      * Loads model geometry and generates object for OBJ file.
      */
-    void obj_load_object(
+    void obj_load(
         std::filesystem::path path, 
         std::function<void(std::shared_ptr<Object>)> function, 
         GLuint shaderProgram, 
@@ -117,7 +119,7 @@ namespace pepng {
     /**
      * Loads a complete COLLADA file (calling the callbase `function` whenever an Object is loaded).
      */
-    void collada_load_all(
+    void collada_load(
         std::filesystem::path path, 
         std::function<void(std::shared_ptr<Object>)> function, 
         GLuint shaderProgram, 
@@ -129,7 +131,7 @@ namespace pepng {
      * Thread loader for Model.
      */
     template <>
-    inline void load_thread(
+    inline void load_model_file_thread(
         std::filesystem::path path, 
         std::function<void(std::shared_ptr<Model>)> function
     ) {
@@ -144,7 +146,7 @@ namespace pepng {
      * Thread loader for Object.
      */
     template <>
-    inline void load_thread(
+    inline void load_model_file_thread(
         std::filesystem::path path, 
         std::function<void(std::shared_ptr<Object>)> function, 
         GLuint shaderProgram, 
@@ -152,9 +154,9 @@ namespace pepng {
         GLuint shadowShaderProgram
     ) {
         if(path.extension() == ".obj") {
-            obj_load_object(path, function, shaderProgram, transform);
+            obj_load(path, function, shaderProgram, transform);
         } else if(path.extension() == ".dae") {
-            collada_load_all(path, function, shaderProgram, transform, shadowShaderProgram);
+            collada_load(path, function, shaderProgram, transform, shadowShaderProgram);
         }
     }
 
@@ -162,7 +164,7 @@ namespace pepng {
      * Generic load class.
      */
     template <typename T, typename... Args>
-    void load(
+    void load_model_file(
         std::filesystem::path path, 
         std::function<void(std::shared_ptr<T>)> function, 
         Args... args
@@ -171,7 +173,7 @@ namespace pepng {
             throw std::runtime_error("Could not find file: " + path.string());
         }
 
-        std::thread thread(load_thread<T, Args...>, path, function, args...);
+        std::thread thread(load_model_file_thread<T, Args...>, path, function, args...);
 
         thread.detach();
     }
@@ -180,7 +182,7 @@ namespace pepng {
      * Generic load sync class.
      */
     template <typename T, typename... Args>
-    void loadSync(
+    void load_model_file_sync(
         std::filesystem::path path, 
         std::function<void(std::shared_ptr<T>)> function, 
         Args... args
@@ -189,7 +191,7 @@ namespace pepng {
             throw std::runtime_error("Could not find file: " + path.string());
         }
 
-        std::thread thread(load_thread<T, Args...>, path, function, args...);
+        std::thread thread(load_model_file_thread<T, Args...>, path, function, args...);
 
         thread.join();
     }

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "object.hpp"
-#include "../component/transform.hpp"
+#include "../object.hpp"
+#include "../../component/transform.hpp"
 
 namespace pepng {
     /**

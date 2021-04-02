@@ -1,9 +1,9 @@
 #include "dynamic_texture.hpp"
 
-#include "renderer.hpp"
-#include "../io/io.hpp"
-#include "transform.hpp"
-#include "../object/camera.hpp"
+#include "../renderer.hpp"
+#include "../../io/io.hpp"
+#include "../transform.hpp"
+#include "../../object/camera.hpp"
 
 DynamicTexture::DynamicTexture(int startTextureIndex, int endTextureIndex) :
     Component("DynamicTexture"),
@@ -43,7 +43,7 @@ void DynamicTexture::update(std::shared_ptr<WithComponents> parent) {
     std::shared_ptr<Renderer> renderer;
 
     try {
-        renderer = parent->get_component<Renderer>();
+        renderer = parent->try_get_component<Renderer>();
     } catch(...) {
         throw std::runtime_error("DynamicTexture requires a Renderer component.");
     }

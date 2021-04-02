@@ -53,6 +53,12 @@ void object_hierarchy(std::shared_ptr<Object> object, std::shared_ptr<Object>* c
 void object_attach_recursive(std::shared_ptr<Object> object) {
     object->attach_component(pepng::make_transformer());
 
+    // Adds FPS controller to cameras.
+    try {
+        object->try_get_component<Camera>();
+        object->attach_component(pepng::make_fps());
+    } catch(...) {}
+
     // Adds DynamicTexture to the screen.
     if(object->name == "Display") {
         object->attach_component(pepng::make_dynamic_texture(2, 4));
@@ -181,7 +187,7 @@ int main(int argc, char *argv[]) {
         )
     };
 
-    pepng::load(
+    pepng::load_model_file(
         modelpath / "sponza" / "scene.dae", 
         std::function([](std::shared_ptr<Object> object) {
             object->attach_component(pepng::make_selector());

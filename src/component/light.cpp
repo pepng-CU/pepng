@@ -115,7 +115,7 @@ void Light::update_fbo() {
 }
 
 void Light::init(std::shared_ptr<WithComponents> parent) {
-    this->transform = parent->get_component<Transform>();
+    this->transform = parent->try_get_component<Transform>();
 
     if(this->transform == nullptr) {
         throw std::runtime_error("Light does not have a transform.");

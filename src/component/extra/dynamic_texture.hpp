@@ -5,10 +5,10 @@
 #include <GL/glew.h>
 #include <glm/gtx/string_cast.hpp>
 
-#include "component.hpp"
-#include "renderer.hpp"
-#include "../gl/model.hpp"
-#include "../gl/material.hpp"
+#include "../component.hpp"
+#include "../renderer.hpp"
+#include "../../gl/model.hpp"
+#include "../../gl/material.hpp"
 
 /**
  * Component that switches the Renderer's texture every ~10 seconds.

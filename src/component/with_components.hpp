@@ -51,6 +51,22 @@ class WithComponents : public WithImGui, public std::enable_shared_from_this<Wit
 
         /**
          * Generic method to get component of certain type.
+         * 
+         * Throws if component cannot be found.
+         */
+        template<typename T>
+        std::shared_ptr<T> try_get_component() {
+            auto component = this->get_component<T>();
+
+            if (!component) throw std::runtime_error("Could not find Component.");
+
+            return component;
+        }
+
+        /**
+         * Generic method to get component of certain type.
+         * 
+         * Returns null if component cannot be found.
          */
         template<typename T>
         std::shared_ptr<T> get_component() {
@@ -60,7 +76,7 @@ class WithComponents : public WithImGui, public std::enable_shared_from_this<Wit
                 }
             }
 
-            throw std::runtime_error("Could not find Component.");
+            return std::shared_ptr<T>(nullptr);
         }
 
         /**

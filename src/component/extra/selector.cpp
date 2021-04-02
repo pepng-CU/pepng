@@ -1,8 +1,8 @@
 #include "selector.hpp"
 
-#include "../io/io.hpp"
+#include "../../io/io.hpp"
 #include "transformer.hpp"
-#include "renderer.hpp"
+#include "../renderer.hpp"
 
 Selector::Selector() : 
     Component("Selector"), 
@@ -38,11 +38,11 @@ Selector* Selector::clone_implementation() {
 
 void Selector::dfs_switch(std::shared_ptr<Object> object, int& index) {
     try {
-        object->get_component<Transformer>()->set_active(index == this->index);
+        object->try_get_component<Transformer>()->set_active(index == this->index);
     } catch(...) {}
 
     try {
-        auto renderer = object->get_component<Renderer>();
+        auto renderer = object->try_get_component<Renderer>();
 
         renderer->render_mode = this->render_mode;
         renderer->receive_shadow = this->receive_shadow;
@@ -73,11 +73,11 @@ void Selector::bfs_switch(std::shared_ptr<Object> object) {
             }
             
             try {
-                object->get_component<Transformer>()->set_active(index++ == this->index);
+                object->try_get_component<Transformer>()->set_active(index++ == this->index);
             } catch(...) {}
 
             try {
-                auto renderer = object->get_component<Renderer>();
+                auto renderer = object->try_get_component<Renderer>();
 
                 renderer->render_mode = this->render_mode;
                 renderer->receive_shadow = this->receive_shadow;

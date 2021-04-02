@@ -6,7 +6,7 @@
 
 #include <GL/glew.h>
 
-#include "component.hpp"
+#include "../component.hpp"
 
 class Object;
 
@@ -70,4 +70,4 @@ namespace pepng {
     std::shared_ptr<Selector> make_selector();
 };
 
-#include "../object/object.hpp"
+#include "../../object/object.hpp"

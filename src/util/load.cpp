@@ -102,7 +102,7 @@ void pepng::obj_load_model(std::filesystem::path path, std::function<void(std::s
     in.close();
 }
 
-void pepng::obj_load_object(
+void pepng::obj_load(
     std::filesystem::path path, 
     std::function<void(std::shared_ptr<Object>)> function, 
     GLuint shaderProgram, 
@@ -113,7 +113,7 @@ void pepng::obj_load_object(
     
     object->attach_component(transform->clone());
 
-    load_thread(
+    load_model_file_thread(
         path,
         std::function([object, shaderProgram](std::shared_ptr<Model> model) mutable {
             auto child = pepng::make_object(model->name());
@@ -431,7 +431,7 @@ std::map<std::string, std::shared_ptr<Model>> pepng::collada_load_geometries(
     return geometries;
 }
 
-std::shared_ptr<Object> loadObjectDataDAE(
+std::shared_ptr<Object> collada_load_object_data(
     tinyxml2::XMLElement* node, 
     std::map<std::string, std::shared_ptr<Model>>& geometries, 
     std::map<std::string, std::shared_ptr<Camera>>& cameras,
@@ -577,7 +577,7 @@ std::vector<std::shared_ptr<Object>> pepng::collada_load_objects(
     auto objNode = node->FirstChildElement("node");
 
     while(objNode != nullptr) {
-        objects.push_back(loadObjectDataDAE(objNode, geometries, cameras, materials, shaderProgram, shadowShaderProgram));
+        objects.push_back(collada_load_object_data(objNode, geometries, cameras, materials, shaderProgram, shadowShaderProgram));
 
         objNode = objNode->NextSiblingElement("node");
     }
@@ -616,7 +616,7 @@ std::map<std::string, std::shared_ptr<Object>> pepng::collada_load_scenes(
     return scenes;
 }
 
-void pepng::collada_load_all(
+void pepng::collada_load(
     std::filesystem::path path, 
     std::function<void(std::shared_ptr<Object>)> function, 
     GLuint shaderProgram, 

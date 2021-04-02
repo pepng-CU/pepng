@@ -1,6 +1,6 @@
 #pragma once
 
-#include "component.hpp"
+#include "../component.hpp"
 
 /**
  * An FPS like controller for object.

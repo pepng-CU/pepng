@@ -40,7 +40,7 @@ void Object::imgui() {
 void Object::update() {
     WithComponents::update_components();
 
-    auto transform = this->get_component<Transform>();
+    auto transform = this->try_get_component<Transform>();
 
     if(transform == nullptr) {
         std::stringstream ss;
@@ -57,7 +57,7 @@ void Object::update() {
             continue;
         }
 
-        if(auto childTransform = child->get_component<Transform>()) {
+        if(auto childTransform = child->try_get_component<Transform>()) {
             childTransform->parent_matrix = glm::mat4(parent_matrix);
         }
 

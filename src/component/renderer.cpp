@@ -50,7 +50,7 @@ void Renderer::render(std::shared_ptr<WithComponents> parent, GLuint shaderProgr
     std::shared_ptr<Transform> transform;
 
     try {
-        transform = parent->get_component<Transform>();
+        transform = parent->try_get_component<Transform>();
     } catch(...) {
         std::stringstream ss;
 

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "object.hpp"
-#include "axes.hpp"
 #include "camera.hpp"
-#include "grid.hpp"
-#include "texture.hpp"
+
+#include "extra/axes.hpp"
+#include "extra/grid.hpp"
+#include "extra/texture.hpp"
