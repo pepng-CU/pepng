@@ -159,11 +159,6 @@ int main(int argc, char *argv[]) {
         pepng::make_shader(shaderpath / "shadow" / "geometry.glsl", GL_GEOMETRY_SHADER)
     );
 
-    static auto textureShaderProgram = pepng::make_shader_program(
-        pepng::make_shader(shaderpath / "texture" / "vertex.glsl", GL_VERTEX_SHADER),
-        pepng::make_shader(shaderpath / "texture" / "fragment.glsl", GL_FRAGMENT_SHADER)
-    );
-
     /**
      * Objects
      */
@@ -247,8 +242,6 @@ int main(int argc, char *argv[]) {
     input
         ->attach_device(keyboard)
         ->attach_device(mouse);
-
-    auto textureObj = pepng::make_texture_object(pepng::make_transform(), textureShaderProgram);
 
     /**
      * OpenGL

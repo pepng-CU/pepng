@@ -165,7 +165,9 @@ std::map<std::string, std::future<std::shared_ptr<Texture>>> pepng::collada_load
 
         textures[textureId] = std::async(loadTexture, texturePath);
 
-        std::cout << "Loaded texture: " << textureId << std::endl;
+        #if DEBUG_MODEL
+            std::cout << "Loaded texture: " << textureId << std::endl;
+        #endif
 
         texture = texture->NextSiblingElement("image");
     }
@@ -225,7 +227,9 @@ std::map<std::string, std::shared_ptr<Texture>> pepng::collada_load_effects(
             effects[effectId] = pepng::make_texture();
         }
 
-        std::cout << "Loaded effect: " << effectId << std::endl;
+        #if DEBUG_MODEL
+            std::cout << "Loaded effect: " << effectId << std::endl;
+        #endif
 
         effect = effect->NextSiblingElement("effect");
     }
@@ -262,7 +266,9 @@ std::map<std::string, std::shared_ptr<Material>> pepng::collada_load_materials(
 
         materials[materialId] = pepng::make_material(shaderProgram, texture);
 
-        std::cout << "Loaded material: " << materialId << std::endl;
+        #if DEBUG_MODEL
+            std::cout << "Loaded material: " << materialId << std::endl;
+        #endif
 
         material = material->NextSiblingElement("material");
     }
@@ -304,7 +310,9 @@ std::map<std::string, std::shared_ptr<Camera>> pepng::collada_load_cameras(
 
         cameras[cameraId] = cameraComponent;
 
-        std::cout << "Loaded camera: " << cameraId << std::endl;
+        #if DEBUG_MODEL
+            std::cout << "Loaded camera: " << cameraId << std::endl;
+        #endif
 
         camera = camera->NextSiblingElement("camera");
     }
@@ -423,7 +431,9 @@ std::map<std::string, std::shared_ptr<Model>> pepng::collada_load_geometries(
 
         geometries[geometryId] = model;
 
-        std::cout << "Loaded geometry: " << geometryId << std::endl;
+        #if DEBUG_MODEL
+            std::cout << "Loaded geometry: " << geometryId << std::endl;
+        #endif
 
         geometry = geometry->NextSiblingElement("geometry");
     }
@@ -557,7 +567,9 @@ std::shared_ptr<Object> collada_load_object_data(
         }
     }
 
-    std::cout << "Loaded object: " << objectName << std::endl;
+    #if DEBUG_MODEL
+        std::cout << "Loaded object: " << objectName << std::endl;
+    #endif
 
     object->children = pepng::collada_load_objects(node, geometries, cameras, materials, shaderProgram, shadowShaderProgram);
 
@@ -608,7 +620,9 @@ std::map<std::string, std::shared_ptr<Object>> pepng::collada_load_scenes(
 
         scenes[sceneName] = sceneObj;
 
-        std::cout << "Loaded scene: " << sceneName << std::endl;
+        #if DEBUG_MODEL
+            std::cout << "Loaded scene: " << sceneName << std::endl;
+        #endif
 
         scene = scene->NextSiblingElement("visual_scene");
     }
@@ -623,7 +637,9 @@ void pepng::collada_load(
     std::shared_ptr<Transform> transform,
     GLuint shadowShaderProgram
 ) {
-    std::cout << "Loading COLLADA: " << path << std::endl;
+    #if DEBUG_MODEL
+        std::cout << "Loading COLLADA: " << path << std::endl;
+    #endif
 
     tinyxml2::XMLDocument doc;
 
@@ -653,5 +669,7 @@ void pepng::collada_load(
         function(scene.second);
     }
 
-    std::cout << "Loaded COLLADA: " << path << std::endl;
+    #if DEBUG_MODEL
+        std::cout << "Loaded COLLADA: " << path << std::endl;
+    #endif
 }

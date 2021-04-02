@@ -10,7 +10,9 @@
 #include "transform.hpp"
 #include "with_components.hpp"
 
-#include "extra/dynamic_texture.hpp"
-#include "extra/fps.hpp"
-#include "extra/selector.hpp"
-#include "extra/transformer.hpp"
+#if EXTRA_COMPONENTS
+    #include "extra/dynamic_texture.hpp"
+    #include "extra/fps.hpp"
+    #include "extra/selector.hpp"
+    #include "extra/transformer.hpp"
+#endif 

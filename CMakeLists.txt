@@ -44,6 +44,10 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/tinyxml2)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 
 if(NOT NO_EXEC)
+    set(EXTRA_OBJECTS ON)
+    set(EXTRA_COMPONENTS ON)
+    set(DEBUG_MODEL OFF)
+
     find_package(OpenGL REQUIRED COMPONENTS OpenGL)
 
     include(BuildGLFW)
@@ -52,6 +56,18 @@ if(NOT NO_EXEC)
 
     add_executable(${EXEC} drivers/main.cpp)
 
+    if(EXTRA_OBJECTS)
+        target_compile_definitions(${EXEC} PRIVATE EXTRA_OBJECTS)
+    endif()
+
+    if(EXTRA_COMPONENTS)
+        target_compile_definitions(${EXEC} PRIVATE EXTRA_COMPONENTS)
+    endif()
+
+    if(DEBUG_COLLADA)
+        target_compile_definitions(${EXEC} PRIVATE DEBUG_MODEL)
+    endif()
+    
     target_include_directories(${EXEC} 
         PUBLIC ${CMAKE_SOURCE_DIR}/thirdparty/stb
         PUBLIC ${CMAKE_SOURCE_DIR}/include
