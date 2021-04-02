@@ -17,7 +17,6 @@
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <GL/glew.h>
-#include <GLFW/glfw3.h>
 #include <tinyxml2.h>
 
 #include "utils.hpp"

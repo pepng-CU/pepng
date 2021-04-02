@@ -1,8 +1,5 @@
 #pragma once
 
-#include <GL/glew.h>
-#include <stdarg.h>
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -10,6 +7,9 @@
 #include <cstring>
 #include <vector>
 #include <sstream>
+
+#include <stdarg.h>
+#include <GL/glew.h>
 
 namespace pepng {
     /**

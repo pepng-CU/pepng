@@ -6,7 +6,9 @@ set(CMAKE_BUILD_TYPE Debug)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
-project(COMP371)
+set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib)
+
+project(pepng)
 
 include(ExternalProject)
 
@@ -34,29 +36,26 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
     endif()
 endif() 
 
-find_package(OpenGL REQUIRED COMPONENTS OpenGL)
-
 include(BuildGLEW)
-include(BuildGLFW)
 include(BuildGLM)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/imgui-cmake)
-
-
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/tinyxml2)
+add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 
-set(EXEC main)
+if(NOT NO_EXEC)
+    find_package(OpenGL REQUIRED COMPONENTS OpenGL)
 
-file(GLOB_RECURSE SRC src/*.cpp)
+    include(BuildGLFW)
 
-add_executable(${EXEC} ${SRC})
+    set(EXEC main)
 
-include_directories(${CMAKE_SOURCE_DIR}/thirdparty/stb)
+    add_executable(${EXEC} drivers/main.cpp)
 
-link_directories(${EXEC} ${CMAKE_SOURCE_DIR}/thirdparty/stb) 
+    target_include_directories(${EXEC} 
+        PUBLIC ${CMAKE_SOURCE_DIR}/thirdparty/stb
+        PUBLIC ${CMAKE_SOURCE_DIR}/include
+    )
 
-target_link_libraries(${EXEC} OpenGL::GL glew_s glfw glm imgui tinyxml2)
-
-list(APPEND BIN ${EXEC})
-
-install(TARGETS ${BIN} DESTINATION ${CMAKE_INSTALL_PREFIX})
+    target_link_libraries(${EXEC} OpenGL::GL glew_s glfw glm imgui ${PROJECT_NAME})
+endif()

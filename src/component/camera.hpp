@@ -1,10 +1,13 @@
 #pragma once
 
+#include <sstream>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <GL/glew.h>
 
-#include "components.hpp"
+#include "component.hpp"
+#include "transform.hpp"
 
 /**
  * Viewport used for glViewport (which uses relative position instead of absolute).

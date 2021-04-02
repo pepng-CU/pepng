@@ -1,3 +1,5 @@
+#include "dynamic_texture.hpp"
+
 #include "renderer.hpp"
 #include "../io/io.hpp"
 #include "transform.hpp"

@@ -1,8 +1,5 @@
 #pragma once
 
-#include <GL/glew.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <unordered_set>
 #include <iostream>
 #include <fstream>
@@ -11,6 +8,10 @@
 #include <memory>
 #include <sstream>
 #include <string>
+
+#include <GL/glew.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 class Renderer;
 

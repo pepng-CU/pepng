@@ -1,10 +1,11 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
 #include <vector>
 #include <memory>
 #include <string>
+
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 enum AxisType {
     FIRST, SECOND, THIRD, FORTH

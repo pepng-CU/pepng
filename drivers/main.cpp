@@ -20,13 +20,7 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_glfw.h>
 
-#include "util/utils.hpp"
-#include "util/load.hpp"
-#include "gl/gl.hpp"
-#include "component/components.hpp"
-#include "object/objects.hpp"
-#include "io/io.hpp"
-#include "ui/ui.hpp"
+#include <pepng.h>
 
 static glm::vec2 windowDimension = glm::vec2(1024.0f, 768.0f);
 
@@ -188,7 +182,7 @@ int main(int argc, char *argv[]) {
     };
 
     pepng::load(
-        modelpath / "pa2" / "scene.dae", 
+        modelpath / "sponza" / "scene.dae", 
         std::function([](std::shared_ptr<Object> object) {
             object->attachComponent(pepng::makeSelector());
 

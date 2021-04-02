@@ -2,13 +2,13 @@
 
 #include <memory>
 #include <vector>
-#include <imgui.h>
-#include <glm/glm.hpp>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 #include <algorithm>
 #include <iostream>
 #include <string>
+
+#include <imgui.h>
+#include <glm/glm.hpp>
+#include <GL/glew.h>
 
 #include "../ui/with_imgui.hpp"
 #include "../util/cloneable.hpp"
