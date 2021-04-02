@@ -151,7 +151,7 @@ Input::Input(GLFWwindow* window) : __window(window) {}
 std::vector<std::shared_ptr<Input>> Input::__inputs = std::vector<std::shared_ptr<Input>>();
 
 std::shared_ptr<Input> Input::make_input(GLFWwindow* window) {
-    std::shared_ptr<Input> input (new Input(window));
+    std::shared_ptr<Input> input(new Input(window));
 
     __inputs.push_back(input);
 
