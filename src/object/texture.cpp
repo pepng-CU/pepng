@@ -3,17 +3,17 @@
 #include "../gl/buffer.hpp"
 #include "../gl/model.hpp"
 
-std::shared_ptr<Object> pepng::makeTextureObj(std::shared_ptr<Transform> transform, GLuint shaderProgram) {
-    auto axes = pepng::makeObject("Texture");
+std::shared_ptr<Object> pepng::make_texture_object(std::shared_ptr<Transform> transform, GLuint shaderProgram) {
+    auto axes = pepng::make_object("Texture");
 
-    axes->attachComponent(transform);
+    axes->attach_component(transform);
 
-    auto material = pepng::makeMaterial(shaderProgram, pepng::makeTexture());
+    auto material = pepng::make_material(shaderProgram, pepng::make_texture());
 
-    axes->attachComponent(pepng::makeRenderer(
-            pepng::makeModel()
-                ->attachBuffer(
-                    pepng::makeBuffer<glm::vec2>(
+    axes->attach_component(pepng::make_renderer(
+            pepng::make_model()
+                ->attach_buffer(
+                    pepng::make_buffer<glm::vec2>(
                         std::vector { 
                             glm::vec2(-1.0f, -1.0f),
                             glm::vec2(1.0f, -1.0f), 
@@ -25,8 +25,8 @@ std::shared_ptr<Object> pepng::makeTextureObj(std::shared_ptr<Transform> transfo
                         2
                     )
                 )
-                ->attachBuffer(
-                    pepng::makeBuffer<int>(
+                ->attach_buffer(
+                    pepng::make_buffer<int>(
                         std::vector {
                             0, 1, 2,
                             1, 3, 2
@@ -34,9 +34,9 @@ std::shared_ptr<Object> pepng::makeTextureObj(std::shared_ptr<Transform> transfo
                         GL_ELEMENT_ARRAY_BUFFER
                     )
                 )
-                ->setElementArray(true)
-                ->setCount(6)
-                ->setName("Texture"), 
+                ->set_element_array(true)
+                ->set_count(6)
+                ->set_name("Texture"), 
             material,
             GL_TRIANGLES
         )

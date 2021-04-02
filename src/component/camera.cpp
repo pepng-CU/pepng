@@ -4,20 +4,20 @@ Camera::Camera(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> p
     Component("Camera"),
     viewport(viewport),
     projection(projection),
-    parent(nullptr)
+    __parent(nullptr)
 {}
 
 Camera::Camera(const Camera& camera) :
     Component(camera),
     viewport(camera.viewport->clone()),
     projection(camera.projection->clone()),
-    parent(camera.parent)
+    __parent(camera.__parent)
 {}
 
-std::shared_ptr<Camera> Camera::currentCamera = nullptr;
+std::shared_ptr<Camera> Camera::current_camera = nullptr;
 std::vector<std::shared_ptr<Camera>> Camera::cameras;
 
-std::shared_ptr<Camera> Camera::makeCamera(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection) {
+std::shared_ptr<Camera> Camera::make_camera(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection) {
     std::shared_ptr<Camera> camera(new Camera(viewport, projection));
 
     Camera::cameras.push_back(camera);
@@ -25,16 +25,16 @@ std::shared_ptr<Camera> Camera::makeCamera(std::shared_ptr<Viewport> viewport, s
     return camera;
 }
 
-std::shared_ptr<Camera> pepng::makeCamera(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection) {
-    return Camera::makeCamera(viewport, projection);
+std::shared_ptr<Camera> pepng::make_camera(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection) {
+    return Camera::make_camera(viewport, projection);
 }
 
-Camera* Camera::cloneImplementation() {
+Camera* Camera::clone_implementation() {
     return new Camera(*this);
 }
 
 void Camera::init(std::shared_ptr<WithComponents> parent) {
-    this->parent = parent;
+    this->__parent = parent;
 }
 
 void Camera::render(GLuint shaderProgram) {
@@ -42,20 +42,18 @@ void Camera::render(GLuint shaderProgram) {
         glGetUniformLocation(shaderProgram, "u_projection"),
         1,
         GL_FALSE,
-        glm::value_ptr(this->projection->getMatrix())
+        glm::value_ptr(this->projection->matrix())
     );
 
     // TODO: Should we throw if there is no parent?
-    if(parent == nullptr) {
-        return;
-    }
+    if(this->__parent == nullptr) return;
 
-    auto transform = parent->getComponent<Transform>();
+    auto transform = this->__parent->get_component<Transform>();
 
     if(transform == nullptr) {
         std::stringstream ss;
 
-        ss << *this->parent << " is being rendered without a transform.";
+        ss << *this->__parent << " is being rendered without a transform.";
 
         throw std::runtime_error(ss.str());
     }
@@ -70,7 +68,7 @@ void Camera::render(GLuint shaderProgram) {
         glGetUniformLocation(shaderProgram, "u_view"),
         1,
         GL_FALSE,
-        glm::value_ptr(transform->getViewMatrix())
+        glm::value_ptr(transform->view_matrix())
     );
 }
 
@@ -84,23 +82,23 @@ void Camera::imgui() {
 Viewport::Viewport(glm::vec2 position, glm::vec2 scale) : 
     position(position), 
     scale(scale), 
-    isActive(true) 
+    __is_active(true) 
 {}
 
 Viewport::Viewport(const Viewport& viewport) : 
     position(viewport.position), 
     scale(viewport.scale),
-    isActive(viewport.isActive) 
+    __is_active(viewport.__is_active) 
 {}
 
-std::shared_ptr<Viewport> Viewport::makeViewport(glm::vec2 position, glm::vec2 scale) {
+std::shared_ptr<Viewport> Viewport::make_viewport(glm::vec2 position, glm::vec2 scale) {
     std::shared_ptr<Viewport> viewport(new Viewport(position, scale));
 
     return viewport;
 }
 
-std::shared_ptr<Viewport> pepng::makeViewport(glm::vec2 position, glm::vec2 scale) {
-    return Viewport::makeViewport(position, scale);
+std::shared_ptr<Viewport> pepng::make_viewport(glm::vec2 position, glm::vec2 scale) {
+    return Viewport::make_viewport(position, scale);
 }
 
 std::shared_ptr<Viewport> Viewport::clone() {
@@ -110,7 +108,7 @@ std::shared_ptr<Viewport> Viewport::clone() {
 }
 
 bool Viewport::render(glm::vec2 windowDimension) {
-    if(!this->isActive) {
+    if(!this->__is_active) {
         return false;
     }
 
@@ -129,35 +127,31 @@ void Viewport::imgui() {
     ImGui::InputFloat2("Scale", glm::value_ptr(this->scale));
 }
 
-Projection::Projection(float aspect) : aspect(aspect) {}
-Projection::Projection(const Projection& projection) : aspect(projection.aspect) {}
-
-void Projection::setAspect(float aspect) {
-    this->aspect = aspect;
-}
+Projection::Projection(float aspect) : _aspect(aspect) {}
+Projection::Projection(const Projection& projection) : _aspect(projection._aspect) {}
 
 Perspective::Perspective(float fovy, float aspect, float near, float far) : 
     Projection(aspect), 
-    fovy(fovy),
-    near(near), 
-    far(far) 
+    __fovy(fovy),
+    __near(near), 
+    __far(far) 
 {}
 
 Perspective::Perspective(const Perspective& perspective) : 
     Projection(perspective),
-    fovy(perspective.fovy),
-    near(perspective.near),
-    far(perspective.far)
+    __fovy(perspective.__fovy),
+    __near(perspective.__near),
+    __far(perspective.__far)
 {}
 
-std::shared_ptr<Perspective> Perspective::makePerspective(float fovy, float aspect, float near, float far) {
+std::shared_ptr<Perspective> Perspective::make_perspective(float fovy, float aspect, float near, float far) {
     std::shared_ptr<Perspective> perspective(new Perspective(fovy, aspect, near, far));
 
     return perspective;
 }
 
-std::shared_ptr<Perspective> pepng::makePerspective(float fovy, float aspect, float near, float far) {
-    return Perspective::makePerspective(fovy, aspect, near, far);
+std::shared_ptr<Perspective> pepng::make_perspective(float fovy, float aspect, float near, float far) {
+    return Perspective::make_perspective(fovy, aspect, near, far);
 }
 
 std::shared_ptr<Projection> Perspective::clone() {
@@ -170,12 +164,12 @@ std::shared_ptr<Perspective> Perspective::clone1() {
     return perspective;
 }
 
-glm::mat4 Perspective::getMatrix() {
-    return glm::perspective(this->fovy, this->aspect, this->near, this->far);
+glm::mat4 Perspective::matrix() {
+    return glm::perspective(this->__fovy, this->_aspect, this->__near, this->__far);
 }
 
 void Perspective::imgui() {
-    ImGui::InputFloat("Fovy", &this->fovy);
-    ImGui::InputFloat("Near", &this->near);
-    ImGui::InputFloat("Far", &this->far);
+    ImGui::InputFloat("Fovy", &this->__fovy);
+    ImGui::InputFloat("Near", &this->__near);
+    ImGui::InputFloat("Far", &this->__far);
 }

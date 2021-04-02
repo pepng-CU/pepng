@@ -17,25 +17,25 @@ namespace pepng {
      * 
      * @param path File path to read (relative to runtime).
      */
-    const std::string readShader(std::filesystem::path filepath);
+    const std::string load_shader_file(std::filesystem::path filepath);
 
     /**
      * Compiles shader source to shader GL instance.
      * 
      * @param shader Shader source.
      */
-    GLuint compileShader(const std::string shader, GLenum shaderType);
+    GLuint compile_shader(const std::string shader, GLenum shaderType);
 
     /**
      * Creates and binds a shader.
      */
-    GLuint makeShader(std::filesystem::path filepath, GLenum shaderType);
+    GLuint make_shader(std::filesystem::path filepath, GLenum shaderType);
 
     /**
      * Creates a shader program from a list of shaders.
      */
     template<typename... Args>
-    GLuint makeShaderProgram(Args... shaders) {
+    GLuint make_shader_program(Args... shaders) {
         GLuint shaderProgram = glCreateProgram();
 
         for(auto shader : std::vector<GLuint>{ shaders... }) {

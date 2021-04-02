@@ -7,54 +7,54 @@
 Selector::Selector() : 
     Component("Selector"), 
     index(0), 
-    renderMode(GL_TRIANGLES), 
-    needsUpdate(true),
-    receiveShadow(true),
-    displayTexture(true)
+    render_mode(GL_TRIANGLES), 
+    needs_update(true),
+    receive_shadow(true),
+    display_texture(true)
 {}
 
 Selector::Selector(const Selector& selector) :
     Component(selector),
     index(selector.index),
-    renderMode(selector.renderMode),
-    needsUpdate(selector.needsUpdate),
-    receiveShadow(selector.receiveShadow),
-    displayTexture(selector.displayTexture)
+    render_mode(selector.render_mode),
+    needs_update(selector.needs_update),
+    receive_shadow(selector.receive_shadow),
+    display_texture(selector.display_texture)
 {}
 
-std::shared_ptr<Selector> Selector::makeSelector() {
+std::shared_ptr<Selector> Selector::make_selector() {
     std::shared_ptr<Selector> selector(new Selector());
 
     return selector;
 }
 
-std::shared_ptr<Selector> pepng::makeSelector() {
-    return Selector::makeSelector();
+std::shared_ptr<Selector> pepng::make_selector() {
+    return Selector::make_selector();
 }
 
-Selector* Selector::cloneImplementation() {
+Selector* Selector::clone_implementation() {
     return new Selector(*this);
 }
 
-void Selector::dfsSwitch(std::shared_ptr<Object> object, int& index) {
+void Selector::dfs_switch(std::shared_ptr<Object> object, int& index) {
     try {
-        object->getComponent<Transformer>()->isActive = index == this->index;
+        object->get_component<Transformer>()->set_active(index == this->index);
     } catch(...) {}
 
     try {
-        auto renderer = object->getComponent<Renderer>();
+        auto renderer = object->get_component<Renderer>();
 
-        renderer->renderMode = this->renderMode;
-        renderer->receiveShadow = this->receiveShadow;
-        renderer->displayTexture = this->displayTexture;
+        renderer->render_mode = this->render_mode;
+        renderer->receive_shadow = this->receive_shadow;
+        renderer->display_texture = this->display_texture;
     } catch(...) {}
 
     for(auto child : object->children) {
-        dfsSwitch(child, ++index);
+        dfs_switch(child, ++index);
     }
 }
 
-void Selector::bfsSwitch(std::shared_ptr<Object> object) {
+void Selector::bfs_switch(std::shared_ptr<Object> object) {
     int index = 0;
 
     std::queue<std::shared_ptr<Object>> currentQueue;
@@ -73,15 +73,15 @@ void Selector::bfsSwitch(std::shared_ptr<Object> object) {
             }
             
             try {
-                object->getComponent<Transformer>()->isActive = index++ == this->index;
+                object->get_component<Transformer>()->set_active(index++ == this->index);
             } catch(...) {}
 
             try {
-                auto renderer = object->getComponent<Renderer>();
+                auto renderer = object->get_component<Renderer>();
 
-                renderer->renderMode = this->renderMode;
-                renderer->receiveShadow = this->receiveShadow;
-                renderer->displayTexture = this->displayTexture;
+                renderer->render_mode = this->render_mode;
+                renderer->receive_shadow = this->receive_shadow;
+                renderer->display_texture = this->display_texture;
             } catch(...) {}
         }
 
@@ -93,38 +93,36 @@ void Selector::bfsSwitch(std::shared_ptr<Object> object) {
 }
 
 void Selector::update(std::shared_ptr<WithComponents> parent) {
-    if (!this->isActive) {
-        return;
-    }
+    if (!this->_is_active) return;
 
     auto input = Input::get();
 
-    if(input->getButtonDown("triangles")) {
-        this->renderMode = GL_TRIANGLES;
-        this->needsUpdate = true;
-    } else if(input->getButtonDown("points")) {
-        this->renderMode = GL_POINTS;
-        this->needsUpdate = true;
-    } else if(input->getButtonDown("lines")) {
-        this->renderMode = GL_LINES;
-        this->needsUpdate = true;
+    if(input->button_down("triangles")) {
+        this->render_mode = GL_TRIANGLES;
+        this->needs_update = true;
+    } else if(input->button_down("points")) {
+        this->render_mode = GL_POINTS;
+        this->needs_update = true;
+    } else if(input->button_down("lines")) {
+        this->render_mode = GL_LINES;
+        this->needs_update = true;
     }
 
-    if(input->getButtonDown("shadow")) {
-        this->receiveShadow = !this->receiveShadow;
-        this->needsUpdate = true;
+    if(input->button_down("shadow")) {
+        this->receive_shadow = !this->receive_shadow;
+        this->needs_update = true;
     }
 
-    if(input->getButtonDown("texture")) {
-        this->displayTexture = !this->displayTexture;
-        this->needsUpdate = true;
+    if(input->button_down("texture")) {
+        this->display_texture = !this->display_texture;
+        this->needs_update = true;
     }
 
-    if (this->needsUpdate) {
-        this->needsUpdate = false;
+    if (this->needs_update) {
+        this->needs_update = false;
 
         if(auto object = std::dynamic_pointer_cast<Object>(parent)) {
-            bfsSwitch(object);
+            bfs_switch(object);
         }
     }
 
@@ -133,10 +131,10 @@ void Selector::update(std::shared_ptr<WithComponents> parent) {
 
         ss << "object_" << i;
 
-        if (input->getButton(ss.str())) {
+        if (input->button(ss.str())) {
             this->index = i;
 
-            this->needsUpdate = true;
+            this->needs_update = true;
         }
     }
 };
@@ -149,7 +147,7 @@ void Selector::imgui() {
     ImGui::InputInt("Index", &this->index);
 
     if(prev != this->index) {
-        this->needsUpdate = true;
+        this->needs_update = true;
     }
 
     // TODO: This is identifical to renderer.cpp - must be a way to reuse!
@@ -157,7 +155,7 @@ void Selector::imgui() {
     static int item_current_idx = -1;
 
     if (item_current_idx == -1) {
-        switch(this->renderMode) {
+        switch(this->render_mode) {
             case GL_TRIANGLES:
                 item_current_idx = 2;
                 break;
@@ -180,17 +178,17 @@ void Selector::imgui() {
 
                 switch(item_current_idx) {
                     case 2:
-                        this->renderMode = GL_TRIANGLES;
+                        this->render_mode = GL_TRIANGLES;
                         break;
                     case 1:
-                        this->renderMode = GL_POINTS;
+                        this->render_mode = GL_POINTS;
                         break;
                     case 0:
-                        this->renderMode = GL_LINES;
+                        this->render_mode = GL_LINES;
                         break;
                 }
 
-                this->needsUpdate = true;
+                this->needs_update = true;
             }
 
             if (is_selected) {
@@ -200,6 +198,6 @@ void Selector::imgui() {
         ImGui::EndCombo();
     }
 
-    if (ImGui::Checkbox("Texture", &this->displayTexture)) this->needsUpdate = true;
-    if (ImGui::Checkbox("Shadow", &this->receiveShadow)) this->needsUpdate = true;
+    if (ImGui::Checkbox("Texture", &this->display_texture)) this->needs_update = true;
+    if (ImGui::Checkbox("Shadow", &this->receive_shadow)) this->needs_update = true;
 };

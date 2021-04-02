@@ -15,21 +15,21 @@ class WithComponents : public WithImGui, public std::enable_shared_from_this<Wit
         /**
          * Attaches a Component to this.
          */
-        std::shared_ptr<WithComponents> attachComponent(std::shared_ptr<Component> component);
+        std::shared_ptr<WithComponents> attach_component(std::shared_ptr<Component> component);
 
         /**
          * Updates all the components.
          */
-        void updateComponents();
+        void update_components();
 
         /**
          * Updates the components that need rendering.
          */
-        void renderComponents();
+        void render_components();
 
         virtual void imgui();
 
-        virtual std::ostream& operatorOstream(std::ostream& os) const;
+        virtual std::ostream& operator_ostream(std::ostream& os) const;
 
         friend std::ostream& operator<<(std::ostream& os, const WithComponents& component);
 
@@ -37,7 +37,7 @@ class WithComponents : public WithImGui, public std::enable_shared_from_this<Wit
          * Generic method to get shared_ptr component of certain type.
          */
         template<typename T>
-        std::vector<std::shared_ptr<T>> getComponents() {
+        std::vector<std::shared_ptr<T>> get_components() {
             std::vector<std::shared_ptr<T>> components;
 
             for (auto component : this->components) {
@@ -53,7 +53,7 @@ class WithComponents : public WithImGui, public std::enable_shared_from_this<Wit
          * Generic method to get component of certain type.
          */
         template<typename T>
-        std::shared_ptr<T> getComponent() {
+        std::shared_ptr<T> get_component() {
             for (auto component : this->components) {
                 if(auto ptr = std::dynamic_pointer_cast<T>(component)) {
                     return ptr;
@@ -66,7 +66,7 @@ class WithComponents : public WithImGui, public std::enable_shared_from_this<Wit
         /**
          * Returns all attached components to this.
          */
-        std::vector<std::shared_ptr<Component>> getComponents() {
+        std::vector<std::shared_ptr<Component>> get_components() {
             return this->components;
         }
 

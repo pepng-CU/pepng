@@ -20,15 +20,15 @@ class Material : public Cloneable<Material> {
         /**
          * Shared_ptr of Material.
          */
-        static std::shared_ptr<Material> makeMaterial(GLuint shaderProgram, std::shared_ptr<Texture> texture);
+        static std::shared_ptr<Material> make_material(GLuint shaderProgram, std::shared_ptr<Texture> texture);
 
         /**
          * Accessor for shader program.
          */
-        GLuint getShaderProgram();
+        inline GLuint shader_program() { return this->__shader_program; }
 
     protected:
-        virtual Material* cloneImplementation() override;
+        virtual Material* clone_implementation() override;
 
     private:
         Material(GLuint shaderProgram, std::shared_ptr<Texture> texture);
@@ -37,9 +37,9 @@ class Material : public Cloneable<Material> {
         /**
          * The OpenGL shaderProgram used.
          */
-        GLuint shaderProgram;
+        GLuint __shader_program;
 };
 
 namespace pepng {
-    std::shared_ptr<Material> makeMaterial(GLuint shaderProgram, std::shared_ptr<Texture> texture);
+    std::shared_ptr<Material> make_material(GLuint shaderProgram, std::shared_ptr<Texture> texture);
 };

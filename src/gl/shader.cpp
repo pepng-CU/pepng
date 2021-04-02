@@ -1,6 +1,6 @@
 #include "shader.hpp"
 
-const std::string pepng::readShader(std::filesystem::path filepath) {
+const std::string pepng::load_shader_file(std::filesystem::path filepath) {
     if(!std::filesystem::exists(filepath)) {
         throw std::runtime_error("Could not find shader: " + filepath.string());
     }
@@ -13,7 +13,7 @@ const std::string pepng::readShader(std::filesystem::path filepath) {
     return contents;
 }
 
-GLuint pepng::compileShader(const std::string shaderSource, GLenum shaderType) {
+GLuint pepng::compile_shader(const std::string shaderSource, GLenum shaderType) {
     GLuint shader = glCreateShader(shaderType);
 
     const char* shaderSourceCStr = shaderSource.c_str();
@@ -38,6 +38,6 @@ GLuint pepng::compileShader(const std::string shaderSource, GLenum shaderType) {
     return shader;
 }
 
-GLuint pepng::makeShader(std::filesystem::path filepath, GLenum shaderType) {
-    return pepng::compileShader(pepng::readShader(filepath), shaderType);
+GLuint pepng::make_shader(std::filesystem::path filepath, GLenum shaderType) {
+    return pepng::compile_shader(pepng::load_shader_file(filepath), shaderType);
 }

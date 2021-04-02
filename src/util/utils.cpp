@@ -20,7 +20,7 @@ std::vector<std::string> utils::split(const std::string& line, const std::string
     return result;
 }
 
-std::vector<int> utils::splitInt(const std::string& line, const std::string& delim) {
+std::vector<int> utils::split_int(const std::string& line, const std::string& delim) {
     auto splits = split(line, delim);
 
     std::vector<int> ints;
@@ -32,7 +32,7 @@ std::vector<int> utils::splitInt(const std::string& line, const std::string& del
     return ints;
 }
 
-std::vector<float> utils::splitFloat(const std::string& line, const std::string& delim) {
+std::vector<float> utils::split_float(const std::string& line, const std::string& delim) {
     auto splits = split(line, delim);
 
     std::vector<float> floats;
@@ -44,7 +44,7 @@ std::vector<float> utils::splitFloat(const std::string& line, const std::string&
     return floats;
 }
 
-std::filesystem::path pepng::getFolderPath(std::filesystem::path folderName) {
+std::filesystem::path pepng::get_folder_path(std::filesystem::path folderName) {
     auto finalPath = std::filesystem::current_path();
 
     int depth = 0;

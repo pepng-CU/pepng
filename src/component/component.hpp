@@ -21,19 +21,24 @@ class WithComponents;
 class Component : public WithImGui, public Cloneable<Component> {
     public:
         /**
-         * Used to check if this component will update.
-         */
-        bool isActive;
-
-        /**
          * Accessor for the component name.
          */
-        std::string getName();
+        inline std::string name() { return this->__name; }
+
+        /**
+         * Accessor for component active state.
+         */
+        inline bool active() { return this->_is_active; }
+
+        /**
+         * Mutator for component active state.
+         */
+        inline void set_active(bool active) { this->_is_active = active; }
 
         /**
          * Virtual operator<< to allow for child class redefine.
          */
-        virtual std::ostream& operatorOstream(std::ostream& os) const;
+        virtual std::ostream& operator_ostream(std::ostream& os) const;
 
         friend std::ostream& operator<<(std::ostream& os, const Component& component);
 
@@ -50,11 +55,16 @@ class Component : public WithImGui, public Cloneable<Component> {
 
         Component(const Component& component);
 
+        /**
+         * Used to check if this component will update.
+         */
+        bool _is_active;
+
     private:
         /**
          * Name of the component (the child class will define this in the constructor).
          */
-        std::string name;
+        std::string __name;
 };
 
 std::ostream& operator<<(std::ostream& os, const Component& component);

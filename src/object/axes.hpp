@@ -7,5 +7,5 @@ namespace pepng {
     /**
      * Creates an Axes object.
      */
-    std::shared_ptr<Object> makeAxes(std::shared_ptr<Transform> transform, GLuint shaderProgram);
+    std::shared_ptr<Object> make_axes(std::shared_ptr<Transform> transform, GLuint shaderProgram);
 }

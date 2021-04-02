@@ -28,7 +28,7 @@ void windowSizeCallback(GLFWwindow* window, int width, int height) {
     windowDimension = glm::vec2(width, height);
 }
 
-void objectHierarchy(std::shared_ptr<Object> object, std::shared_ptr<Object>* currentObject) {
+void object_hierarchy(std::shared_ptr<Object> object, std::shared_ptr<Object>* currentObject) {
     ImGuiTreeNodeFlags nodeFlags = 0;
 
     if(object == *currentObject) {
@@ -43,23 +43,23 @@ void objectHierarchy(std::shared_ptr<Object> object, std::shared_ptr<Object>* cu
 
     if(nodeOpen) {
         for(auto child : object->children) {
-            objectHierarchy(child, currentObject);
+            object_hierarchy(child, currentObject);
         }
 
         ImGui::TreePop();
     }
 }
 
-void objectAttachRecursive(std::shared_ptr<Object> object) {
-    object->attachComponent(pepng::makeTransformer());
+void object_attach_recursive(std::shared_ptr<Object> object) {
+    object->attach_component(pepng::make_transformer());
 
     // Adds DynamicTexture to the screen.
     if(object->name == "Display") {
-        object->attachComponent(pepng::makeDynamicTexture(2, 4));
+        object->attach_component(pepng::make_dynamic_texture(2, 4));
     }
 
     for(auto child : object->children) {
-        objectAttachRecursive(child);
+        object_attach_recursive(child);
     }
 }
 
@@ -113,28 +113,28 @@ int main(int argc, char *argv[]) {
     /**
      * Paths
      */
-    auto texturespath = pepng::getFolderPath("textures");
-    auto modelpath = pepng::getFolderPath("models");
-    auto shaderpath = pepng::getFolderPath("shaders");
+    auto texturespath = pepng::get_folder_path("textures");
+    auto modelpath = pepng::get_folder_path("models");
+    auto shaderpath = pepng::get_folder_path("shaders");
 
     /**
      * Textures
      */
 
-    static auto missingTexture = pepng::makeTexture(texturespath / "missing.jpg");
-    missingTexture->delayedInit();
+    static auto missingTexture = pepng::make_texture(texturespath / "missing.jpg");
+    missingTexture->delayed_init();
 
     // Loadings screen for stage.
     for(int i = 1; i <= 3; i++) {
-        pepng::makeTexture(modelpath / "pa2" / "screens" / (std::to_string(i) + ".jpg"))->delayedInit();
+        pepng::make_texture(modelpath / "pa2" / "screens" / (std::to_string(i) + ".jpg"))->delayed_init();
     }
 
     /**
      * Shaders
      */
-    static auto shaderProgram = pepng::makeShaderProgram(
-        pepng::makeShader(shaderpath / "object" / "vertex.glsl", GL_VERTEX_SHADER),
-        pepng::makeShader(shaderpath / "object" / "fragment.glsl", GL_FRAGMENT_SHADER)
+    static auto shaderProgram = pepng::make_shader_program(
+        pepng::make_shader(shaderpath / "object" / "vertex.glsl", GL_VERTEX_SHADER),
+        pepng::make_shader(shaderpath / "object" / "fragment.glsl", GL_FRAGMENT_SHADER)
     );
 
     glUseProgram(shaderProgram);
@@ -142,36 +142,36 @@ int main(int argc, char *argv[]) {
     glUniform1i(glGetUniformLocation(shaderProgram, "u_texture"), 0);
     glUniform1i(glGetUniformLocation(shaderProgram, "u_shadow"), 1);
 
-    static auto lineShaderProgram = pepng::makeShaderProgram(
-        pepng::makeShader(shaderpath / "line" / "vertex.glsl", GL_VERTEX_SHADER),
-        pepng::makeShader(shaderpath / "line" / "fragment.glsl", GL_FRAGMENT_SHADER)
+    static auto lineShaderProgram = pepng::make_shader_program(
+        pepng::make_shader(shaderpath / "line" / "vertex.glsl", GL_VERTEX_SHADER),
+        pepng::make_shader(shaderpath / "line" / "fragment.glsl", GL_FRAGMENT_SHADER)
     );
 
-    static auto shadowShaderProgram = pepng::makeShaderProgram(
-        pepng::makeShader(shaderpath / "shadow" / "vertex.glsl", GL_VERTEX_SHADER),
-        pepng::makeShader(shaderpath / "shadow" / "fragment.glsl", GL_FRAGMENT_SHADER),
-        pepng::makeShader(shaderpath / "shadow" / "geometry.glsl", GL_GEOMETRY_SHADER)
+    static auto shadowShaderProgram = pepng::make_shader_program(
+        pepng::make_shader(shaderpath / "shadow" / "vertex.glsl", GL_VERTEX_SHADER),
+        pepng::make_shader(shaderpath / "shadow" / "fragment.glsl", GL_FRAGMENT_SHADER),
+        pepng::make_shader(shaderpath / "shadow" / "geometry.glsl", GL_GEOMETRY_SHADER)
     );
 
-    static auto textureShaderProgram = pepng::makeShaderProgram(
-        pepng::makeShader(shaderpath / "texture" / "vertex.glsl", GL_VERTEX_SHADER),
-        pepng::makeShader(shaderpath / "texture" / "fragment.glsl", GL_FRAGMENT_SHADER)
+    static auto textureShaderProgram = pepng::make_shader_program(
+        pepng::make_shader(shaderpath / "texture" / "vertex.glsl", GL_VERTEX_SHADER),
+        pepng::make_shader(shaderpath / "texture" / "fragment.glsl", GL_FRAGMENT_SHADER)
     );
 
     /**
      * Objects
      */
     static std::vector<std::shared_ptr<Object>> objects {
-        pepng::makeAxes(
-            pepng::makeTransform(
+        pepng::make_axes(
+            pepng::make_transform(
                 glm::vec3(0.0f, 0.0f, 0.0f),
                 glm::vec3(0.0f, 0.0f, 0.0f),
                 glm::vec3(7.0f, 7.0f, 7.0f)
             ), 
             lineShaderProgram
         ),
-        pepng::makeGrid(
-            pepng::makeTransform(
+        pepng::make_grid(
+            pepng::make_transform(
                 glm::vec3(0.0f, 0.0f, 0.0f),
                 glm::vec3(0.0f, 0.0f, 0.0f),
                 glm::vec3(128.0f, 128.0f, 128.0f)
@@ -184,65 +184,65 @@ int main(int argc, char *argv[]) {
     pepng::load(
         modelpath / "sponza" / "scene.dae", 
         std::function([](std::shared_ptr<Object> object) {
-            object->attachComponent(pepng::makeSelector());
+            object->attach_component(pepng::make_selector());
 
-            objectAttachRecursive(object);
+            object_attach_recursive(object);
 
             objects.push_back(object);
         }),
         shaderProgram,
-        pepng::makeTransform(),
+        pepng::make_transform(),
         shadowShaderProgram
     );
 
     /**
      * Controller
      */
-    auto input = pepng::makeInput(window);
+    auto input = pepng::make_input(window);
 
-    auto mouse = pepng::makeDevice(DeviceType::MOUSE)
-        ->attachUnit(pepng::makeAxis("mouseY", AxisType::FIRST))
-        ->attachUnit(pepng::makeAxis("mouseX", AxisType::SECOND))
-        ->attachUnit(pepng::makeAxis("zoom", AxisType::THIRD, 25.0f, true))
-        ->attachUnit(pepng::makeButton("pan", GLFW_MOUSE_BUTTON_MIDDLE))
-        ->attachUnit(pepng::makeButton("pan", GLFW_MOUSE_BUTTON_4))
-        ->attachUnit(pepng::makeButton("rotate", GLFW_MOUSE_BUTTON_RIGHT));
+    auto mouse = pepng::make_device(DeviceType::MOUSE)
+        ->attach_unit(pepng::make_axis("mouseY", AxisType::FIRST))
+        ->attach_unit(pepng::make_axis("mouseX", AxisType::SECOND))
+        ->attach_unit(pepng::make_axis("zoom", AxisType::THIRD, 25.0f, true))
+        ->attach_unit(pepng::make_button("pan", GLFW_MOUSE_BUTTON_MIDDLE))
+        ->attach_unit(pepng::make_button("pan", GLFW_MOUSE_BUTTON_4))
+        ->attach_unit(pepng::make_button("rotate", GLFW_MOUSE_BUTTON_RIGHT));
 
-    auto keyboard = pepng::makeDevice(DeviceType::KEYBOARD)
-        ->attachUnit(pepng::makeButton("vertical", GLFW_KEY_W))
-        ->attachUnit(pepng::makeButton("vertical", GLFW_KEY_S, -1.0f))
-        ->attachUnit(pepng::makeButton("horizontal", GLFW_KEY_A))
-        ->attachUnit(pepng::makeButton("horizontal", GLFW_KEY_D, -1.0f))
-        ->attachUnit(pepng::makeButton("svertical", GLFW_KEY_Q))
-        ->attachUnit(pepng::makeButton("svertical", GLFW_KEY_E, -1.0f))
-        ->attachUnit(pepng::makeButton("shorizontal", GLFW_KEY_C))
-        ->attachUnit(pepng::makeButton("shorizontal", GLFW_KEY_V, -1.0f))
-        ->attachUnit(pepng::makeButton("yaw", GLFW_KEY_UP))
-        ->attachUnit(pepng::makeButton("yaw", GLFW_KEY_DOWN, -1.0f))
-        ->attachUnit(pepng::makeButton("pitch", GLFW_KEY_LEFT))
-        ->attachUnit(pepng::makeButton("pitch", GLFW_KEY_RIGHT, -1.0f))
-        ->attachUnit(pepng::makeButton("triangles", GLFW_KEY_T))
-        ->attachUnit(pepng::makeButton("points", GLFW_KEY_P))
-        ->attachUnit(pepng::makeButton("lines", GLFW_KEY_L))
-        ->attachUnit(pepng::makeButton("recenter", GLFW_KEY_HOME))
-        ->attachUnit(pepng::makeButton("shadow", GLFW_KEY_B))
-        ->attachUnit(pepng::makeButton("texture", GLFW_KEY_X))
-        ->attachUnit(pepng::makeButton("scale", GLFW_KEY_U))
-        ->attachUnit(pepng::makeButton("scale", GLFW_KEY_J, -1.0f));
+    auto keyboard = pepng::make_device(DeviceType::KEYBOARD)
+        ->attach_unit(pepng::make_button("vertical", GLFW_KEY_W))
+        ->attach_unit(pepng::make_button("vertical", GLFW_KEY_S, -1.0f))
+        ->attach_unit(pepng::make_button("horizontal", GLFW_KEY_A))
+        ->attach_unit(pepng::make_button("horizontal", GLFW_KEY_D, -1.0f))
+        ->attach_unit(pepng::make_button("svertical", GLFW_KEY_Q))
+        ->attach_unit(pepng::make_button("svertical", GLFW_KEY_E, -1.0f))
+        ->attach_unit(pepng::make_button("shorizontal", GLFW_KEY_C))
+        ->attach_unit(pepng::make_button("shorizontal", GLFW_KEY_V, -1.0f))
+        ->attach_unit(pepng::make_button("yaw", GLFW_KEY_UP))
+        ->attach_unit(pepng::make_button("yaw", GLFW_KEY_DOWN, -1.0f))
+        ->attach_unit(pepng::make_button("pitch", GLFW_KEY_LEFT))
+        ->attach_unit(pepng::make_button("pitch", GLFW_KEY_RIGHT, -1.0f))
+        ->attach_unit(pepng::make_button("triangles", GLFW_KEY_T))
+        ->attach_unit(pepng::make_button("points", GLFW_KEY_P))
+        ->attach_unit(pepng::make_button("lines", GLFW_KEY_L))
+        ->attach_unit(pepng::make_button("recenter", GLFW_KEY_HOME))
+        ->attach_unit(pepng::make_button("shadow", GLFW_KEY_B))
+        ->attach_unit(pepng::make_button("texture", GLFW_KEY_X))
+        ->attach_unit(pepng::make_button("scale", GLFW_KEY_U))
+        ->attach_unit(pepng::make_button("scale", GLFW_KEY_J, -1.0f));
 
     for(int i = 0; i < 10; i++) {
         std::stringstream ss;
 
         ss << "object_" << i;
 
-        keyboard->attachUnit(pepng::makeButton(ss.str(), GLFW_KEY_0 + i));
+        keyboard->attach_unit(pepng::make_button(ss.str(), GLFW_KEY_0 + i));
     }
 
     input
-        ->attachDevice(keyboard)
-        ->attachDevice(mouse);
+        ->attach_device(keyboard)
+        ->attach_device(mouse);
 
-    auto textureObj = pepng::makeTextureObj(pepng::makeTransform(), textureShaderProgram);
+    auto textureObj = pepng::make_texture_object(pepng::make_transform(), textureShaderProgram);
 
     /**
      * OpenGL
@@ -265,14 +265,14 @@ int main(int argc, char *argv[]) {
          * Shadow
          */
         for(auto light : Light::lights) {
-            if(light->isActive) {
-                light->initFBO();
+            if(light->active()) {
+                light->init_fbo();
 
                 for(auto object : objects) {
-                    object->render(light->shaderProgram);
+                    object->render(light->shader_program);
                 }
 
-                light->updateFBO();
+                light->update_fbo();
             }
         }
 
@@ -282,24 +282,18 @@ int main(int argc, char *argv[]) {
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
         for(auto camera : Camera::cameras) {
-            if(camera->isActive) {
+            if(camera->active()) {
                 camera->viewport->render(windowDimension);
 
-                Camera::currentCamera = camera;
+                Camera::current_camera = camera;
 
-                camera->projection->setAspect(windowDimension.x / windowDimension.y);
+                camera->projection->set_aspect(windowDimension.x / windowDimension.y);
 
                 for(auto object : objects) {
                     object->render();
                 }
             }
         }
-
-        // for(auto camera : Camera::cameras) {
-        //     Camera::currentCamera = camera;
-
-        //     textureObj->render();
-        // }
 
         /**
          * ImGui
@@ -311,7 +305,7 @@ int main(int argc, char *argv[]) {
         ImGui::Begin("Hierarchy");
         
         for(auto object : objects) {
-            objectHierarchy(object, &currentObject);
+            object_hierarchy(object, &currentObject);
         }
 
         ImGui::End();

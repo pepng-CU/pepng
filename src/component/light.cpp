@@ -2,32 +2,32 @@
 
 Light::Light(GLuint shaderProgram, glm::vec3 color) : 
     Component("Light"), 
-    shaderProgram(shaderProgram),
+    shader_program(shaderProgram),
     near(0.1f),
     far(100.0f),
-    textureDimension(2048),
+    texture_dimension(2048),
     color(color),
     intensity(1000)
 {}
 
 Light::Light(const Light& light) : 
     Component(light), 
-    shaderProgram(light.shaderProgram),
+    shader_program(light.shader_program),
     near(light.near),
     far(light.far),
-    textureDimension(light.textureDimension),
+    texture_dimension(light.texture_dimension),
     color(light.color),
     intensity(light.intensity)
 {}
 
 std::vector<std::shared_ptr<Light>> Light::lights;
 
-void Light::delayedInit() {
-    if(this->isInit) {
+void Light::delayed_init() {
+    if(this->_is_init) {
         return;
     }
     
-    this->isInit = true;
+    this->_is_init = true;
 
     glGenFramebuffers(1, &this->fbo);
 
@@ -39,8 +39,8 @@ void Light::delayedInit() {
             GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 
             0, 
             GL_DEPTH_COMPONENT, 
-            this->textureDimension,
-            this->textureDimension,
+            this->texture_dimension,
+            this->texture_dimension,
             0,
             GL_DEPTH_COMPONENT,
             GL_FLOAT,
@@ -59,29 +59,29 @@ void Light::delayedInit() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Light::initFBO() {
-    this->delayedInit();
+void Light::init_fbo() {
+    this->delayed_init();
 
-    glViewport(0, 0, this->textureDimension, this->textureDimension);
+    glViewport(0, 0, this->texture_dimension, this->texture_dimension);
     glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-    glUseProgram(this->shaderProgram);
+    glUseProgram(this->shader_program);
 
     auto lightPos = this->transform->position;
 
     glUniform3fv(
-        glGetUniformLocation(shaderProgram, "u_light_pos"),
+        glGetUniformLocation(shader_program, "u_light_pos"),
         1,
         glm::value_ptr(lightPos)
     );
 
     glUniform1f(
-        glGetUniformLocation(shaderProgram, "u_far"),
+        glGetUniformLocation(shader_program, "u_far"),
         this->far
     );
 
-    auto shadowProj = this->getProjection();
+    auto shadowProj = this->projection();
 
     std::vector<glm::mat4> shadowTransforms;
     
@@ -100,7 +100,7 @@ void Light::initFBO() {
     
     for(int i = 0; i < 6; i++) {
         glUniformMatrix4fv(
-            glGetUniformLocation(shaderProgram, "u_shadow_matrices"),
+            glGetUniformLocation(shader_program, "u_shadow_matrices"),
             6,
             GL_FALSE,
             glm::value_ptr(shadowTransforms[0])
@@ -108,42 +108,42 @@ void Light::initFBO() {
     }
 }
 
-void Light::updateFBO() {
+void Light::update_fbo() {
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Light::init(std::shared_ptr<WithComponents> parent) {
-    this->transform = parent->getComponent<Transform>();
+    this->transform = parent->get_component<Transform>();
 
     if(this->transform == nullptr) {
         throw std::runtime_error("Light does not have a transform.");
     }
 }
 
-std::shared_ptr<Light> Light::makeLight(GLuint shaderProgram, glm::vec3 color) {
+std::shared_ptr<Light> Light::make_light(GLuint shaderProgram, glm::vec3 color) {
     std::shared_ptr<Light> light(new Light(shaderProgram, color));
     lights.push_back(light);
 
     return light;
 }
 
-Light* Light::cloneImplementation() {
+Light* Light::clone_implementation() {
     return new Light(*this);
 }
 
-glm::mat4 Light::getProjection() {
+glm::mat4 Light::projection() {
     float aspect = 1.0;
     return glm::perspective(glm::radians(90.0f), aspect, this->near, this->far); 
 }
 
-glm::mat4 Light::getMatrix() {
-    return this->getProjection() * this->transform->getViewMatrix();
+glm::mat4 Light::matrix() {
+    return this->projection() * this->transform->view_matrix();
 }
 
 void Light::render(GLuint shaderProgram) {
-    if(!this->isActive) {
+    if(!this->_is_active) {
         return;
     }
 
@@ -185,7 +185,7 @@ void Light::imgui() {
 }
 
 namespace pepng {
-    std::shared_ptr<Light> makeLight(GLuint shaderProgram, glm::vec3 color) {
-        return Light::makeLight(shaderProgram, color);
+    std::shared_ptr<Light> make_light(GLuint shaderProgram, glm::vec3 color) {
+        return Light::make_light(shaderProgram, color);
     }
 }

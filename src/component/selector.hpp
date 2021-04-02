@@ -23,29 +23,29 @@ class Selector : public Component {
         /**
          * The OpenGL render mode that children with renderers will render with.
          */
-        GLenum renderMode;
+        GLenum render_mode;
 
         /**
          * Does model receive shadow?
          */
-        bool receiveShadow;
+        bool receive_shadow;
         
         /**
          * Does model display texture?
          */
-        bool displayTexture;
+        bool display_texture;
 
         /**
          * Shared_ptr constructor for Selector.
          */
-        static std::shared_ptr<Selector> makeSelector();
+        static std::shared_ptr<Selector> make_selector();
 
         virtual void update(std::shared_ptr<WithComponents> parent) override;
 
         virtual void imgui() override;
 
     protected:
-        virtual Selector* cloneImplementation() override;
+        virtual Selector* clone_implementation() override;
         
     private:
         Selector();
@@ -54,20 +54,20 @@ class Selector : public Component {
         /**
          * Selects a child object through DFS.
          * 
-         * @deprecated Assignment seems to want the bfsSwitch.
+         * @deprecated Assignment seems to want the bfs_switch.
          */
-        void dfsSwitch(std::shared_ptr<Object> object, int& index);
+        void dfs_switch(std::shared_ptr<Object> object, int& index);
 
         /**
          * Selects a child object through BFS.
          */
-        void bfsSwitch(std::shared_ptr<Object> object);
+        void bfs_switch(std::shared_ptr<Object> object);
 
-        bool needsUpdate;
+        bool needs_update;
 };
 
 namespace pepng {
-    std::shared_ptr<Selector> makeSelector();
+    std::shared_ptr<Selector> make_selector();
 };
 
 #include "../object/object.hpp"

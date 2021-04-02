@@ -1,6 +1,6 @@
 #include "load.hpp"
 
-void pepng::loadModelOBJ(std::filesystem::path path, std::function<void(std::shared_ptr<Model>)> function) {
+void pepng::obj_load_model(std::filesystem::path path, std::function<void(std::shared_ptr<Model>)> function) {
     std::ifstream in(path);
 
     if(!in.is_open()) {
@@ -46,13 +46,13 @@ void pepng::loadModelOBJ(std::filesystem::path path, std::function<void(std::sha
             }
 
             function(
-                Model::makeModel()
-                    ->setName(name)
-                    ->setCount(mapVertex.size())
-                    ->calculateOffset(verticies, vertexIndex)
-                    ->attachBuffer(pepng::makeBuffer<glm::vec3>(mapVertex, GL_ARRAY_BUFFER, 0, 3))
-                    ->attachBuffer(pepng::makeBuffer<glm::vec3>(mapNormal, GL_ARRAY_BUFFER, 1, 3))
-                    ->attachBuffer(pepng::makeBuffer<glm::vec2>(mapTexture, GL_ARRAY_BUFFER, 2, 2))
+                Model::make_model()
+                    ->set_name(name)
+                    ->set_count(mapVertex.size())
+                    ->calculate_offset(verticies, vertexIndex)
+                    ->attach_buffer(pepng::make_buffer<glm::vec3>(mapVertex, GL_ARRAY_BUFFER, 0, 3))
+                    ->attach_buffer(pepng::make_buffer<glm::vec3>(mapNormal, GL_ARRAY_BUFFER, 1, 3))
+                    ->attach_buffer(pepng::make_buffer<glm::vec2>(mapTexture, GL_ARRAY_BUFFER, 2, 2))
             );
 
             vertexIndex.clear();
@@ -90,7 +90,7 @@ void pepng::loadModelOBJ(std::filesystem::path path, std::function<void(std::sha
             ss >> faceIndex[0] >> faceIndex[1] >> faceIndex[2];
 
             for(auto f : faceIndex) {
-                auto fa = utils::splitInt(f, "/");
+                auto fa = utils::split_int(f, "/");
 
                 vertexIndex.push_back(fa[0] - 1);
                 textureIndex.push_back(fa[1] - 1);
@@ -102,30 +102,30 @@ void pepng::loadModelOBJ(std::filesystem::path path, std::function<void(std::sha
     in.close();
 }
 
-void pepng::loadObjectOBJ(
+void pepng::obj_load_object(
     std::filesystem::path path, 
     std::function<void(std::shared_ptr<Object>)> function, 
     GLuint shaderProgram, 
     std::shared_ptr<Transform> transform
 ) {
     std::string name = path.filename().string();
-    std::shared_ptr<Object> object = pepng::makeObject(name);
+    std::shared_ptr<Object> object = pepng::make_object(name);
     
-    object->attachComponent(transform->clone());
+    object->attach_component(transform->clone());
 
-    loadThread(
+    load_thread(
         path,
         std::function([object, shaderProgram](std::shared_ptr<Model> model) mutable {
-            auto child = pepng::makeObject(model->getName());
+            auto child = pepng::make_object(model->name());
 
             child
-                ->attachComponent(pepng::makeTransform())
-                ->attachComponent(
-                    pepng::makeRenderer(
+                ->attach_component(pepng::make_transform())
+                ->attach_component(
+                    pepng::make_renderer(
                         model, 
-                        pepng::makeMaterial(
+                        pepng::make_material(
                             shaderProgram, 
-                            pepng::makeTexture()
+                            pepng::make_texture()
                         ), 
                         GL_TRIANGLES
                     )
@@ -139,10 +139,10 @@ void pepng::loadObjectOBJ(
 }
 
 std::shared_ptr<Texture> loadTexture(std::filesystem::path path) {
-    return pepng::makeTexture(path);
+    return pepng::make_texture(path);
 }
 
-std::map<std::string, std::future<std::shared_ptr<Texture>>> pepng::loadTexturesDAE(
+std::map<std::string, std::future<std::shared_ptr<Texture>>> pepng::collada_load_textures(
     tinyxml2::XMLElement* libraryImages, 
     std::filesystem::path path
 ) {
@@ -173,7 +173,7 @@ std::map<std::string, std::future<std::shared_ptr<Texture>>> pepng::loadTextures
     return textures;
 }
 
-std::map<std::string, std::shared_ptr<Texture>> pepng::loadEffectDAE(
+std::map<std::string, std::shared_ptr<Texture>> pepng::collada_load_effects(
     tinyxml2::XMLElement* libraryEffects, 
     std::map<std::string, std::future<std::shared_ptr<Texture>>>& textures
 ) {
@@ -222,7 +222,7 @@ std::map<std::string, std::shared_ptr<Texture>> pepng::loadEffectDAE(
         }
 
         if(!effectLoaded) {
-            effects[effectId] = pepng::makeTexture();
+            effects[effectId] = pepng::make_texture();
         }
 
         std::cout << "Loaded effect: " << effectId << std::endl;
@@ -233,7 +233,7 @@ std::map<std::string, std::shared_ptr<Texture>> pepng::loadEffectDAE(
     return effects;
 }
 
-std::map<std::string, std::shared_ptr<Material>> pepng::loadMaterialsDAE(
+std::map<std::string, std::shared_ptr<Material>> pepng::collada_load_materials(
     tinyxml2::XMLElement* libraryMaterials, 
     std::map<std::string, std::shared_ptr<Texture>>& effects, 
     GLuint shaderProgram
@@ -260,7 +260,7 @@ std::map<std::string, std::shared_ptr<Material>> pepng::loadMaterialsDAE(
             throw std::runtime_error("Could not find effect " + effectId);
         }
 
-        materials[materialId] = pepng::makeMaterial(shaderProgram, texture);
+        materials[materialId] = pepng::make_material(shaderProgram, texture);
 
         std::cout << "Loaded material: " << materialId << std::endl;
 
@@ -270,7 +270,7 @@ std::map<std::string, std::shared_ptr<Material>> pepng::loadMaterialsDAE(
     return materials;
 }
 
-std::map<std::string, std::shared_ptr<Camera>> pepng::loadCamerasDAE(
+std::map<std::string, std::shared_ptr<Camera>> pepng::collada_load_cameras(
     tinyxml2::XMLElement* libraryCameras
 ) {
     std::map<std::string, std::shared_ptr<Camera>> cameras;
@@ -297,10 +297,10 @@ std::map<std::string, std::shared_ptr<Camera>> pepng::loadCamerasDAE(
             auto near = std::stof(perspective->FirstChildElement("znear")->GetText());
             auto far = std::stof(perspective->FirstChildElement("zfar")->GetText());
 
-            projection = pepng::makePerspective(fovy, aspect, near, far);
+            projection = pepng::make_perspective(fovy, aspect, near, far);
         }
 
-        auto cameraComponent = pepng::makeCamera(pepng::makeViewport(glm::vec2(0.0f), glm::vec2(1.0f)), projection);
+        auto cameraComponent = pepng::make_camera(pepng::make_viewport(glm::vec2(0.0f), glm::vec2(1.0f)), projection);
 
         cameras[cameraId] = cameraComponent;
 
@@ -312,7 +312,7 @@ std::map<std::string, std::shared_ptr<Camera>> pepng::loadCamerasDAE(
     return cameras;
 }
 
-std::map<std::string, std::shared_ptr<Model>> pepng::loadGeometriesDAE(
+std::map<std::string, std::shared_ptr<Model>> pepng::collada_load_geometries(
     tinyxml2::XMLElement* libraryGeometries
 ) {
     std::map<std::string, std::shared_ptr<Model>> geometries;
@@ -340,7 +340,7 @@ std::map<std::string, std::shared_ptr<Model>> pepng::loadGeometriesDAE(
 
             auto floatArrayTag = source->FirstChildElement("float_array");
 
-            auto floatArray = utils::splitFloat(floatArrayTag->GetText());
+            auto floatArray = utils::split_float(floatArrayTag->GetText());
 
             if(floatArray.size() != floatArrayTag->FindAttribute("count")->IntValue()) {
                 std::stringstream ss;
@@ -370,13 +370,13 @@ std::map<std::string, std::shared_ptr<Model>> pepng::loadGeometriesDAE(
 
         auto triangles = mesh->FirstChildElement("triangles");
 
-        auto indicies = utils::splitInt(triangles->FirstChildElement("p")->GetText());
+        auto indicies = utils::split_int(triangles->FirstChildElement("p")->GetText());
 
-        auto model = pepng::makeModel();
+        auto model = pepng::make_model();
 
-        model->setCount(triangles->FindAttribute("count")->IntValue() * 3);
+        model->set_count(triangles->FindAttribute("count")->IntValue() * 3);
 
-        model->setName(geometryName);
+        model->set_name(geometryName);
 
         auto input = triangles->FirstChildElement("input");
 
@@ -414,9 +414,9 @@ std::map<std::string, std::shared_ptr<Model>> pepng::loadGeometriesDAE(
                 }
             }
 
-            auto buffer = pepng::makeBuffer<float>(sourceBuffer, GL_ARRAY_BUFFER, offset, sourceSize);
+            auto buffer = pepng::make_buffer<float>(sourceBuffer, GL_ARRAY_BUFFER, offset, sourceSize);
 
-            model->attachBuffer(buffer);
+            model->attach_buffer(buffer);
 
             input = input->NextSiblingElement("input");
         }
@@ -451,7 +451,7 @@ std::shared_ptr<Object> loadObjectDataDAE(
         std::string sid = translate->FindAttribute("sid")->Value();
 
         if (sid == "location") {
-            auto p = utils::splitFloat(translate->GetText());
+            auto p = utils::split_float(translate->GetText());
 
             position = glm::vec3(p[0], p[1], p[2]);
         }
@@ -465,7 +465,7 @@ std::shared_ptr<Object> loadObjectDataDAE(
         std::string sid = scaleTag->FindAttribute("sid")->Value();
 
         if (sid == "scale") {
-            auto s = utils::splitFloat(scaleTag->GetText());
+            auto s = utils::split_float(scaleTag->GetText());
 
             scale = glm::vec3(s[0], s[1], s[2]);
         }
@@ -476,7 +476,7 @@ std::shared_ptr<Object> loadObjectDataDAE(
     auto rotate = node->FirstChildElement("rotate");
 
     while(rotate != nullptr) {
-        auto r = utils::splitFloat(rotate->GetText());
+        auto r = utils::split_float(rotate->GetText());
 
         rotationQuat *= glm::quat(r[0], r[1], r[2], r[3]);
 
@@ -489,7 +489,7 @@ std::shared_ptr<Object> loadObjectDataDAE(
         std::string sid = matrix->FindAttribute("sid")->Value();
 
         if(sid == "transform") {
-            auto transformArray = utils::splitFloat(matrix->GetText());
+            auto transformArray = utils::split_float(matrix->GetText());
 
             if(transformArray.size() != 16) {
                 throw std::runtime_error("Expected mat4x4 but got array of size " + transformArray.size());
@@ -523,16 +523,16 @@ std::shared_ptr<Object> loadObjectDataDAE(
 
         auto camera = cameras[cameraId];
 
-        object = pepng::makeCameraObj(pepng::makeCameraTransform(position, rotation, scale), camera);
+        object = pepng::make_camera_object(pepng::make_camera_transform(position, rotation, scale), camera);
     } else {
-        object = pepng::makeObject(objectName);
+        object = pepng::make_object(objectName);
 
-        object->attachComponent(pepng::makeTransform(position, rotation, scale));
+        object->attach_component(pepng::make_transform(position, rotation, scale));
     }
 
     if(auto iLight = node->FirstChildElement("instance_light")) {
         // TODO: Import actual light values instead of default.
-        object->attachComponent(pepng::makeLight(shadowShaderProgram, glm::vec3(1.0f)));
+        object->attach_component(pepng::make_light(shadowShaderProgram, glm::vec3(1.0f)));
     }
 
     if(auto iGeometry = node->FirstChildElement("instance_geometry")) {
@@ -551,20 +551,20 @@ std::shared_ptr<Object> loadObjectDataDAE(
                 throw std::runtime_error("Could not find material " + materialId);
             }
 
-            object->attachComponent(pepng::makeRenderer(geometry, material));
+            object->attach_component(pepng::make_renderer(geometry, material));
         } else {
-            object->attachComponent(pepng::makeRenderer(geometry, pepng::makeMaterial(shaderProgram, pepng::makeTexture())));
+            object->attach_component(pepng::make_renderer(geometry, pepng::make_material(shaderProgram, pepng::make_texture())));
         }
     }
 
     std::cout << "Loaded object: " << objectName << std::endl;
 
-    object->children = pepng::loadObjectsDAE(node, geometries, cameras, materials, shaderProgram, shadowShaderProgram);
+    object->children = pepng::collada_load_objects(node, geometries, cameras, materials, shaderProgram, shadowShaderProgram);
 
     return object;
 }
 
-std::vector<std::shared_ptr<Object>> pepng::loadObjectsDAE(
+std::vector<std::shared_ptr<Object>> pepng::collada_load_objects(
     tinyxml2::XMLElement* node, 
     std::map<std::string, std::shared_ptr<Model>>& geometries, 
     std::map<std::string, std::shared_ptr<Camera>>& cameras,
@@ -585,7 +585,7 @@ std::vector<std::shared_ptr<Object>> pepng::loadObjectsDAE(
     return objects;
 }
 
-std::map<std::string, std::shared_ptr<Object>> pepng::loadScenesDAE(
+std::map<std::string, std::shared_ptr<Object>> pepng::collada_load_scenes(
     tinyxml2::XMLElement* libraryScenes, 
     std::map<std::string, std::shared_ptr<Model>>& geometries, 
     std::map<std::string, std::shared_ptr<Camera>>& cameras,
@@ -600,11 +600,11 @@ std::map<std::string, std::shared_ptr<Object>> pepng::loadScenesDAE(
     while(scene != nullptr) {
         std::string sceneName = scene->FindAttribute("name")->Value();
 
-        auto sceneObj = pepng::makeObject(sceneName);
+        auto sceneObj = pepng::make_object(sceneName);
 
-        sceneObj->attachComponent(pepng::makeTransform());
+        sceneObj->attach_component(pepng::make_transform());
 
-        sceneObj->children = loadObjectsDAE(scene, geometries, cameras, materials, shaderProgram, shadowShaderProgram);
+        sceneObj->children = collada_load_objects(scene, geometries, cameras, materials, shaderProgram, shadowShaderProgram);
 
         scenes[sceneName] = sceneObj;
 
@@ -616,7 +616,7 @@ std::map<std::string, std::shared_ptr<Object>> pepng::loadScenesDAE(
     return scenes;
 }
 
-void pepng::loadObjectDAE(
+void pepng::collada_load_all(
     std::filesystem::path path, 
     std::function<void(std::shared_ptr<Object>)> function, 
     GLuint shaderProgram, 
@@ -633,21 +633,21 @@ void pepng::loadObjectDAE(
 
     auto root = doc.RootElement();
 
-    auto futureCameras = std::async(loadCamerasDAE, root->FirstChildElement("library_cameras"));
+    auto futureCameras = std::async(collada_load_cameras, root->FirstChildElement("library_cameras"));
 
-    auto futureGeometries = std::async(loadGeometriesDAE, root->FirstChildElement("library_geometries"));
+    auto futureGeometries = std::async(collada_load_geometries, root->FirstChildElement("library_geometries"));
 
-    auto textures = loadTexturesDAE(root->FirstChildElement("library_images"), path);
+    auto textures = collada_load_textures(root->FirstChildElement("library_images"), path);
 
-    auto effects = loadEffectDAE(root->FirstChildElement("library_effects"), textures);
+    auto effects = collada_load_effects(root->FirstChildElement("library_effects"), textures);
 
-    auto materials = loadMaterialsDAE(root->FirstChildElement("library_materials"), effects, shaderProgram);
+    auto materials = collada_load_materials(root->FirstChildElement("library_materials"), effects, shaderProgram);
 
     auto cameras = futureCameras.get();
 
     auto geometries = futureGeometries.get();
 
-    auto scenes = loadScenesDAE(root->FirstChildElement("library_visual_scenes"), geometries, cameras, materials, shaderProgram, shadowShaderProgram);
+    auto scenes = collada_load_scenes(root->FirstChildElement("library_visual_scenes"), geometries, cameras, materials, shaderProgram, shadowShaderProgram);
 
     for(auto scene : scenes) {
         function(scene.second);

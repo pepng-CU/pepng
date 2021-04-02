@@ -18,17 +18,17 @@ class DynamicTexture : public Component {
         /**
          * The first texture index.
          */
-        int startTextureIndex;
+        int start_texture_index;
 
         /**
          * The last texture index.
          */
-        int endTextureIndex;
+        int end_texture_index;
 
         /**
          * Current active texture.
          */
-        int currentIndex;
+        int current_index;
 
         /**
          * Game cycle counter.
@@ -43,17 +43,17 @@ class DynamicTexture : public Component {
         /**
          * Shared_ptr constructor for DynamicTexture.
          */
-        static std::shared_ptr<DynamicTexture> makeDynamicTexture(int startTextureIndex, int endTextureIndex);
+        static std::shared_ptr<DynamicTexture> make_dynamic_texture(int startTextureIndex, int endTextureIndex);
 
         virtual void update(std::shared_ptr<WithComponents> object) override;
         virtual void imgui() override;
 
-        virtual DynamicTexture* cloneImplementation() override;
+        virtual DynamicTexture* clone_implementation() override;
     private:
         DynamicTexture(int startTextureIndex, int endTextureIndex);
         DynamicTexture(const DynamicTexture& renderer);
 };
 
 namespace pepng {
-    std::shared_ptr<DynamicTexture> makeDynamicTexture(int startTextureIndex, int endTextureIndex);
+    std::shared_ptr<DynamicTexture> make_dynamic_texture(int startTextureIndex, int endTextureIndex);
 };

@@ -3,17 +3,17 @@
 #include "../gl/buffer.hpp"
 #include "../gl/model.hpp"
 
-std::shared_ptr<Object> pepng::makeAxes(std::shared_ptr<Transform> transform, GLuint shaderProgram) {
-    auto axes = pepng::makeObject("Axes");
+std::shared_ptr<Object> pepng::make_axes(std::shared_ptr<Transform> transform, GLuint shaderProgram) {
+    auto axes = pepng::make_object("Axes");
 
-    axes->attachComponent(transform);
+    axes->attach_component(transform);
 
-    auto material = pepng::makeMaterial(shaderProgram, pepng::makeTexture());
+    auto material = pepng::make_material(shaderProgram, pepng::make_texture());
 
-    axes->attachComponent(pepng::makeRenderer(
-            pepng::makeModel()
-                ->attachBuffer(
-                    pepng::makeBuffer<glm::vec3>(
+    axes->attach_component(pepng::make_renderer(
+            pepng::make_model()
+                ->attach_buffer(
+                    pepng::make_buffer<glm::vec3>(
                         std::vector { 
                             glm::vec3(0.0f, 0.0f, 0.0f),
                             glm::vec3(1.0f, 0.0f, 0.0f), 
@@ -27,8 +27,8 @@ std::shared_ptr<Object> pepng::makeAxes(std::shared_ptr<Transform> transform, GL
                         3
                     )
                 )
-                ->attachBuffer(
-                    pepng::makeBuffer<glm::vec4>(
+                ->attach_buffer(
+                    pepng::make_buffer<glm::vec4>(
                         std::vector { 
                             glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 
                             glm::vec4(1.0f, 0.0f, 0.0f, 1.0f), 
@@ -42,8 +42,8 @@ std::shared_ptr<Object> pepng::makeAxes(std::shared_ptr<Transform> transform, GL
                         4
                     )
                 )
-                ->attachBuffer(
-                    pepng::makeBuffer<int>(
+                ->attach_buffer(
+                    pepng::make_buffer<int>(
                         std::vector {
                             0, 1, 
                             2, 3, 
@@ -52,9 +52,9 @@ std::shared_ptr<Object> pepng::makeAxes(std::shared_ptr<Transform> transform, GL
                         GL_ELEMENT_ARRAY_BUFFER
                     )
                 )
-                ->setElementArray(true)
-                ->setCount(6)
-                ->setName("Axes"), 
+                ->set_element_array(true)
+                ->set_count(6)
+                ->set_name("Axes"), 
             material,
             GL_LINES
         )

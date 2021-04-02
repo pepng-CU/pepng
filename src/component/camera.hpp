@@ -15,10 +15,6 @@
 class Viewport : public WithImGui {
     public:
         /**
-         * Variable to check if the viewport will render.
-         */
-        bool isActive;
-        /**
          * The XY position of the viewport.
          */
         glm::vec2 position;
@@ -33,7 +29,12 @@ class Viewport : public WithImGui {
          * @param position The XY viewport position.
          * @param scale The XY scale of the viewport.
          */
-        static std::shared_ptr<Viewport> makeViewport(glm::vec2 position, glm::vec2 scale);
+        static std::shared_ptr<Viewport> make_viewport(glm::vec2 position, glm::vec2 scale);
+
+        /**
+         * Accessor for active variable.
+         */
+        inline bool active() { return this->__is_active; }
 
         /**
          * Attempts to render the viewport.
@@ -49,6 +50,11 @@ class Viewport : public WithImGui {
     private:
         Viewport(glm::vec2 position, glm::vec2 scale);
         Viewport(const Viewport& viewport);
+
+        /**
+         * Variable to check if the viewport will render.
+         */
+        bool __is_active;
 };
 
 /**
@@ -61,14 +67,14 @@ class Projection : public WithImGui {
         /**
          * Generates the projection matrix.
          */
-        virtual glm::mat4 getMatrix() = 0;
+        virtual glm::mat4 matrix() = 0;
 
         /**
          * Sets the projection aspect ratio.
          * 
          * @param aspect The aspect ratio to set.
          */
-        void setAspect(float aspect);
+        inline void set_aspect(float aspect) { this->_aspect = aspect; }
         
     protected:
         Projection(float aspect);
@@ -77,7 +83,7 @@ class Projection : public WithImGui {
         /**
          * The current window aspect ratio.
          */
-        float aspect;
+        float _aspect;
 };
 
 /**
@@ -88,13 +94,13 @@ class Perspective : public Projection {
         /**
          * Shared_ptr constructor of Perspective.
          */
-        static std::shared_ptr<Perspective> makePerspective(float fovy, float aspect, float near, float far);
+        static std::shared_ptr<Perspective> make_perspective(float fovy, float aspect, float near, float far);
 
         virtual std::shared_ptr<Projection> clone() override;
 
         virtual std::shared_ptr<Perspective> clone1();
 
-        virtual glm::mat4 getMatrix() override;
+        virtual glm::mat4 matrix() override;
 
         virtual void imgui() override;
 
@@ -105,15 +111,15 @@ class Perspective : public Projection {
         /**
          * The field of view of the camera.
          */
-        float fovy;
+        float __fovy;
         /**
          * The near cutoff plane.
          */
-        float near;
+        float __near;
         /**
          * The far cutoff plane.
          */
-        float far;
+        float __far;
 };
 
 /**
@@ -124,7 +130,7 @@ class Camera : public Component {
         /**
          * Pointer to the current camera being rendered.
          */
-        static std::shared_ptr<Camera> currentCamera;
+        static std::shared_ptr<Camera> current_camera;
 
         /**
          * Static list of cameras.
@@ -134,7 +140,7 @@ class Camera : public Component {
         /**
          * Static_ptr constructor of Camera.
          */
-        static std::shared_ptr<Camera> makeCamera(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection);
+        static std::shared_ptr<Camera> make_camera(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection);
 
         /**
          * Pointer to the projection used for the camera.
@@ -153,23 +159,23 @@ class Camera : public Component {
         virtual void imgui() override;
         
     protected:
-        virtual Camera* cloneImplementation() override;
+        virtual Camera* clone_implementation() override;
 
     private:
         /**
          * Pointer to the parent component of the camera.
          * We store this because camera rendering doesn't fall in the update/rendering stage.
          */
-        std::shared_ptr<WithComponents> parent;
+        std::shared_ptr<WithComponents> __parent;
 
         Camera(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection);
         Camera(const Camera& camera);
 };
 
 namespace pepng {
-    std::shared_ptr<Camera> makeCamera(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection);
+    std::shared_ptr<Camera> make_camera(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection);
 
-    std::shared_ptr<Viewport> makeViewport(glm::vec2 position, glm::vec2 scale);
+    std::shared_ptr<Viewport> make_viewport(glm::vec2 position, glm::vec2 scale);
 
-    std::shared_ptr<Perspective> makePerspective(float fovy, float aspect, float near, float far);
+    std::shared_ptr<Perspective> make_perspective(float fovy, float aspect, float near, float far);
 };

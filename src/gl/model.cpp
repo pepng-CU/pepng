@@ -2,78 +2,56 @@
 #include "../object/objects.hpp"
 
 Model::Model() : 
-    count(-1), 
-    vao(-1), 
-    offset(glm::vec3(0.0f, 0.0f, 0.0f)), 
-    hasElementArray(false), 
-    name("Model")
+    __count(-1), 
+    __vao(-1), 
+    __offset(glm::vec3(0.0f, 0.0f, 0.0f)), 
+    __has_element_array(false), 
+    __name("Model")
 {}
 
 Model::Model(const Model& model) : 
     DelayedInit(model),
-    count(model.count),
-    vao(model.vao),
-    offset(model.offset),
-    hasElementArray(model.hasElementArray),
-    name(model.name)
+    __count(model.__count),
+    __vao(model.__vao),
+    __offset(model.__offset),
+    __has_element_array(model.__has_element_array),
+    __name(model.__name)
 {}
 
-std::shared_ptr<Model> Model::makeModel() {
+std::shared_ptr<Model> Model::make_model() {
     std::shared_ptr<Model> model(new Model());
 
     return model;
 }
 
-std::shared_ptr<Model> pepng::makeModel() {
-    return Model::makeModel();
+std::shared_ptr<Model> pepng::make_model() {
+    return Model::make_model();
 }
 
-Model* Model::cloneImplementation() {
+Model* Model::clone_implementation() {
     return new Model(*this);
 }
 
-void Model::delayedInit() {
-    if(this->isInit) {
+void Model::delayed_init() {
+    if(this->_is_init) {
         return;
     }
 
-    this->isInit = true;
+    this->_is_init = true;
 
     GLuint vao;
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    this->vao = vao;
+    this->__vao = vao;
 
-    for(auto child : this->delayedChildren) {
-        child->delayedInit();
+    for(auto child : this->_delayed_children) {
+        child->delayed_init();
     }
 }
 
-std::shared_ptr<Model> Model::setCount(unsigned int count) {
-    this->count = count;
-
-    return shared_from_this();
-}
-
-std::shared_ptr<Model> Model::setElementArray(bool hasElementArray) {
-    this->hasElementArray = hasElementArray;
-
-    return shared_from_this();
-}
-
-std::shared_ptr<Model> Model::setName(std::string name) {
-    this->name = name;
-
-    return shared_from_this();
-}
-
-std::string Model::getName() {
-    return this->name;
-}
-
-std::shared_ptr<Model> Model::calculateOffset(std::vector<glm::vec3> vertexArray, std::vector<unsigned int> faceArray) {
+std::shared_ptr<Model> Model::calculate_offset(std::vector<glm::vec3> vertexArray, std::vector<unsigned int> faceArray) {
     int count = 0;
     glm::vec3 offset = glm::vec3(0.0f, 0.0f, 0.0f);
     std::unordered_set<unsigned int> seenPoints;
@@ -92,7 +70,7 @@ std::shared_ptr<Model> Model::calculateOffset(std::vector<glm::vec3> vertexArray
         offset /= count;
     }
 
-    this->offset = offset;
+    this->__offset = offset;
 
     return shared_from_this();
 }

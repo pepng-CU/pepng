@@ -7,14 +7,14 @@
  */
 class Transformer : public Component {
     public:
-        static std::shared_ptr<Transformer> makeTransformer(float positionSpeed = 0.1f, float rotationSpeed = 1.0f, float scaleSpeed = 0.01f);
+        static std::shared_ptr<Transformer> make_transformer(float positionSpeed = 0.1f, float rotationSpeed = 1.0f, float scaleSpeed = 0.01f);
 
         virtual void update(std::shared_ptr<WithComponents> parent) override;
 
         virtual void imgui() override;
 
     protected:
-        virtual Transformer* cloneImplementation() override;
+        virtual Transformer* clone_implementation() override;
 
     private:
         Transformer(float positionSpeed, float rotationSpeed, float scaleSpeed);
@@ -23,17 +23,17 @@ class Transformer : public Component {
         /**
          * The translation speed to apply.
          */
-        float positionSpeed;
+        float __position_speed;
         /**
          * The scale speed to apply.
          */
-        float scaleSpeed;
+        float __scale_speed;
         /**
          * The rotation speed to apply.
          */
-        float rotationSpeed;
+        float __rotation_speed;
 };
 
 namespace pepng {
-    std::shared_ptr<Transformer> makeTransformer(float positionSpeed = 0.1f, float rotationSpeed = 1.0f, float scaleSpeed = 0.01f);
+    std::shared_ptr<Transformer> make_transformer(float positionSpeed = 0.1f, float rotationSpeed = 1.0f, float scaleSpeed = 0.01f);
 };

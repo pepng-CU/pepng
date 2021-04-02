@@ -3,10 +3,10 @@
 #include "../gl/buffer.hpp"
 #include "../gl/model.hpp"
 
-std::shared_ptr<Object> pepng::makeGrid(std::shared_ptr<Transform> transform, GLuint shaderProgram, int count, glm::vec4 color) {
-    auto grid = pepng::makeObject("Grid");
+std::shared_ptr<Object> pepng::make_grid(std::shared_ptr<Transform> transform, GLuint shaderProgram, int count, glm::vec4 color) {
+    auto grid = pepng::make_object("Grid");
 
-    grid->attachComponent(transform);
+    grid->attach_component(transform);
 
     if (count < 2) {
         throw std::runtime_error("A grid needs at least 2 lines for edges.");
@@ -33,35 +33,35 @@ std::shared_ptr<Object> pepng::makeGrid(std::shared_ptr<Transform> transform, GL
         colors.push_back(color);
     }
 
-    auto material = pepng::makeMaterial(shaderProgram, pepng::makeTexture());
+    auto material = pepng::make_material(shaderProgram, pepng::make_texture());
 
-    grid->attachComponent(pepng::makeRenderer(
-            pepng::makeModel()
-                ->attachBuffer(
-                    pepng::makeBuffer<glm::vec3>(
+    grid->attach_component(pepng::make_renderer(
+            pepng::make_model()
+                ->attach_buffer(
+                    pepng::make_buffer<glm::vec3>(
                         verticies,
                         GL_ARRAY_BUFFER,
                         0,
                         3
                     )
                 )
-                ->attachBuffer(
-                    pepng::makeBuffer<glm::vec4>(
+                ->attach_buffer(
+                    pepng::make_buffer<glm::vec4>(
                         colors,
                         GL_ARRAY_BUFFER,
                         1,
                         4
                     )
                 )
-                ->attachBuffer(
-                    pepng::makeBuffer<int>(
+                ->attach_buffer(
+                    pepng::make_buffer<int>(
                         indicies,
                         GL_ELEMENT_ARRAY_BUFFER
                     )
                 )
-                ->setCount(indicies.size())
-                ->setElementArray(true)
-                ->setName("Grid"),
+                ->set_count(indicies.size())
+                ->set_element_array(true)
+                ->set_name("Grid"),
             material,
             GL_LINES
         )

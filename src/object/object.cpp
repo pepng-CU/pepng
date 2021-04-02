@@ -15,17 +15,17 @@ Object::Object(const Object& object) :
     }
 }
 
-std::shared_ptr<Object> Object::makeObject(std::string name) {
+std::shared_ptr<Object> Object::make_object(std::string name) {
     std::shared_ptr<Object> object(new Object(name));
 
     return object;
 }
 
-Object* Object::cloneImplementation() {
+Object* Object::clone_implementation() {
     return new Object(*this);
 }
 
-std::shared_ptr<Object> Object::attachChild(std::shared_ptr<Object> object) {
+std::shared_ptr<Object> Object::attach_child(std::shared_ptr<Object> object) {
     this->children.push_back(object);
 
     return std::dynamic_pointer_cast<Object>(shared_from_this());
@@ -38,9 +38,9 @@ void Object::imgui() {
 }
 
 void Object::update() {
-    WithComponents::updateComponents();
+    WithComponents::update_components();
 
-    auto transform = this->getComponent<Transform>();
+    auto transform = this->get_component<Transform>();
 
     if(transform == nullptr) {
         std::stringstream ss;
@@ -50,15 +50,15 @@ void Object::update() {
         throw std::runtime_error(ss.str());
     }
 
-    auto parentMatrix = transform->parentMatrix * transform->getWorldMatrix();
+    auto parent_matrix = transform->parent_matrix * transform->world_matrix();
 
     for(auto child : this->children) {
         if(child == nullptr) {
             continue;
         }
 
-        if(auto childTransform = child->getComponent<Transform>()) {
-            childTransform->parentMatrix = glm::mat4(parentMatrix);
+        if(auto childTransform = child->get_component<Transform>()) {
+            childTransform->parent_matrix = glm::mat4(parent_matrix);
         }
 
         child->update();
@@ -66,7 +66,7 @@ void Object::update() {
 }
 
 void Object::render(GLuint shaderProgram) {
-    for(auto component : this->getComponents()) {
+    for(auto component : this->get_components()) {
         if(auto renderer = std::dynamic_pointer_cast<Renderer>(component)) {
             renderer->render(shared_from_this(), shaderProgram);
         }
@@ -78,19 +78,19 @@ void Object::render(GLuint shaderProgram) {
 }
 
 void Object::render() {
-    WithComponents::renderComponents();
+    WithComponents::render_components();
 
     for(auto child : this->children) {
         child->render();
     }
 }
 
-std::ostream& Object::operatorOstream(std::ostream& os) const {
+std::ostream& Object::operator_ostream(std::ostream& os) const {
     os  << "Object { " 
         << this->name
         << ", "; 
 
-    WithComponents::operatorOstream(os);
+    WithComponents::operator_ostream(os);
 
     os << " }";
 
@@ -98,11 +98,11 @@ std::ostream& Object::operatorOstream(std::ostream& os) const {
 }
 
 std::ostream& operator<<(std::ostream& os, const Object& object) {
-    return object.operatorOstream(os);
+    return object.operator_ostream(os);
 }
 
 namespace pepng {
-    std::shared_ptr<Object> makeObject(std::string name) {
-        return Object::makeObject(name);
+    std::shared_ptr<Object> make_object(std::string name) {
+        return Object::make_object(name);
     }
 };

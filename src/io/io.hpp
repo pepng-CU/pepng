@@ -29,21 +29,21 @@ class DeviceUnit : public std::enable_shared_from_this<DeviceUnit> {
         /**
          * Accessor for the device value.
          */
-        virtual float getValue();
+        virtual float value();
 
     protected:
         /**
          * The current device unit value.
          */
-        float value;
+        float _value;
         /**
          * The strength multiplier for the device.
          */
-        float strength;
+        float _strength;
         /**
          * Parent device.
          */
-        std::shared_ptr<Device> device;
+        std::shared_ptr<Device> _device;
 
         DeviceUnit(std::string name, float strength); 
 
@@ -51,7 +51,7 @@ class DeviceUnit : public std::enable_shared_from_this<DeviceUnit> {
         /**
          * The label for device unit.
          */
-        std::string name;
+        std::string __name;
 };
 
 /**
@@ -64,7 +64,7 @@ class Button : public DeviceUnit, public std::enable_shared_from_this<Button> {
         /**
          * Shared_ptr constructor for Button.
          */
-        static std::shared_ptr<Button> makeButton(std::string name, int buttonId, float strength = 1);
+        static std::shared_ptr<Button> make_button(std::string name, int buttonId, float strength = 1);
 
     protected:
         Button(std::string name, int buttonId, float strength = 1);
@@ -73,11 +73,11 @@ class Button : public DeviceUnit, public std::enable_shared_from_this<Button> {
         /**
          * The GLFW button value.
          */
-        int buttonId;
+        int __button_id;
         /**
          * Instantiation of Buttons.
          */
-        static std::vector<std::shared_ptr<Button>> buttons;
+        static std::vector<std::shared_ptr<Button>> __buttons;
         /**
          * Keyboard button callback (which uses buttons vector).
          */
@@ -95,9 +95,9 @@ class Axis : public DeviceUnit, public std::enable_shared_from_this<Axis> {
     public:
         friend Input;
         
-        static std::shared_ptr<Axis> makeAxis(std::string name, AxisType axisType, float strength, bool needsReset);
+        static std::shared_ptr<Axis> make_axis(std::string name, AxisType axisType, float strength, bool needsReset);
 
-        virtual float getValue() override;
+        virtual float value() override;
 
     protected:
         Axis(std::string name, AxisType axisType, float strength, bool needsReset);
@@ -106,19 +106,19 @@ class Axis : public DeviceUnit, public std::enable_shared_from_this<Axis> {
         /**
          * The GLFW axis type.
          */
-        AxisType axisType;
+        AxisType __axis_type;
         /**
          * Method to reset value when reset.
          */
-        bool needsReset;
+        bool __needs_reset;
         /**
          * Instantiation of Axes.
          */
-        static std::vector<std::shared_ptr<Axis>> axes;
+        static std::vector<std::shared_ptr<Axis>> __axes;
         /**
          * The static XY position of the cursor.
          */
-        static glm::vec2 cursorPosition;
+        static glm::vec2 __cursor_position;
         /**
          * Scroll callback (uses axes).
          */
@@ -139,41 +139,41 @@ class Device : public std::enable_shared_from_this<Device> {
         /**
          * Shared_ptr constructor of Device.
          */
-        static std::shared_ptr<Device> makeDevice(DeviceType deviceType);
+        static std::shared_ptr<Device> make_device(DeviceType deviceType);
 
         /**
          * Attaches a device unit to the device.
          */
-        std::shared_ptr<Device> attachUnit(std::shared_ptr<DeviceUnit> unit);
+        std::shared_ptr<Device> attach_unit(std::shared_ptr<DeviceUnit> unit);
 
         /**
          * Get an Axis device unit value by name.
          */
-        float getAxis(std::string name);
+        float axis(std::string name);
 
         /**
          * Get a Button device unit value by name.
          */
-        bool getButton(std::string name);
+        bool button(std::string name);
 
         /**
          * Get a Button device unit value by name (reset to zero once called).
          */
-        bool getButtonDown(std::string name);
+        bool button_down(std::string name);
 
     private:
         /**
          * The device type using the DeviceType enum.
          */
-        DeviceType deviceType;
+        DeviceType __device_type;
         /**
          * The parent input device.
          */
-        std::shared_ptr<Input> input;
+        std::shared_ptr<Input> __input;
         /**
          * List of attached device unit.
          */
-        std::vector<std::shared_ptr<DeviceUnit>> units;
+        std::vector<std::shared_ptr<DeviceUnit>> __units;
         
         Device(DeviceType deviceType);
 };
@@ -186,32 +186,32 @@ class Input : public std::enable_shared_from_this<Input> {
         /**
          * Shared_ptr constructor for Input.
          */
-        static std::shared_ptr<Input> makeInput(GLFWwindow* window);
+        static std::shared_ptr<Input> make_input(GLFWwindow* window);
 
         /**
          * Attaches a device to the input.
          */
-        std::shared_ptr<Input> attachDevice(std::shared_ptr<Device> device);
+        std::shared_ptr<Input> attach_device(std::shared_ptr<Device> device);
 
         /**
          * Gets an Axis value from all attached devices by name.
          */
-        float getAxis(std::string name);
+        float axis(std::string name);
 
         /**
          * Gets a Button value from all attached devices by name.
          */
-        bool getButton(std::string name);
+        bool button(std::string name);
 
         /**
          * Get a Button device unit value by name (reset to zero once called).
          */
-        bool getButtonDown(std::string name);
+        bool button_down(std::string name);
 
         /**
          * Gets the window that this input is attached to.
          */
-        GLFWwindow* getWindow();
+        GLFWwindow* window();
 
         /**
          * Gets the current input manager.
@@ -224,24 +224,24 @@ class Input : public std::enable_shared_from_this<Input> {
         /**
          * The window that this input manager is attached to.
          */
-        GLFWwindow* window;
+        GLFWwindow* __window;
 
         /**
          * List of attached devices.
          */
-        std::vector<std::shared_ptr<Device>> devices;
+        std::vector<std::shared_ptr<Device>> __devices;
 
         /**
          * List of inputs.
          */
-        static std::vector<std::shared_ptr<Input>> inputs;
+        static std::vector<std::shared_ptr<Input>> __inputs;
 
         Input(GLFWwindow* window);
 };
 
 namespace pepng {
-    std::shared_ptr<Input> makeInput(GLFWwindow* window);
-    std::shared_ptr<Device> makeDevice(DeviceType deviceType);
-    std::shared_ptr<Axis> makeAxis(std::string name, AxisType axisType, float strength = 1, bool needsReset = false);
-    std::shared_ptr<Button> makeButton(std::string name, int buttonId, float strength = 1);
+    std::shared_ptr<Input> make_input(GLFWwindow* window);
+    std::shared_ptr<Device> make_device(DeviceType deviceType);
+    std::shared_ptr<Axis> make_axis(std::string name, AxisType axisType, float strength = 1, bool needsReset = false);
+    std::shared_ptr<Button> make_button(std::string name, int buttonId, float strength = 1);
 }

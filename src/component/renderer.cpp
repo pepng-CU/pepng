@@ -4,57 +4,53 @@
 #include "transform.hpp"
 #include "../object/camera.hpp"
 
-Renderer::Renderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum renderMode) :
+Renderer::Renderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum render_mode) :
     Component("Renderer"),
     model(model),
     material(material),
-    renderMode(renderMode),
-    receiveShadow(true),
-    displayTexture(true)
+    render_mode(render_mode),
+    receive_shadow(true),
+    display_texture(true)
 {}
 
 Renderer::Renderer(const Renderer& renderer) :
     Component(renderer),
     model(renderer.model->clone2()),
     material(renderer.material->clone()),
-    renderMode(renderer.renderMode),
-    receiveShadow(renderer.receiveShadow),
-    displayTexture(renderer.displayTexture)
+    render_mode(renderer.render_mode),
+    receive_shadow(renderer.receive_shadow),
+    display_texture(renderer.display_texture)
 {}
 
-std::shared_ptr<Renderer> Renderer::makeRenderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum renderMode) {
-    std::shared_ptr<Renderer> renderer(new Renderer(model, material, renderMode));
+std::shared_ptr<Renderer> Renderer::make_renderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum render_mode) {
+    std::shared_ptr<Renderer> renderer(new Renderer(model, material, render_mode));
 
     return renderer;
 }
 
-std::shared_ptr<Renderer> pepng::makeRenderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum renderMode) {
-    return Renderer::makeRenderer(model, material, renderMode);
+std::shared_ptr<Renderer> pepng::make_renderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum render_mode) {
+    return Renderer::make_renderer(model, material, render_mode);
 }
 
-Renderer* Renderer::cloneImplementation() {
+Renderer* Renderer::clone_implementation() {
     return new Renderer(*this);
 }
 
 void Renderer::render(std::shared_ptr<WithComponents> parent, GLuint shaderProgram) {
-    if(!this->model->isInit) {
-        this->model->delayedInit();
-    }
+    if(!this->model->is_init()) this->model->delayed_init();
 
-    if(this->model->vao == -1 || !this->isActive) {
-        return;
-    }
+    if(this->model->vao() == -1 || !this->active()) return;
 
     glUseProgram(shaderProgram);
     
     glActiveTexture(GL_TEXTURE0);
 
-    glBindTexture(GL_TEXTURE_2D, this->material->texture->getIndex());
+    glBindTexture(GL_TEXTURE_2D, this->material->texture->gl_index());
 
     std::shared_ptr<Transform> transform;
 
     try {
-        transform = parent->getComponent<Transform>();
+        transform = parent->get_component<Transform>();
     } catch(...) {
         std::stringstream ss;
 
@@ -66,10 +62,10 @@ void Renderer::render(std::shared_ptr<WithComponents> parent, GLuint shaderProgr
     GLuint uWorld = glGetUniformLocation(shaderProgram, "u_world");
 
     if (uWorld >= 0) {
-        auto worldMatrix = transform->parentMatrix
-            * glm::translate(glm::mat4(1.0f), this->model->offset)
-            * transform->getWorldMatrix()
-            * glm::translate(glm::mat4(1.0f), -this->model->offset);
+        auto worldMatrix = transform->parent_matrix
+            * glm::translate(glm::mat4(1.0f), this->model->offset())
+            * transform->world_matrix()
+            * glm::translate(glm::mat4(1.0f), -this->model->offset());
 
         glUniformMatrix4fv(
             uWorld,
@@ -84,7 +80,7 @@ void Renderer::render(std::shared_ptr<WithComponents> parent, GLuint shaderProgr
     if(uReceiveShadow >= 0) {
         glUniform1f(
             uReceiveShadow,
-            this->receiveShadow
+            this->receive_shadow
         );
     }
 
@@ -93,38 +89,38 @@ void Renderer::render(std::shared_ptr<WithComponents> parent, GLuint shaderProgr
     if(uDisplayTexture >= 0) {
         glUniform1f(
             uDisplayTexture,
-            this->displayTexture
+            this->display_texture
         );
     }
 
-    glBindVertexArray(this->model->vao);
+    glBindVertexArray(this->model->vao());
 
-    if(this->model->hasElementArray) {
+    if(this->model->has_element_array()) {
         glDrawElements(
-            this->renderMode,
-            this->model->count,
+            this->render_mode,
+            this->model->count(),
             GL_UNSIGNED_INT,
             0
         );
     } else {
         glDrawArrays(
-            this->renderMode,
+            this->render_mode,
             0,
-            this->model->count
+            this->model->count()
         );
     }
 }
 
 void Renderer::render(std::shared_ptr<WithComponents> parent) {
-    auto shaderProgram = this->material->getShaderProgram();
+    auto shaderProgram = this->material->shader_program();
 
     glUseProgram(shaderProgram);
 
-    if(Camera::currentCamera == nullptr) {
+    if(Camera::current_camera == nullptr) {
         throw std::runtime_error("No current camera set.");
     }
 
-    Camera::currentCamera->render(shaderProgram);
+    Camera::current_camera->render(shaderProgram);
 
     /**
      * TODO: This is a hacky way to select the current light.
@@ -139,11 +135,11 @@ void Renderer::render(std::shared_ptr<WithComponents> parent) {
 void Renderer::imgui() {
     Component::imgui();
 
-    ImGui::LabelText("Name", this->model->name.c_str());
+    ImGui::LabelText("Name", this->model->name().c_str());
 
     std::stringstream ss;
 
-    ss << this->model->count;
+    ss << this->model->count();
 
     ImGui::LabelText("Index Count", ss.str().c_str());
 
@@ -151,7 +147,7 @@ void Renderer::imgui() {
     static int item_current_idx = -1;
 
     if (item_current_idx == -1) {
-        switch(this->renderMode) {
+        switch(this->render_mode) {
             case GL_TRIANGLES:
                 item_current_idx = 2;
                 break;
@@ -174,13 +170,13 @@ void Renderer::imgui() {
 
                 switch(item_current_idx) {
                     case 2:
-                        this->renderMode = GL_TRIANGLES;
+                        this->render_mode = GL_TRIANGLES;
                         break;
                     case 1:
-                        this->renderMode = GL_POINTS;
+                        this->render_mode = GL_POINTS;
                         break;
                     case 0:
-                        this->renderMode = GL_LINES;
+                        this->render_mode = GL_LINES;
                         break;
                 }
             }
@@ -192,6 +188,6 @@ void Renderer::imgui() {
         ImGui::EndCombo();
     }
 
-    ImGui::Checkbox("Texture", &this->displayTexture);
-    ImGui::Checkbox("Shadow", &this->receiveShadow);
+    ImGui::Checkbox("Texture", &this->display_texture);
+    ImGui::Checkbox("Shadow", &this->receive_shadow);
 }

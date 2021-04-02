@@ -18,7 +18,7 @@ class Renderer : public Component {
         /**
          * The OpenGL render mode.
          */
-        GLenum renderMode;
+        GLenum render_mode;
         /**
          * Pointer to the model.
          */
@@ -30,27 +30,27 @@ class Renderer : public Component {
         /**
          * Does model receive shadow?
          */
-        bool receiveShadow;
+        bool receive_shadow;
         /**
          * Does model display texture?
          */
-        bool displayTexture;
+        bool display_texture;
 
         /**
          * Shared_ptr constructor for Renderer.
          */
-        static std::shared_ptr<Renderer> makeRenderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum renderMode);
+        static std::shared_ptr<Renderer> make_renderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum render_mode);
 
         void render(std::shared_ptr<WithComponents> object, GLuint shaderProgram);
         virtual void render(std::shared_ptr<WithComponents> object) override;
         virtual void imgui() override;
 
-        virtual Renderer* cloneImplementation() override;
+        virtual Renderer* clone_implementation() override;
     private:
-        Renderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum renderMode);
+        Renderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum render_mode);
         Renderer(const Renderer& renderer);
 };
 
 namespace pepng {
-    std::shared_ptr<Renderer> makeRenderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum renderMode = GL_TRIANGLES);
+    std::shared_ptr<Renderer> make_renderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum render_mode = GL_TRIANGLES);
 };

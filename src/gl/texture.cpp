@@ -2,48 +2,40 @@
 
 Texture::Texture() :
     DelayedInit(),
-    textureIndex(0),
-    width(0),
-    height(0),
-    image(nullptr)
+    __texture_index(0),
+    __width(0),
+    __height(0),
+    __image(nullptr)
 {}
 
 // TODO: Make a deep clone of the image?
 Texture::Texture(const Texture& texture) : 
     DelayedInit(texture),
-    textureIndex(texture.textureIndex),
-    width(texture.width),
-    height(texture.height),
-    image(texture.image)
+    __texture_index(texture.__texture_index),
+    __width(texture.__width),
+    __height(texture.__height),
+    __image(texture.__image)
 {}
 
-GLuint Texture::getIndex() {
-    if(!this->isInit) {
-        this->delayedInit();
-    }
-
-    return this->textureIndex;
-}
-
-void Texture::delayedInit() {
-    if(this->isInit) {
+void Texture::delayed_init() {
+    if(this->_is_init) {
         return;
     }
 
-    this->isInit = true;
+    this->_is_init = true;
 
-    glGenTextures(1, &this->textureIndex);
+    glGenTextures(1, &this->__texture_index);
 
-    glBindTexture(GL_TEXTURE_2D, this->textureIndex);
+    glBindTexture(GL_TEXTURE_2D, this->__texture_index);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->width, this->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, this->image);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, this->__width, this->__height, 0, GL_RGBA, GL_UNSIGNED_BYTE, this->__image);
 
-    stbi_image_free(this->image);
+    stbi_image_free(this->__image);
 }
 
-std::shared_ptr<Texture> Texture::makeTexture(const std::filesystem::path& filePath) {
+std::shared_ptr<Texture> Texture::make_texture(const std::filesystem::path& filePath) {
     std::shared_ptr<Texture> texture(new Texture());
 
     #ifdef _MSC_VER
@@ -55,47 +47,47 @@ std::shared_ptr<Texture> Texture::makeTexture(const std::filesystem::path& fileP
     stbi_set_flip_vertically_on_load_thread(true);
 
     int numComponents;
-    texture->image = stbi_load(filePathString.c_str(), &texture->width, &texture->height, &numComponents, STBI_rgb_alpha);
+    texture->__image = stbi_load(filePathString.c_str(), &texture->__width, &texture->__height, &numComponents, STBI_rgb_alpha);
 
-    if (texture->image == nullptr){
+    if (texture->__image == nullptr){
         throw std::runtime_error("Cannot load texture: " + filePath.string());
     }
 
     return texture;
 }
 
-std::shared_ptr<Texture> Texture::makeTexture() {
+std::shared_ptr<Texture> Texture::make_texture() {
     std::shared_ptr<Texture> texture(new Texture());
 
-    texture->isInit = true;
-    texture->textureIndex = 1;
+    texture->_is_init = true;
+    texture->__texture_index = 1;
 
     return texture;
 }
 
-std::shared_ptr<Texture> Texture::makeTexture(GLuint textureIndex) {
+std::shared_ptr<Texture> Texture::make_texture(GLuint textureIndex) {
     std::shared_ptr<Texture> texture(new Texture());
 
-    texture->isInit = true;
-    texture->textureIndex = textureIndex;
+    texture->_is_init = true;
+    texture->__texture_index = textureIndex;
 
     return texture;
 }
 
-Texture* Texture::cloneImplementation() {
+Texture* Texture::clone_implementation() {
     return new Texture(*this);
 }
 
 namespace pepng {
-    std::shared_ptr<Texture> makeTexture(const std::filesystem::path& filePath) {
-        return Texture::makeTexture(filePath);
+    std::shared_ptr<Texture> make_texture(const std::filesystem::path& filePath) {
+        return Texture::make_texture(filePath);
     }
 
-    std::shared_ptr<Texture> makeTexture() {
-        return Texture::makeTexture();
+    std::shared_ptr<Texture> make_texture() {
+        return Texture::make_texture();
     }
 
-    std::shared_ptr<Texture> makeTexture(GLuint textureIndex) {
-        return Texture::makeTexture(textureIndex);
+    std::shared_ptr<Texture> make_texture(GLuint textureIndex) {
+        return Texture::make_texture(textureIndex);
     }
 }

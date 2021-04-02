@@ -31,12 +31,12 @@ class Object : public WithComponents, public Cloneable<Object> {
         /**
          * Shared_ptr constructor for Object.
          */
-        static std::shared_ptr<Object> makeObject(std::string name);
+        static std::shared_ptr<Object> make_object(std::string name);
 
         /**
          * Attaches a child to this object.
          */
-        std::shared_ptr<Object> attachChild(std::shared_ptr<Object> object);
+        std::shared_ptr<Object> attach_child(std::shared_ptr<Object> object);
 
         virtual void imgui();
 
@@ -46,7 +46,7 @@ class Object : public WithComponents, public Cloneable<Object> {
 
         void render(GLuint shaderProgram);
 
-        virtual std::ostream& operatorOstream(std::ostream& os) const override;
+        virtual std::ostream& operator_ostream(std::ostream& os) const override;
 
         friend std::ostream& operator<<(std::ostream& os, const Object& object);
 
@@ -54,11 +54,11 @@ class Object : public WithComponents, public Cloneable<Object> {
         Object(std::string name);
         Object(const Object& object);
 
-        virtual Object* cloneImplementation() override;
+        virtual Object* clone_implementation() override;
 };
 
 namespace pepng {
-    std::shared_ptr<Object> makeObject(std::string name);
+    std::shared_ptr<Object> make_object(std::string name);
 };
 
 std::ostream& operator<<(std::ostream& os, const Object& object);

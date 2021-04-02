@@ -31,12 +31,12 @@ namespace pepng {
      * Load from thread.
      */
     template <typename T, typename... Args>
-    void loadThread(std::filesystem::path path, std::function<void(std::shared_ptr<T>)> function, Args... args);
+    void load_thread(std::filesystem::path path, std::function<void(std::shared_ptr<T>)> function, Args... args);
 
     /**
      * Loads model geometry from OBJ file.
      */
-    void loadModelOBJ(
+    void obj_load_model(
         std::filesystem::path path, 
         std::function<void(std::shared_ptr<Model>)> function
     );
@@ -44,7 +44,7 @@ namespace pepng {
     /**
      * Loads model geometry and generates object for OBJ file.
      */
-    void loadObjectOBJ(
+    void obj_load_object(
         std::filesystem::path path, 
         std::function<void(std::shared_ptr<Object>)> function, 
         GLuint shaderProgram, 
@@ -54,7 +54,7 @@ namespace pepng {
     /**
      * Loads all textures (with their tag) from COLLADA file.
      */
-    std::map<std::string, std::future<std::shared_ptr<Texture>>> loadTexturesDAE(
+    std::map<std::string, std::future<std::shared_ptr<Texture>>> collada_load_textures(
         tinyxml2::XMLElement* libraryImages, 
         std::filesystem::path path
     );
@@ -62,7 +62,7 @@ namespace pepng {
     /**
      * Loads all effects (with their tag) from COLLADA file.
      */
-    std::map<std::string, std::shared_ptr<Texture>> loadEffectDAE(
+    std::map<std::string, std::shared_ptr<Texture>> collada_load_effects(
         tinyxml2::XMLElement* libraryEffects, 
         std::map<std::string, std::future<std::shared_ptr<Texture>>>& textures
     );
@@ -70,7 +70,7 @@ namespace pepng {
     /**
      * Loads all materials (with their tag) from COLLADA file.
      */
-    std::map<std::string, std::shared_ptr<Material>> loadMaterialsDAE(
+    std::map<std::string, std::shared_ptr<Material>> collada_load_materials(
         tinyxml2::XMLElement* libraryMaterials, 
         std::map<std::string, std::shared_ptr<Texture>>& effects, 
         GLuint shaderProgram
@@ -79,21 +79,21 @@ namespace pepng {
     /**
      * Loads all cameras (with their tag) from COLLADA file.
      */
-    std::map<std::string, std::shared_ptr<Camera>> loadCamerasDAE(
+    std::map<std::string, std::shared_ptr<Camera>> collada_load_cameras(
         tinyxml2::XMLElement* libraryCameras
     );
 
     /**
      * Loads all geometry as model (with their tag) from COLLADA file.
      */
-    std::map<std::string, std::shared_ptr<Model>> loadGeometriesDAE(
+    std::map<std::string, std::shared_ptr<Model>> collada_load_geometries(
         tinyxml2::XMLElement* libraryGeometries
     );
 
     /**
      * Loads all objects recursively (with their tag) from COLLADA file.
      */
-    std::vector<std::shared_ptr<Object>> loadObjectsDAE(
+    std::vector<std::shared_ptr<Object>> collada_load_objects(
         tinyxml2::XMLElement* node, 
         std::map<std::string, std::shared_ptr<Model>>& geometries, 
         std::map<std::string, std::shared_ptr<Camera>>& cameras,
@@ -105,7 +105,7 @@ namespace pepng {
     /**
      * Loads all scenes of objects (with their tag) from COLLADA file.
      */
-    std::map<std::string, std::shared_ptr<Object>> loadScenesDAE(
+    std::map<std::string, std::shared_ptr<Object>> collada_load_scenes(
         tinyxml2::XMLElement* libraryScenes, 
         std::map<std::string, std::shared_ptr<Model>>& geometries, 
         std::map<std::string, std::shared_ptr<Camera>>& cameras,
@@ -117,7 +117,7 @@ namespace pepng {
     /**
      * Loads a complete COLLADA file (calling the callbase `function` whenever an Object is loaded).
      */
-    void loadObjectDAE(
+    void collada_load_all(
         std::filesystem::path path, 
         std::function<void(std::shared_ptr<Object>)> function, 
         GLuint shaderProgram, 
@@ -129,12 +129,12 @@ namespace pepng {
      * Thread loader for Model.
      */
     template <>
-    inline void loadThread(
+    inline void load_thread(
         std::filesystem::path path, 
         std::function<void(std::shared_ptr<Model>)> function
     ) {
         if(path.extension() == ".obj") {
-            pepng::loadModelOBJ(path, function);
+            pepng::obj_load_model(path, function);
         } else {
             throw std::runtime_error("Cannot load " + path.extension().string() + " model type.");
         }
@@ -144,7 +144,7 @@ namespace pepng {
      * Thread loader for Object.
      */
     template <>
-    inline void loadThread(
+    inline void load_thread(
         std::filesystem::path path, 
         std::function<void(std::shared_ptr<Object>)> function, 
         GLuint shaderProgram, 
@@ -152,9 +152,9 @@ namespace pepng {
         GLuint shadowShaderProgram
     ) {
         if(path.extension() == ".obj") {
-            loadObjectOBJ(path, function, shaderProgram, transform);
+            obj_load_object(path, function, shaderProgram, transform);
         } else if(path.extension() == ".dae") {
-            loadObjectDAE(path, function, shaderProgram, transform, shadowShaderProgram);
+            collada_load_all(path, function, shaderProgram, transform, shadowShaderProgram);
         }
     }
 
@@ -171,7 +171,7 @@ namespace pepng {
             throw std::runtime_error("Could not find file: " + path.string());
         }
 
-        std::thread thread(loadThread<T, Args...>, path, function, args...);
+        std::thread thread(load_thread<T, Args...>, path, function, args...);
 
         thread.detach();
     }
@@ -189,7 +189,7 @@ namespace pepng {
             throw std::runtime_error("Could not find file: " + path.string());
         }
 
-        std::thread thread(loadThread<T, Args...>, path, function, args...);
+        std::thread thread(load_thread<T, Args...>, path, function, args...);
 
         thread.join();
     }

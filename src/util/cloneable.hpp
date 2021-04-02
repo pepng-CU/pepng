@@ -12,14 +12,14 @@ class Cloneable {
          * Clones this object as type T.
          */
         std::shared_ptr<T> clone() {
-            return std::shared_ptr<T>(this->cloneImplementation());
+            return std::shared_ptr<T>(this->clone_implementation());
         }
     
     protected:
         /**
          * Implementation of clone using raw pointers.
          */
-        virtual T* cloneImplementation() = 0;
+        virtual T* clone_implementation() = 0;
 };
 
 /**
@@ -32,12 +32,12 @@ class Cloneable2 {
          * Clones this object as type T.
          */
         std::shared_ptr<T> clone2() {
-            return std::shared_ptr<T>(this->cloneImplementation());
+            return std::shared_ptr<T>(this->clone_implementation());
         }
 
     protected:
         /**
          * Implementation of clone using raw pointers.
          */
-        virtual T* cloneImplementation() = 0;
+        virtual T* clone_implementation() = 0;
 };

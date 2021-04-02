@@ -1,29 +1,25 @@
 #include "component.hpp"
 
 Component::Component(std::string name) : 
-    name(name),
-    isActive(true)
+    __name(name),
+    _is_active(true)
 {}
 
 Component::Component(const Component& component) : 
-    name(component.name),
-    isActive(component.isActive)
+    __name(component.__name),
+    _is_active(component._is_active)
 {}
 
-std::string Component::getName() {
-    return this->name;
-}
-
 void Component::imgui() {
-    ImGui::Checkbox("Active", &this->isActive);
+    ImGui::Checkbox("Active", &this->_is_active);
 }
 
-std::ostream& Component::operatorOstream(std::ostream& os) const {
-    os << "Component { " << this->name << " }";
+std::ostream& Component::operator_ostream(std::ostream& os) const {
+    os << "Component { " << this->__name << " }";
 
     return os;
 }
 
 std::ostream& operator<<(std::ostream& os, const Component& component) {
-    return component.operatorOstream(os);
+    return component.operator_ostream(os);
 }

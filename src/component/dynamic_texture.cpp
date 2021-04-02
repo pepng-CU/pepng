@@ -7,31 +7,31 @@
 
 DynamicTexture::DynamicTexture(int startTextureIndex, int endTextureIndex) :
     Component("DynamicTexture"),
-    startTextureIndex(startTextureIndex), 
-    endTextureIndex(endTextureIndex),
-    currentIndex(startTextureIndex - 1),
+    start_texture_index(startTextureIndex), 
+    end_texture_index(endTextureIndex),
+    current_index(startTextureIndex - 1),
     count(MAX_COUNT)
 {}
 
 DynamicTexture::DynamicTexture(const DynamicTexture& dynamicTexture) :
     Component(dynamicTexture),
-    startTextureIndex(dynamicTexture.startTextureIndex), 
-    endTextureIndex(dynamicTexture.endTextureIndex),
-    currentIndex(dynamicTexture.currentIndex),
+    start_texture_index(dynamicTexture.start_texture_index), 
+    end_texture_index(dynamicTexture.end_texture_index),
+    current_index(dynamicTexture.current_index),
     count(dynamicTexture.count)
 {}
 
-std::shared_ptr<DynamicTexture> DynamicTexture::makeDynamicTexture(int startTextureIndex, int endTextureIndex) {
+std::shared_ptr<DynamicTexture> DynamicTexture::make_dynamic_texture(int startTextureIndex, int endTextureIndex) {
     std::shared_ptr<DynamicTexture> dynamicTexture(new DynamicTexture(startTextureIndex, endTextureIndex));
 
     return dynamicTexture;
 }
 
-std::shared_ptr<DynamicTexture> pepng::makeDynamicTexture(int startTextureIndex, int endTextureIndex) {
-    return DynamicTexture::makeDynamicTexture(startTextureIndex, endTextureIndex);
+std::shared_ptr<DynamicTexture> pepng::make_dynamic_texture(int startTextureIndex, int endTextureIndex) {
+    return DynamicTexture::make_dynamic_texture(startTextureIndex, endTextureIndex);
 }
 
-DynamicTexture* DynamicTexture::cloneImplementation() {
+DynamicTexture* DynamicTexture::clone_implementation() {
     return new DynamicTexture(*this);
 }
 
@@ -43,22 +43,22 @@ void DynamicTexture::update(std::shared_ptr<WithComponents> parent) {
     std::shared_ptr<Renderer> renderer;
 
     try {
-        renderer = parent->getComponent<Renderer>();
+        renderer = parent->get_component<Renderer>();
     } catch(...) {
         throw std::runtime_error("DynamicTexture requires a Renderer component.");
     }
 
-    if(++this->currentIndex > this->endTextureIndex) {
-        this->currentIndex = this->startTextureIndex;
+    if(++this->current_index > this->end_texture_index) {
+        this->current_index = this->start_texture_index;
     }
 
-    renderer->material->texture = pepng::makeTexture(this->currentIndex);
+    renderer->material->texture = pepng::make_texture(this->current_index);
 }
 
 void DynamicTexture::imgui() {
     Component::imgui();
 
-    ImGui::InputInt("Start", &this->startTextureIndex);
-    ImGui::InputInt("End", &this->endTextureIndex);
-    ImGui::InputInt("Current", &this->currentIndex);
+    ImGui::InputInt("Start", &this->start_texture_index);
+    ImGui::InputInt("End", &this->end_texture_index);
+    ImGui::InputInt("Current", &this->current_index);
 }

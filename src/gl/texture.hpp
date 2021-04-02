@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <memory>
+
 #include <stb_image.h>
 #include <GL/glew.h>
 
@@ -17,27 +18,31 @@ class Texture : public DelayedInit {
         /**
          * Default shared_ptr constructor Texture.
          */
-        static std::shared_ptr<Texture> makeTexture();
+        static std::shared_ptr<Texture> make_texture();
 
         /**
          * Texture from index.
          */
-        static std::shared_ptr<Texture> makeTexture(GLuint textureIndex);
+        static std::shared_ptr<Texture> make_texture(GLuint textureIndex);
 
         /**
          * Shared_ptr constructor Texture.
          */
-        static std::shared_ptr<Texture> makeTexture(const std::filesystem::path& filePath);
+        static std::shared_ptr<Texture> make_texture(const std::filesystem::path& filePath);
 
-        virtual void delayedInit() override;
+        virtual void delayed_init() override;
 
         /**
          * Accessor for OpenGL texture index.
          */
-        GLuint getIndex();
+        inline GLuint gl_index() {
+            if(!this->_is_init) this->delayed_init();
+
+            return this->__texture_index;
+        }
 
     protected:
-        virtual Texture* cloneImplementation() override;
+        virtual Texture* clone_implementation() override;
 
     private:
         Texture();
@@ -46,37 +51,37 @@ class Texture : public DelayedInit {
         /**
          * The OpenGL texture index.
          */
-        GLuint textureIndex;
+        GLuint __texture_index;
 
         /**
          * Pointer to STB image array.
          */
-        stbi_uc* image;
+        stbi_uc* __image;
 
         /**
          * Width of image.
          */
-        int width;
+        int __width;
         
         /**
          * Height of image.
          */
-        int height;
+        int __height;
 };
 
 namespace pepng {
     /**
      * Creates and binds texture.
      */
-    std::shared_ptr<Texture> makeTexture(const std::filesystem::path& filePath);
+    std::shared_ptr<Texture> make_texture(const std::filesystem::path& filePath);
 
     /**
      * Creates empty void texture.
      */
-    std::shared_ptr<Texture> makeTexture();
+    std::shared_ptr<Texture> make_texture();
 
     /**
      * Creates texture from textureIndex.
      */
-    std::shared_ptr<Texture> makeTexture(GLuint textureIndex);
+    std::shared_ptr<Texture> make_texture(GLuint textureIndex);
 }
