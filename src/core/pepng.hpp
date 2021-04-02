@@ -24,7 +24,7 @@ namespace pepng {
     /**
      * Initializes pepng.
      */
-    bool init(const char *title);
+    bool init(const char *title, float width, float height);
 
     /**
      * Renders and update pepng until program close/failure.
@@ -32,6 +32,23 @@ namespace pepng {
      * @return Exit code.
      */
     int update();
+
+    /**
+     * Sets the object shader.
+     */
+    void set_object_shader(GLuint shaderProgram);
+
+    /**
+     * Sets the shadow shader.
+     */
+    void set_shadow_shader(GLuint shaderProgram);
+
+    /**
+     * Imports image file and sets missing texture.
+     * 
+     * This should be called before all other texture bindings.
+     */
+    void set_missing_texture(const std::filesystem::path& filePath);
 
     /**
      * Attaches device to current pepng instance.

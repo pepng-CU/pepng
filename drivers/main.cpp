@@ -3,7 +3,7 @@
 void object_attach_recursive(std::shared_ptr<Object> object);
 
 int main(int argc, char *argv[]) {
-    if (!pepng::init("COMP 371")) return -1;
+    if (!pepng::init("COMP 371", 1024, 768)) return -1;
 
     /**
      * Paths
@@ -15,8 +15,7 @@ int main(int argc, char *argv[]) {
     /**
      * Textures
      */
-    static auto missing_texture = pepng::make_texture(texture_path / "missing.jpg");
-    missing_texture->delayed_init();
+    pepng::set_missing_texture(texture_path / "missing.jpg");
 
     // Loadings screen for stage.
     for(int i = 1; i <= 3; i++) {
@@ -31,10 +30,7 @@ int main(int argc, char *argv[]) {
         pepng::make_shader(shader_path / "object" / "fragment.glsl", GL_FRAGMENT_SHADER)
     );
 
-    glUseProgram(object_shader_program);
-
-    glUniform1i(glGetUniformLocation(object_shader_program, "u_texture"), 0);
-    glUniform1i(glGetUniformLocation(object_shader_program, "u_shadow"), 1);
+    pepng::set_object_shader(object_shader_program);
 
     static auto line_shader_program = pepng::make_shader_program(
         pepng::make_shader(shader_path / "line" / "vertex.glsl", GL_VERTEX_SHADER),
@@ -46,6 +42,8 @@ int main(int argc, char *argv[]) {
         pepng::make_shader(shader_path / "shadow" / "fragment.glsl", GL_FRAGMENT_SHADER),
         pepng::make_shader(shader_path / "shadow" / "geometry.glsl", GL_GEOMETRY_SHADER)
     );
+
+    pepng::set_shadow_shader(shadow_shader_program);
 
     /**
      * Objects
@@ -71,7 +69,7 @@ int main(int argc, char *argv[]) {
         )
     );
 
-    pepng::load_model_file(
+    pepng::load_file(
         model_path / "sponza" / "scene.dae", 
         std::function([](std::shared_ptr<Object> object) {
             object->attach_component(pepng::make_selector());
@@ -80,9 +78,7 @@ int main(int argc, char *argv[]) {
 
             pepng::instantiate(object);
         }),
-        object_shader_program,
-        pepng::make_transform(),
-        shadow_shader_program
+        pepng::make_transform()
     );
 
     /**

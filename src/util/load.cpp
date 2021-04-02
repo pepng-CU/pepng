@@ -1,5 +1,13 @@
 #include "load.hpp"
 
+namespace pepng {
+    GLuint OBJECT_SHADER = 0;
+    GLuint SHADOW_SHADER = 0;
+}
+
+void pepng::load_set_object_shader(GLuint shader) { pepng::OBJECT_SHADER = shader; }
+void pepng::load_set_shadow_shader(GLuint shader) { pepng::SHADOW_SHADER = shader; }
+
 void pepng::obj_load_model(std::filesystem::path path, std::function<void(std::shared_ptr<Model>)> function) {
     std::ifstream in(path);
 
@@ -105,7 +113,6 @@ void pepng::obj_load_model(std::filesystem::path path, std::function<void(std::s
 void pepng::obj_load(
     std::filesystem::path path, 
     std::function<void(std::shared_ptr<Object>)> function, 
-    GLuint shaderProgram, 
     std::shared_ptr<Transform> transform
 ) {
     std::string name = path.filename().string();
@@ -113,9 +120,9 @@ void pepng::obj_load(
     
     object->attach_component(transform->clone());
 
-    load_model_file_thread(
+    load_file_thread(
         path,
-        std::function([object, shaderProgram](std::shared_ptr<Model> model) mutable {
+        std::function([object](std::shared_ptr<Model> model) mutable {
             auto child = pepng::make_object(model->name());
 
             child
@@ -124,7 +131,7 @@ void pepng::obj_load(
                     pepng::make_renderer(
                         model, 
                         pepng::make_material(
-                            shaderProgram, 
+                            pepng::OBJECT_SHADER, 
                             pepng::make_texture()
                         ), 
                         GL_TRIANGLES
@@ -239,8 +246,7 @@ std::map<std::string, std::shared_ptr<Texture>> pepng::collada_load_effects(
 
 std::map<std::string, std::shared_ptr<Material>> pepng::collada_load_materials(
     tinyxml2::XMLElement* libraryMaterials, 
-    std::map<std::string, std::shared_ptr<Texture>>& effects, 
-    GLuint shaderProgram
+    std::map<std::string, std::shared_ptr<Texture>>& effects
 ) {
     std::map<std::string, std::shared_ptr<Material>> materials;
 
@@ -264,7 +270,7 @@ std::map<std::string, std::shared_ptr<Material>> pepng::collada_load_materials(
             throw std::runtime_error("Could not find effect " + effectId);
         }
 
-        materials[materialId] = pepng::make_material(shaderProgram, texture);
+        materials[materialId] = pepng::make_material(OBJECT_SHADER, texture);
 
         #if DEBUG_MODEL
             std::cout << "Loaded material: " << materialId << std::endl;
@@ -445,9 +451,7 @@ std::shared_ptr<Object> collada_load_object_data(
     tinyxml2::XMLElement* node, 
     std::map<std::string, std::shared_ptr<Model>>& geometries, 
     std::map<std::string, std::shared_ptr<Camera>>& cameras,
-    std::map<std::string, std::shared_ptr<Material>>& materials,
-    GLuint shaderProgram,
-    GLuint shadowShaderProgram
+    std::map<std::string, std::shared_ptr<Material>>& materials
 ) {
     std::string objectName = node->FindAttribute("name")->Value();
 
@@ -542,7 +546,7 @@ std::shared_ptr<Object> collada_load_object_data(
 
     if(auto iLight = node->FirstChildElement("instance_light")) {
         // TODO: Import actual light values instead of default.
-        object->attach_component(pepng::make_light(shadowShaderProgram, glm::vec3(1.0f)));
+        object->attach_component(pepng::make_light(pepng::SHADOW_SHADER, glm::vec3(1.0f)));
     }
 
     if(auto iGeometry = node->FirstChildElement("instance_geometry")) {
@@ -563,7 +567,7 @@ std::shared_ptr<Object> collada_load_object_data(
 
             object->attach_component(pepng::make_renderer(geometry, material));
         } else {
-            object->attach_component(pepng::make_renderer(geometry, pepng::make_material(shaderProgram, pepng::make_texture())));
+            object->attach_component(pepng::make_renderer(geometry, pepng::make_material(pepng::OBJECT_SHADER, pepng::make_texture())));
         }
     }
 
@@ -571,7 +575,7 @@ std::shared_ptr<Object> collada_load_object_data(
         std::cout << "Loaded object: " << objectName << std::endl;
     #endif
 
-    object->children = pepng::collada_load_objects(node, geometries, cameras, materials, shaderProgram, shadowShaderProgram);
+    object->children = pepng::collada_load_objects(node, geometries, cameras, materials);
 
     return object;
 }
@@ -580,16 +584,14 @@ std::vector<std::shared_ptr<Object>> pepng::collada_load_objects(
     tinyxml2::XMLElement* node, 
     std::map<std::string, std::shared_ptr<Model>>& geometries, 
     std::map<std::string, std::shared_ptr<Camera>>& cameras,
-    std::map<std::string, std::shared_ptr<Material>>& materials,
-    GLuint shaderProgram,
-    GLuint shadowShaderProgram
+    std::map<std::string, std::shared_ptr<Material>>& materials
 ) {
     std::vector<std::shared_ptr<Object>> objects;
 
     auto objNode = node->FirstChildElement("node");
 
     while(objNode != nullptr) {
-        objects.push_back(collada_load_object_data(objNode, geometries, cameras, materials, shaderProgram, shadowShaderProgram));
+        objects.push_back(collada_load_object_data(objNode, geometries, cameras, materials));
 
         objNode = objNode->NextSiblingElement("node");
     }
@@ -601,9 +603,7 @@ std::map<std::string, std::shared_ptr<Object>> pepng::collada_load_scenes(
     tinyxml2::XMLElement* libraryScenes, 
     std::map<std::string, std::shared_ptr<Model>>& geometries, 
     std::map<std::string, std::shared_ptr<Camera>>& cameras,
-    std::map<std::string, std::shared_ptr<Material>>& materials,
-    GLuint shaderProgram,
-    GLuint shadowShaderProgram
+    std::map<std::string, std::shared_ptr<Material>>& materials
 ) {
     std::map<std::string, std::shared_ptr<Object>> scenes;
 
@@ -616,7 +616,7 @@ std::map<std::string, std::shared_ptr<Object>> pepng::collada_load_scenes(
 
         sceneObj->attach_component(pepng::make_transform());
 
-        sceneObj->children = collada_load_objects(scene, geometries, cameras, materials, shaderProgram, shadowShaderProgram);
+        sceneObj->children = collada_load_objects(scene, geometries, cameras, materials);
 
         scenes[sceneName] = sceneObj;
 
@@ -633,9 +633,7 @@ std::map<std::string, std::shared_ptr<Object>> pepng::collada_load_scenes(
 void pepng::collada_load(
     std::filesystem::path path, 
     std::function<void(std::shared_ptr<Object>)> function, 
-    GLuint shaderProgram, 
-    std::shared_ptr<Transform> transform,
-    GLuint shadowShaderProgram
+    std::shared_ptr<Transform> transform
 ) {
     #if DEBUG_MODEL
         std::cout << "Loading COLLADA: " << path << std::endl;
@@ -657,13 +655,13 @@ void pepng::collada_load(
 
     auto effects = collada_load_effects(root->FirstChildElement("library_effects"), textures);
 
-    auto materials = collada_load_materials(root->FirstChildElement("library_materials"), effects, shaderProgram);
+    auto materials = collada_load_materials(root->FirstChildElement("library_materials"), effects);
 
     auto cameras = futureCameras.get();
 
     auto geometries = futureGeometries.get();
 
-    auto scenes = collada_load_scenes(root->FirstChildElement("library_visual_scenes"), geometries, cameras, materials, shaderProgram, shadowShaderProgram);
+    auto scenes = collada_load_scenes(root->FirstChildElement("library_visual_scenes"), geometries, cameras, materials);
 
     for(auto scene : scenes) {
         function(scene.second);

@@ -31,7 +31,7 @@ namespace pepng {
      * Load from thread.
      */
     template <typename T, typename... Args>
-    void load_model_file_thread(std::filesystem::path path, std::function<void(std::shared_ptr<T>)> function, Args... args);
+    void load_file_thread(std::filesystem::path path, std::function<void(std::shared_ptr<T>)> function, Args... args);
 
     /**
      * Loads model geometry from OBJ file.
@@ -49,7 +49,6 @@ namespace pepng {
     void obj_load(
         std::filesystem::path path, 
         std::function<void(std::shared_ptr<Object>)> function, 
-        GLuint shaderProgram, 
         std::shared_ptr<Transform> transform
     );
 
@@ -74,8 +73,7 @@ namespace pepng {
      */
     std::map<std::string, std::shared_ptr<Material>> collada_load_materials(
         tinyxml2::XMLElement* libraryMaterials, 
-        std::map<std::string, std::shared_ptr<Texture>>& effects, 
-        GLuint shaderProgram
+        std::map<std::string, std::shared_ptr<Texture>>& effects
     );
 
     /**
@@ -99,9 +97,7 @@ namespace pepng {
         tinyxml2::XMLElement* node, 
         std::map<std::string, std::shared_ptr<Model>>& geometries, 
         std::map<std::string, std::shared_ptr<Camera>>& cameras,
-        std::map<std::string, std::shared_ptr<Material>>& materials,
-        GLuint shaderProgram,
-        GLuint shadowShaderProgram
+        std::map<std::string, std::shared_ptr<Material>>& materials
     );
 
     /**
@@ -111,9 +107,7 @@ namespace pepng {
         tinyxml2::XMLElement* libraryScenes, 
         std::map<std::string, std::shared_ptr<Model>>& geometries, 
         std::map<std::string, std::shared_ptr<Camera>>& cameras,
-        std::map<std::string, std::shared_ptr<Material>>& materials,
-        GLuint shaderProgram,
-        GLuint shadowShaderProgram
+        std::map<std::string, std::shared_ptr<Material>>& materials
     );
 
     /**
@@ -122,16 +116,24 @@ namespace pepng {
     void collada_load(
         std::filesystem::path path, 
         std::function<void(std::shared_ptr<Object>)> function, 
-        GLuint shaderProgram, 
-        std::shared_ptr<Transform> transform,
-        GLuint shadowShaderProgram
+        std::shared_ptr<Transform> transform
     );
+
+    /**
+     * Sets object shader for future loads.
+     */
+    void load_set_object_shader(GLuint shader);
+
+    /**
+     * Sets shadow shader for future loads.
+     */
+    void load_set_shadow_shader(GLuint shader);
 
     /**
      * Thread loader for Model.
      */
     template <>
-    inline void load_model_file_thread(
+    inline void load_file_thread(
         std::filesystem::path path, 
         std::function<void(std::shared_ptr<Model>)> function
     ) {
@@ -146,17 +148,15 @@ namespace pepng {
      * Thread loader for Object.
      */
     template <>
-    inline void load_model_file_thread(
+    inline void load_file_thread(
         std::filesystem::path path, 
         std::function<void(std::shared_ptr<Object>)> function, 
-        GLuint shaderProgram, 
-        std::shared_ptr<Transform> transform,
-        GLuint shadowShaderProgram
+        std::shared_ptr<Transform> transform
     ) {
         if(path.extension() == ".obj") {
-            obj_load(path, function, shaderProgram, transform);
+            obj_load(path, function, transform);
         } else if(path.extension() == ".dae") {
-            collada_load(path, function, shaderProgram, transform, shadowShaderProgram);
+            collada_load(path, function, transform);
         }
     }
 
@@ -164,7 +164,7 @@ namespace pepng {
      * Generic load class.
      */
     template <typename T, typename... Args>
-    void load_model_file(
+    void load_file(
         std::filesystem::path path, 
         std::function<void(std::shared_ptr<T>)> function, 
         Args... args
@@ -173,7 +173,7 @@ namespace pepng {
             throw std::runtime_error("Could not find file: " + path.string());
         }
 
-        std::thread thread(load_model_file_thread<T, Args...>, path, function, args...);
+        std::thread thread(load_file_thread<T, Args...>, path, function, args...);
 
         thread.detach();
     }
@@ -182,7 +182,7 @@ namespace pepng {
      * Generic load sync class.
      */
     template <typename T, typename... Args>
-    void load_model_file_sync(
+    void load_file_sync(
         std::filesystem::path path, 
         std::function<void(std::shared_ptr<T>)> function, 
         Args... args
@@ -191,7 +191,7 @@ namespace pepng {
             throw std::runtime_error("Could not find file: " + path.string());
         }
 
-        std::thread thread(load_model_file_thread<T, Args...>, path, function, args...);
+        std::thread thread(load_file_thread<T, Args...>, path, function, args...);
 
         thread.join();
     }

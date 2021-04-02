@@ -2,6 +2,8 @@
 
 #include "../../src/component/camera.hpp"
 #include "../../src/component/light.hpp"
+#include "../../src/gl/texture.hpp"
+#include "../util/load.hpp"
 
 namespace pepng {
     static GLFWwindow *WINDOW;
@@ -9,8 +11,8 @@ namespace pepng {
     static std::vector<std::shared_ptr<Object>> WORLD;
     static std::shared_ptr<Object> CURRENT_IMGUI_OBJECT;
 
-    static float WINDOW_X = 1024.0f;
-    static float WINDOW_Y = 768.0f;
+    static float WINDOW_X;
+    static float WINDOW_Y;
 
     GLFWwindow *window() { return WINDOW; }
 
@@ -35,6 +37,24 @@ void windowSizeCallback(GLFWwindow *window, int width, int height) {
     pepng::WINDOW_Y = height;
 }
 
+void pepng::set_object_shader(GLuint shader_program) {
+    glUseProgram(shader_program);
+
+    glUniform1i(glGetUniformLocation(shader_program, "u_texture"), 0);
+    glUniform1i(glGetUniformLocation(shader_program, "u_shadow"), 1);
+
+    pepng::load_set_object_shader(shader_program);
+}
+
+void pepng::set_shadow_shader(GLuint shader_program) {
+    pepng::load_set_shadow_shader(shader_program);
+}
+
+void pepng::set_missing_texture(const std::filesystem::path& filePath) {
+    static auto missing_texture = pepng::make_texture(filePath);
+    missing_texture->delayed_init();
+}
+
 void pepng::attach_device(std::shared_ptr<Device> device) {
     INPUT->attach_device(device);
 }
@@ -43,8 +63,11 @@ void pepng::instantiate(std::shared_ptr<Object> object) {
     WORLD.push_back(object);
 }
 
-bool pepng::init(const char *title) {
+bool pepng::init(const char *title, float width, float height) {
     srand(time(NULL));
+
+    pepng::WINDOW_X = width;
+    pepng::WINDOW_Y = height;
 
     /**
      * GLFW
