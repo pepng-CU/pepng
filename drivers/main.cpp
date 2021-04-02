@@ -1,7 +1,5 @@
 #include <pepng.h>
 
-void object_attach_recursive(std::shared_ptr<Object> object);
-
 int main(int argc, char *argv[]) {
     if (!pepng::init("COMP 371", 1024, 768)) return -1;
 
@@ -25,19 +23,19 @@ int main(int argc, char *argv[]) {
     /**
      * Shaders
      */
-    static auto object_shader_program = pepng::make_shader_program(
+    auto object_shader_program = pepng::make_shader_program(
         pepng::make_shader(shader_path / "object" / "vertex.glsl", GL_VERTEX_SHADER),
         pepng::make_shader(shader_path / "object" / "fragment.glsl", GL_FRAGMENT_SHADER)
     );
 
     pepng::set_object_shader(object_shader_program);
 
-    static auto line_shader_program = pepng::make_shader_program(
+    auto line_shader_program = pepng::make_shader_program(
         pepng::make_shader(shader_path / "line" / "vertex.glsl", GL_VERTEX_SHADER),
         pepng::make_shader(shader_path / "line" / "fragment.glsl", GL_FRAGMENT_SHADER)
     );
 
-    static auto shadow_shader_program = pepng::make_shader_program(
+    auto shadow_shader_program = pepng::make_shader_program(
         pepng::make_shader(shader_path / "shadow" / "vertex.glsl", GL_VERTEX_SHADER),
         pepng::make_shader(shader_path / "shadow" / "fragment.glsl", GL_FRAGMENT_SHADER),
         pepng::make_shader(shader_path / "shadow" / "geometry.glsl", GL_GEOMETRY_SHADER)
@@ -74,7 +72,22 @@ int main(int argc, char *argv[]) {
         std::function([](std::shared_ptr<Object> object) {
             object->attach_component(pepng::make_selector());
 
-            object_attach_recursive(object);
+            /**
+             * Binds components to loaded objects.
+             */
+            object->for_each([](std::shared_ptr<Object> obj) {
+                obj->attach_component(pepng::make_transformer());
+
+                // Adds FPS controller if camera.
+                if(obj->has_component<Camera>()) {
+                    obj->attach_component(pepng::make_fps());
+                }
+
+                // Adds DynamicTexture if object named Display (in this case, the screen).
+                if(obj->name == "Display") {
+                    obj->attach_component(pepng::make_dynamic_texture(2, 4));
+                }
+            });
 
             pepng::instantiate(object);
         }),
@@ -127,23 +140,4 @@ int main(int argc, char *argv[]) {
     pepng::attach_device(keyboard);
 
     return pepng::update();
-}
-
-void object_attach_recursive(std::shared_ptr<Object> object) {
-    object->attach_component(pepng::make_transformer());
-
-    // Adds FPS controller to cameras.
-    try {
-        object->try_get_component<Camera>();
-        object->attach_component(pepng::make_fps());
-    } catch(...) {}
-
-    // Adds DynamicTexture to the screen.
-    if(object->name == "Display") {
-        object->attach_component(pepng::make_dynamic_texture(2, 4));
-    }
-
-    for(auto child : object->children) {
-        object_attach_recursive(child);
-    }
 }

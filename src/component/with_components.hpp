@@ -41,7 +41,7 @@ class WithComponents :
         #endif
 
         /**
-         * Generic method to get shared_ptr component of certain type.
+         * Get shared_ptr components of certain type.
          */
         template<typename T>
         std::vector<std::shared_ptr<T>> get_components() {
@@ -59,7 +59,7 @@ class WithComponents :
         /**
          * Generic method to get component of certain type.
          * 
-         * Throws if component cannot be found.
+         * @throw If component cannot be found.
          */
         template<typename T>
         std::shared_ptr<T> try_get_component() {
@@ -71,9 +71,9 @@ class WithComponents :
         }
 
         /**
-         * Generic method to get component of certain type.
+         * Get component of certain type.
          * 
-         * Returns null if component cannot be found.
+         * @return nullptr if component cannot be found.
          */
         template<typename T>
         std::shared_ptr<T> get_component() {
@@ -84,6 +84,44 @@ class WithComponents :
             }
 
             return std::shared_ptr<T>(nullptr);
+        }
+
+        /**
+         * Checks if component is attached.
+         */
+        template<typename T>
+        bool has_component() {
+            if(this->get_component<T>()) return true;
+
+            return false;
+        }
+
+        /**
+         * Replaces all components of certain type with new component.
+         */
+        template<typename T>
+        void replace_components(std::shared_ptr<T> component) {
+            for(int i = 0; i < this->components.size(); i++) {
+                if(std::dynamic_pointer_cast<T>(this->components.at(i))) {
+                    this->components.at(i) = component;
+                }
+            }
+        }
+
+        /**
+         * Removes all components of certain type with new component.
+         */
+        template<typename T>
+        void remove_components() {
+            std::vector<std::shared_ptr<Component>> new_components;
+
+            for(int i = 0; i < this->components.size(); i++) {
+                if(!std::dynamic_pointer_cast<T>(this->components.at(i))) {
+                    new_components.push_back(this->components.at(i));
+                }
+            }
+
+            this->components = new_components;
         }
 
         /**

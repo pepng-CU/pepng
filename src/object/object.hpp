@@ -4,6 +4,7 @@
 #include <vector>
 #include <filesystem>
 #include <iostream>
+#include <functional>
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
@@ -37,6 +38,11 @@ class Object : public WithComponents, public Cloneable<Object> {
          * Attaches a child to this object.
          */
         std::shared_ptr<Object> attach_child(std::shared_ptr<Object> object);
+
+        /**
+         * Applies callback function of this object and all children object.
+         */
+        void for_each(std::function<void (std::shared_ptr<Object>)> callback);
 
         virtual void update();
 

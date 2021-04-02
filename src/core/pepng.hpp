@@ -58,7 +58,7 @@ namespace pepng {
     void attach_device(std::shared_ptr<Device> device);
 
     /**
-     * Inserts object to world.
+     * Creates instance of object in world.
      */
     void instantiate(std::shared_ptr<Object> object);
 

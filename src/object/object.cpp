@@ -91,6 +91,14 @@ std::ostream& Object::operator_ostream(std::ostream& os) const {
     return os;
 }
 
+void Object::for_each(std::function<void (std::shared_ptr<Object>)> callback) {
+    callback(std::static_pointer_cast<Object>(shared_from_this()));
+
+    for(auto child : this->children) {
+        child->for_each(callback);
+    }
+}
+
 std::ostream& operator<<(std::ostream& os, const Object& object) {
     return object.operator_ostream(os);
 }
