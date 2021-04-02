@@ -11,7 +11,9 @@ class Transformer : public Component {
 
         virtual void update(std::shared_ptr<WithComponents> parent) override;
 
+        #if IMGUI
         virtual void imgui() override;
+        #endif
 
     protected:
         virtual Transformer* clone_implementation() override;

@@ -1,3 +1,15 @@
+#################
+# Configuration #
+#################
+set(DEBUG_MODEL OFF)
+set(DRIVER ON)
+set(EXTRA_OBJECTS ON)
+set(EXTRA_COMPONENTS ON)
+set(IMGUI ON)
+
+#########
+# CMake #
+#########
 cmake_minimum_required(VERSION 3.11)
 
 set (CMAKE_CXX_STANDARD 20)
@@ -36,42 +48,28 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
     endif()
 endif() 
 
+find_package(OpenGL REQUIRED COMPONENTS OpenGL)
+
 include(BuildGLEW)
+include(BuildGLFW)
 include(BuildGLM)
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/imgui-cmake)
+if(IMGUI)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/imgui-cmake)
+endif()
+
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/tinyxml2)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 
-if(NOT NO_EXEC)
-    set(EXTRA_OBJECTS ON)
-    set(EXTRA_COMPONENTS ON)
-    set(DEBUG_MODEL OFF)
-
-    find_package(OpenGL REQUIRED COMPONENTS OpenGL)
-
-    include(BuildGLFW)
-
+if(DRIVER)
     set(EXEC main)
 
     add_executable(${EXEC} drivers/main.cpp)
 
-    if(EXTRA_OBJECTS)
-        target_compile_definitions(${EXEC} PRIVATE EXTRA_OBJECTS)
-    endif()
-
-    if(EXTRA_COMPONENTS)
-        target_compile_definitions(${EXEC} PRIVATE EXTRA_COMPONENTS)
-    endif()
-
-    if(DEBUG_COLLADA)
-        target_compile_definitions(${EXEC} PRIVATE DEBUG_MODEL)
-    endif()
-    
     target_include_directories(${EXEC} 
         PUBLIC ${CMAKE_SOURCE_DIR}/thirdparty/stb
         PUBLIC ${CMAKE_SOURCE_DIR}/include
     )
 
-    target_link_libraries(${EXEC} OpenGL::GL glew_s glfw glm imgui ${PROJECT_NAME})
+    target_link_libraries(${EXEC} OpenGL::GL glew_s ${PROJECT_NAME})
 endif()

@@ -137,8 +137,9 @@ void Selector::update(std::shared_ptr<WithComponents> parent) {
             this->needs_update = true;
         }
     }
-};
+}
 
+#if IMGUI
 void Selector::imgui() {
     Component::imgui();
 
@@ -200,4 +201,5 @@ void Selector::imgui() {
 
     if (ImGui::Checkbox("Texture", &this->display_texture)) this->needs_update = true;
     if (ImGui::Checkbox("Shadow", &this->receive_shadow)) this->needs_update = true;
-};
+}
+#endif

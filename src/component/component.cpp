@@ -10,10 +10,6 @@ Component::Component(const Component& component) :
     _is_active(component._is_active)
 {}
 
-void Component::imgui() {
-    ImGui::Checkbox("Active", &this->_is_active);
-}
-
 std::ostream& Component::operator_ostream(std::ostream& os) const {
     os << "Component { " << this->__name << " }";
 
@@ -23,3 +19,9 @@ std::ostream& Component::operator_ostream(std::ostream& os) const {
 std::ostream& operator<<(std::ostream& os, const Component& component) {
     return component.operator_ostream(os);
 }
+
+#if IMGUI
+void Component::imgui() {
+    ImGui::Checkbox("Active", &this->_is_active);
+}
+#endif

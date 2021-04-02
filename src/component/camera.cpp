@@ -72,13 +72,6 @@ void Camera::render(GLuint shaderProgram) {
     );
 }
 
-void Camera::imgui() {
-    Component::imgui();
-
-    this->viewport->imgui();
-    this->projection->imgui();
-}
-
 Viewport::Viewport(glm::vec2 position, glm::vec2 scale) : 
     position(position), 
     scale(scale), 
@@ -122,11 +115,6 @@ bool Viewport::render(glm::vec2 windowDimension) {
     return true;
 }
 
-void Viewport::imgui() {
-    ImGui::InputFloat2("Position", glm::value_ptr(this->position));
-    ImGui::InputFloat2("Scale", glm::value_ptr(this->scale));
-}
-
 Projection::Projection(float aspect) : _aspect(aspect) {}
 Projection::Projection(const Projection& projection) : _aspect(projection._aspect) {}
 
@@ -168,8 +156,22 @@ glm::mat4 Perspective::matrix() {
     return glm::perspective(this->__fovy, this->_aspect, this->__near, this->__far);
 }
 
+#if IMGUI
+void Camera::imgui() {
+    Component::imgui();
+
+    this->viewport->imgui();
+    this->projection->imgui();
+}
+
+void Viewport::imgui() {
+    ImGui::InputFloat2("Position", glm::value_ptr(this->position));
+    ImGui::InputFloat2("Scale", glm::value_ptr(this->scale));
+}
+
 void Perspective::imgui() {
     ImGui::InputFloat("Fovy", &this->__fovy);
     ImGui::InputFloat("Near", &this->__near);
     ImGui::InputFloat("Far", &this->__far);
 }
+#endif

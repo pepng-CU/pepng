@@ -63,6 +63,66 @@ void pepng::instantiate(std::shared_ptr<Object> object) {
     WORLD.push_back(object);
 }
 
+#if IMGUI
+namespace pepng {
+    void imgui_init() {
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        ImGui::StyleColorsDark();
+        ImGui_ImplGlfw_InitForOpenGL(pepng::WINDOW, true);
+        ImGui_ImplOpenGL3_Init((char*)glGetString(GL_NUM_SHADING_LANGUAGE_VERSIONS));
+    }
+
+    void object_hierarchy(std::shared_ptr<Object> object) {
+        ImGuiTreeNodeFlags nodeFlags = 0;
+
+        if(object == CURRENT_IMGUI_OBJECT) {
+            nodeFlags |= ImGuiTreeNodeFlags_Selected;
+        }
+
+        bool nodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)&object, nodeFlags, object->name.c_str());
+
+        if (ImGui::IsItemClicked()) {
+            CURRENT_IMGUI_OBJECT = object;
+        }
+
+        if(nodeOpen) {
+            for(auto child : object->children) {
+                object_hierarchy(child);
+            }
+
+            ImGui::TreePop();
+        }
+    }
+
+    void imgui_render() {
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::Begin("Hierarchy");
+        
+        for(auto object : WORLD) {
+            object_hierarchy(object);
+        }
+
+        ImGui::End();
+
+        ImGui::Begin("Inspector");
+
+        if(CURRENT_IMGUI_OBJECT) {
+            CURRENT_IMGUI_OBJECT->imgui();
+        }
+        
+        ImGui::End();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    }
+}
+#endif
+
 bool pepng::init(const char *title, float width, float height) {
     srand(time(NULL));
 
@@ -104,12 +164,9 @@ bool pepng::init(const char *title, float width, float height) {
     /**
      * ImGui
      */
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    ImGui::StyleColorsDark();
-    ImGui_ImplGlfw_InitForOpenGL(pepng::WINDOW, true);
-    ImGui_ImplOpenGL3_Init((char*)glGetString(GL_NUM_SHADING_LANGUAGE_VERSIONS));
+    #if IMGUI
+    pepng::imgui_init();
+    #endif
 
     /**
      * Input
@@ -126,30 +183,6 @@ bool pepng::init(const char *title, float width, float height) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     return true;
-}
-
-namespace pepng {
-    void object_hierarchy(std::shared_ptr<Object> object) {
-        ImGuiTreeNodeFlags nodeFlags = 0;
-
-        if(object == CURRENT_IMGUI_OBJECT) {
-            nodeFlags |= ImGuiTreeNodeFlags_Selected;
-        }
-
-        bool nodeOpen = ImGui::TreeNodeEx((void*)(intptr_t)&object, nodeFlags, object->name.c_str());
-
-        if (ImGui::IsItemClicked()) {
-            CURRENT_IMGUI_OBJECT = object;
-        }
-
-        if(nodeOpen) {
-            for(auto child : object->children) {
-                object_hierarchy(child);
-            }
-
-            ImGui::TreePop();
-        }
-    }
 }
 
 int pepng::update() {
@@ -198,28 +231,9 @@ int pepng::update() {
         /**
          * ImGui
          */
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        ImGui::Begin("Hierarchy");
-        
-        for(auto object : WORLD) {
-            object_hierarchy(object);
-        }
-
-        ImGui::End();
-
-        ImGui::Begin("Inspector");
-
-        if(CURRENT_IMGUI_OBJECT) {
-            CURRENT_IMGUI_OBJECT->imgui();
-        }
-        
-        ImGui::End();
-
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        #if IMGUI
+        pepng::imgui_render();
+        #endif
 
         /**
          * GLFW events.

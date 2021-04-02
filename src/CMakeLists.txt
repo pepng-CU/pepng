@@ -7,4 +7,24 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC ${CMAKE_SOURCE_DIR}/thirdparty/stb
 )
 
-target_link_libraries(${PROJECT_NAME} glm imgui tinyxml2)
+target_link_libraries(${PROJECT_NAME} glm glfw tinyxml2)
+
+if(IMGUI)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC IMGUI)
+endif()
+
+if(EXTRA_OBJECTS)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC EXTRA_OBJECTS)
+endif()
+
+if(EXTRA_COMPONENTS)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC EXTRA_COMPONENTS)
+endif()
+
+if(DEBUG_COLLADA)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC DEBUG_MODEL)
+endif()
+
+if(IMGUI)
+    target_link_libraries(${PROJECT_NAME} imgui)
+endif()

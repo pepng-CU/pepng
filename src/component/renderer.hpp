@@ -43,9 +43,12 @@ class Renderer : public Component {
 
         void render(std::shared_ptr<WithComponents> object, GLuint shaderProgram);
         virtual void render(std::shared_ptr<WithComponents> object) override;
-        virtual void imgui() override;
 
         virtual Renderer* clone_implementation() override;
+
+        #if IMGUI
+        virtual void imgui() override;
+        #endif
     private:
         Renderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum render_mode);
         Renderer(const Renderer& renderer);

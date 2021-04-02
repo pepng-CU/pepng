@@ -38,8 +38,6 @@ class Object : public WithComponents, public Cloneable<Object> {
          */
         std::shared_ptr<Object> attach_child(std::shared_ptr<Object> object);
 
-        virtual void imgui();
-
         virtual void update();
 
         virtual void render();
@@ -49,6 +47,10 @@ class Object : public WithComponents, public Cloneable<Object> {
         virtual std::ostream& operator_ostream(std::ostream& os) const override;
 
         friend std::ostream& operator<<(std::ostream& os, const Object& object);
+
+        #if IMGUI
+        virtual void imgui();
+        #endif
 
     protected:
         Object(std::string name);

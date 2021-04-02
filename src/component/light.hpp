@@ -22,8 +22,11 @@ class Light : public Component, public DelayedInit {
         glm::mat4 matrix();
         glm::mat4 projection();
         void render(GLuint shaderProgram);
-        virtual void imgui() override;
         virtual void init(std::shared_ptr<WithComponents> parent) override;
+
+        #if IMGUI
+        virtual void imgui() override;
+        #endif
 
     protected:
         Light(GLuint shaderProgram, glm::vec3 color);

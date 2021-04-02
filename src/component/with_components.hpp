@@ -10,7 +10,12 @@
 /**
  * Interface to hold Components.
  */
-class WithComponents : public WithImGui, public std::enable_shared_from_this<WithComponents> {
+class WithComponents : 
+    #if IMGUI
+    public WithImGui, 
+    #endif
+    public std::enable_shared_from_this<WithComponents> 
+{
     public:
         /**
          * Attaches a Component to this.
@@ -27,11 +32,13 @@ class WithComponents : public WithImGui, public std::enable_shared_from_this<Wit
          */
         void render_components();
 
-        virtual void imgui();
-
         virtual std::ostream& operator_ostream(std::ostream& os) const;
 
         friend std::ostream& operator<<(std::ostream& os, const WithComponents& component);
+
+        #if IMGUI
+        virtual void imgui();
+        #endif
 
         /**
          * Generic method to get shared_ptr component of certain type.

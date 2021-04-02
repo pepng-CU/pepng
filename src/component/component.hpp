@@ -6,11 +6,14 @@
 #include <iostream>
 #include <string>
 
-#include <imgui.h>
 #include <glm/glm.hpp>
 #include <GL/glew.h>
 
+#if IMGUI
+#include <imgui.h>
 #include "../ui/with_imgui.hpp"
+#endif
+
 #include "../util/cloneable.hpp"
 
 class WithComponents;
@@ -18,7 +21,12 @@ class WithComponents;
 /**
  * Abstract Component definition that is binded to an object/component holder.
  */
-class Component : public WithImGui, public Cloneable<Component> {
+class Component : 
+    #if IMGUI
+    public WithImGui, 
+    #endif
+    public Cloneable<Component> 
+{
     public:
         /**
          * Accessor for the component name.
@@ -48,7 +56,9 @@ class Component : public WithImGui, public Cloneable<Component> {
 
         virtual void update(std::shared_ptr<WithComponents> parent) {};
 
+        #if IMGUI
         virtual void imgui() override;
+        #endif
 
     protected:
         Component(std::string name);

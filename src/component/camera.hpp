@@ -12,7 +12,11 @@
 /**
  * Viewport used for glViewport (which uses relative position instead of absolute).
  */
-class Viewport : public WithImGui {
+class Viewport
+    #if IMGUI
+    : public WithImGui 
+    #endif
+{
     public:
         /**
          * The XY position of the viewport.
@@ -44,7 +48,9 @@ class Viewport : public WithImGui {
          */
         bool render(glm::vec2 windowDimension);
 
+        #if IMGUI
         virtual void imgui() override;
+        #endif
 
         virtual std::shared_ptr<Viewport> clone();
     private:
@@ -60,7 +66,11 @@ class Viewport : public WithImGui {
 /**
  * Abstract projection definition.
  */
-class Projection : public WithImGui {
+class Projection 
+    #if IMGUI
+    : public WithImGui 
+    #endif
+{
     public:
         virtual std::shared_ptr<Projection> clone() = 0;
 
@@ -102,7 +112,9 @@ class Perspective : public Projection {
 
         virtual glm::mat4 matrix() override;
 
+        #if IMGUI
         virtual void imgui() override;
+        #endif
 
     private:
         Perspective(float fovy, float aspect, float near, float far);
@@ -156,7 +168,9 @@ class Camera : public Component {
 
         virtual void init(std::shared_ptr<WithComponents> parent) override;
 
+        #if IMGUI
         virtual void imgui() override;
+        #endif
         
     protected:
         virtual Camera* clone_implementation() override;

@@ -132,6 +132,7 @@ void Renderer::render(std::shared_ptr<WithComponents> parent) {
     this->render(parent, shaderProgram);
 }
 
+#if IMGUI
 void Renderer::imgui() {
     Component::imgui();
 
@@ -191,3 +192,4 @@ void Renderer::imgui() {
     ImGui::Checkbox("Texture", &this->display_texture);
     ImGui::Checkbox("Shadow", &this->receive_shadow);
 }
+#endif

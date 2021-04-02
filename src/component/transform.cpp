@@ -156,15 +156,6 @@ glm::vec3 Transform::euler() {
     return glm::eulerAngles(this->rotation());
 }
 
-void Transform::imgui() {
-    glm::vec3 rotation = glm::degrees(this->euler());
-
-    ImGui::InputFloat3("Position", glm::value_ptr(this->position));
-    ImGui::InputFloat3("Rotation", glm::value_ptr(rotation));
-    ImGui::InputFloat3("Scale", glm::value_ptr(this->scale));
-    ImGui::InputFloat3("Shear", glm::value_ptr(this->shear));
-}
-
 std::ostream& operator<<(std::ostream& os, const Transform& transform) {
     os  << "Transform { Position: " 
         << glm::to_string(transform.position) 
@@ -238,3 +229,14 @@ namespace pepng {
         return CameraTransform::make_camera_transform(position, rotation, scale, shear);
     }
 }
+
+#if IMGUI
+void Transform::imgui() {
+    glm::vec3 rotation = glm::degrees(this->euler());
+
+    ImGui::InputFloat3("Position", glm::value_ptr(this->position));
+    ImGui::InputFloat3("Rotation", glm::value_ptr(rotation));
+    ImGui::InputFloat3("Scale", glm::value_ptr(this->scale));
+    ImGui::InputFloat3("Shear", glm::value_ptr(this->shear));
+}
+#endif

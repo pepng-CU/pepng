@@ -11,7 +11,9 @@ class FPS : public Component {
 
         virtual void update(std::shared_ptr<WithComponents> parent) override;
 
+        #if IMGUI
         virtual void imgui() override;
+        #endif
 
     protected:
         virtual FPS* clone_implementation() override;

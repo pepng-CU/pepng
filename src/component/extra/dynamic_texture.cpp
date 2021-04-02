@@ -55,6 +55,7 @@ void DynamicTexture::update(std::shared_ptr<WithComponents> parent) {
     renderer->material->texture = pepng::make_texture(this->current_index);
 }
 
+#if IMGUI
 void DynamicTexture::imgui() {
     Component::imgui();
 
@@ -62,3 +63,4 @@ void DynamicTexture::imgui() {
     ImGui::InputInt("End", &this->end_texture_index);
     ImGui::InputInt("Current", &this->current_index);
 }
+#endif

@@ -52,9 +52,11 @@ void FPS::update(std::shared_ptr<WithComponents> parent) {
     transform->position -= transform->forward() * input->axis("zoom") * this->__pan_speed;
 }
 
+#if IMGUI
 void FPS::imgui() {
     Component::imgui();
 
     ImGui::InputFloat("Pan Speed", &this->__pan_speed);
     ImGui::InputFloat("Rotation Speed", &this->__rotation_speed);
 }
+#endif

@@ -1,6 +1,8 @@
 #pragma once
 
-#include <imgui.h>
+#if IMGUI
+    #include <imgui.h>
+#endif
 
 /**
  * Interface class to print to ImGui.

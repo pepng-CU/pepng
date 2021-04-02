@@ -175,6 +175,13 @@ void Light::render(GLuint shaderProgram) {
     );
 }
 
+namespace pepng {
+    std::shared_ptr<Light> make_light(GLuint shaderProgram, glm::vec3 color) {
+        return Light::make_light(shaderProgram, color);
+    }
+}
+
+#if IMGUI
 void Light::imgui() {
     Component::imgui();
 
@@ -183,9 +190,4 @@ void Light::imgui() {
     ImGui::InputFloat("Intensity", &this->intensity);
     ImGui::ColorPicker3("Color", glm::value_ptr(this->color));
 }
-
-namespace pepng {
-    std::shared_ptr<Light> make_light(GLuint shaderProgram, glm::vec3 color) {
-        return Light::make_light(shaderProgram, color);
-    }
-}
+#endif

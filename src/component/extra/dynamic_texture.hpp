@@ -46,9 +46,12 @@ class DynamicTexture : public Component {
         static std::shared_ptr<DynamicTexture> make_dynamic_texture(int startTextureIndex, int endTextureIndex);
 
         virtual void update(std::shared_ptr<WithComponents> object) override;
-        virtual void imgui() override;
-
+        
         virtual DynamicTexture* clone_implementation() override;
+
+        #if IMGUI
+        virtual void imgui() override;
+        #endif
     private:
         DynamicTexture(int startTextureIndex, int endTextureIndex);
         DynamicTexture(const DynamicTexture& renderer);

@@ -72,6 +72,7 @@ void Transformer::update(std::shared_ptr<WithComponents> parent) {
     }
 }
 
+#if IMGUI
 void Transformer::imgui() {
     Component::imgui();
     
@@ -79,3 +80,4 @@ void Transformer::imgui() {
     ImGui::InputFloat("Rotation Speed", &this->__rotation_speed);
     ImGui::InputFloat("Scale Speed", &this->__scale_speed);
 }
+#endif

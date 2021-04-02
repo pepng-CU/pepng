@@ -97,9 +97,11 @@ class Transform : public Component {
          */
         virtual glm::vec3 right();
 
-        virtual void imgui() override;
-
         friend std::ostream& operator<<(std::ostream& os, const Transform& transform);
+
+        #if IMGUI
+        virtual void imgui() override;
+        #endif
     protected:
         glm::quat rotationX;
         glm::quat rotationY;

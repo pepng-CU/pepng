@@ -31,12 +31,6 @@ std::shared_ptr<Object> Object::attach_child(std::shared_ptr<Object> object) {
     return std::dynamic_pointer_cast<Object>(shared_from_this());
 }
 
-void Object::imgui() {
-    ImGui::LabelText("Name", this->name.c_str());
-
-    WithComponents::imgui();
-}
-
 void Object::update() {
     WithComponents::update_components();
 
@@ -105,4 +99,12 @@ namespace pepng {
     std::shared_ptr<Object> make_object(std::string name) {
         return Object::make_object(name);
     }
-};
+}
+
+#if IMGUI
+void Object::imgui() {
+    ImGui::LabelText("Name", this->name.c_str());
+
+    WithComponents::imgui();
+}
+#endif
