@@ -10,7 +10,7 @@ set(FETCHCONTENT_UPDATES_DISCONNECTED ON) # speed up config
 set(THIRDPARTY thirdparty-glew)
 
 FetchContent_Declare(${THIRDPARTY}
-    URL ${CMAKE_SOURCE_DIR}/thirdparty/glew-2.1.0.zip
+    URL ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glew-2.1.0.zip
 )
 
 mark_as_advanced(FETCHCONTENT_BASE_DIR)

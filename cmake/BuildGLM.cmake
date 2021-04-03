@@ -10,7 +10,7 @@ set(FETCHCONTENT_UPDATES_DISCONNECTED ON) # speed up config
 set(THIRDPARTY thirdparty-glm)
 
 FetchContent_Declare(${THIRDPARTY}
-    URL ${CMAKE_SOURCE_DIR}/thirdparty/glm-0.9.9.8.zip
+    URL ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/glm-0.9.9.8.zip
 )
 
 mark_as_advanced(FETCHCONTENT_BASE_DIR)

@@ -4,7 +4,7 @@ add_library(${PROJECT_NAME} STATIC ${SRCS})
 
 target_include_directories(${PROJECT_NAME} 
     INTERFACE $<BUILD_INTERFACE:${thirdparty-glew_SOURCE_DIR}/include>
-    PUBLIC ${CMAKE_SOURCE_DIR}/thirdparty/stb
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/stb
 )
 
 target_link_libraries(${PROJECT_NAME} glm glfw tinyxml2)
