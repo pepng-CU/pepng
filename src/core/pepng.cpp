@@ -55,6 +55,19 @@ void pepng::set_missing_texture(const std::filesystem::path& filePath) {
     missing_texture->delayed_init();
 }
 
+void pepng::set_window_icon(const std::filesystem::path& filePath) {
+    #ifdef _MSC_VER
+        const std::string& filePathString = (const std::string&) filePath.u8string();
+    #else
+        const std::string& filePathString = (const std::string&) filePath;
+    #endif
+
+    GLFWimage images[1];
+    images[0].pixels = stbi_load(filePathString.c_str(), &images[0].width, &images[0].height, 0, 4);
+    glfwSetWindowIcon(pepng::window(), 1, images); 
+    stbi_image_free(images[0].pixels);
+}
+
 void pepng::attach_device(std::shared_ptr<Device> device) {
     INPUT->attach_device(device);
 }

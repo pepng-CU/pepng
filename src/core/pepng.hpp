@@ -53,6 +53,11 @@ namespace pepng {
     void set_missing_texture(const std::filesystem::path& filePath);
 
     /**
+     * This sets the window icon.
+     */
+    void set_window_icon(const std::filesystem::path& filePath);
+
+    /**
      * Attaches device to current pepng instance.
      */
     void attach_device(std::shared_ptr<Device> device);
