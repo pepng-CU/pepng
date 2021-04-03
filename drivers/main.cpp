@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
      */
     pepng::set_missing_texture(texture_path / "missing.jpg");
 
-    // Loadings screen for stage.
+    // Load screens for stage.
     for(int i = 1; i <= 3; i++) {
         pepng::make_texture(model_path / "pa2" / "screens" / (std::to_string(i) + ".jpg"))->delayed_init();
     }
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
     );
 
     /**
-     * Controller
+     * Controllers
      */
     auto mouse = pepng::make_device(DeviceType::MOUSE)
         ->attach_unit(pepng::make_axis("mouseY", AxisType::FIRST))

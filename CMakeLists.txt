@@ -1,26 +1,39 @@
-#################
-# Configuration #
-#################
-set(DEBUG_MODEL OFF)
-set(DRIVER ON)
-set(EXTRA_OBJECTS ON)
-set(EXTRA_COMPONENTS ON)
-set(IMGUI ON)
-
-#########
-# CMake #
-#########
 cmake_minimum_required(VERSION 3.11)
 
-set (CMAKE_CXX_STANDARD 20)
+project(pepng)
 
-set(CMAKE_BUILD_TYPE Debug)
+set (CMAKE_CXX_STANDARD 20)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
 set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/lib)
 
-project(pepng)
+###########
+# Options #
+###########
+option(DEBUG "Enables CMake debug mode." ON)
+option(DEBUG_MODEL "Enables logging when loading model(s)." OFF)
+option(DRIVER "Builds the driver file." ON)
+option(EXTRA_OBJECTS "Includes objects in extra folder." ON)
+option(EXTRA_COMPONENTS "Includes components in extra folder." ON)
+option(IMGUI "Enables IMGUI." ON)
+
+#################
+# Configuration #
+#################
+
+# Build tinyxml as static instead of shared.
+set(BUILD_SHARED_LIBS OFF)
+
+# Prevents tinyxml tests.
+set(BUILD_TESTS OFF)
+
+#########
+# CMake #
+#########
+if(DEBUG)
+    set(CMAKE_BUILD_TYPE Debug)
+endif()
 
 include(ExternalProject)
 
@@ -32,7 +45,9 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
-# Submodules
+##################
+# Git Submodules #
+##################
 find_package(Git QUIET)
 
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
@@ -48,6 +63,9 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
     endif()
 endif() 
 
+#############
+# Libraries #
+#############
 find_package(OpenGL REQUIRED COMPONENTS OpenGL)
 
 include(BuildGLEW)
@@ -57,17 +75,18 @@ include(BuildGLM)
 if(IMGUI)
     add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/imgui-cmake)
 endif()
-
 add_subdirectory(${CMAKE_SOURCE_DIR}/thirdparty/tinyxml2)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src)
 
+##########
+# Driver #
+##########
 if(DRIVER)
     set(EXEC main)
 
     add_executable(${EXEC} drivers/main.cpp)
 
     target_include_directories(${EXEC} 
-        PUBLIC ${CMAKE_SOURCE_DIR}/thirdparty/stb
         PUBLIC ${CMAKE_SOURCE_DIR}/include
     )
 
