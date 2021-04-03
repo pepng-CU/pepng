@@ -7,7 +7,7 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../thirdparty/stb
 )
 
-target_link_libraries(${PROJECT_NAME} glm glfw tinyxml2)
+target_link_libraries(${PROJECT_NAME} glm glfw tinyxml2 glew_s)
 
 if(IMGUI)
     target_compile_definitions(${PROJECT_NAME} PUBLIC IMGUI)
