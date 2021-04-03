@@ -1,4 +1,8 @@
-# PEPNG - Group 9
+# PEPNG
+
+<p align="center"><img src="./.github/images/logo.png" alt="Repo"></p>
+
+## Overview
 
 | Student ID | First Name | Last Name |
 | ---        | ---        | ---       |
@@ -6,6 +10,8 @@
 | 40075912   | Arman      | Jahanpour |
 | 40129457   | Alexandre  | Lavoie    |
 | 40131102   | Antoine    | Poulin    |
+
+Group 9
 
 PEPNG (pronounced "pep-engine") is a basic OpenGL/C++ game engine created for COMP 371 at Concordia University. The current project both defines and implements the engine - the long term goal is to make a standalone source/editor. The engine currently supports basic rendering, synchronous I/O, and texture/model loading. Additional debug utilities were created to make on the fly modifications of the scene.
 
