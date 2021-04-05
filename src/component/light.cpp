@@ -55,7 +55,9 @@ void Light::delayed_init() {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);  
 
     glBindFramebuffer(GL_FRAMEBUFFER, this->fbo);
+    #ifndef EMSCRIPTEN
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->texture, 0);
+    #endif
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -109,15 +111,19 @@ void Light::init_fbo() {
 }
 
 void Light::update_fbo() {
+    #ifndef EMSCRIPTEN
     glDrawBuffer(GL_NONE);
+    #endif
     glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Light::init(std::shared_ptr<WithComponents> parent) {
-    this->transform = parent->try_get_component<Transform>();
+    this->transform = parent->get_component<Transform>();
 
     if(this->transform == nullptr) {
+        std::cout << "Light does not have a transform." << std::endl;
+
         throw std::runtime_error("Light does not have a transform.");
     }
 }

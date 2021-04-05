@@ -1,7 +1,7 @@
 #include <pepng.h>
 
 int main(int argc, char *argv[]) {
-    if (!pepng::init("COMP 371", 1024, 768)) return -1;
+    if (!pepng::init("COMP 371", 1920, 1080)) return -1;
 
     /**
      * Paths
@@ -37,8 +37,10 @@ int main(int argc, char *argv[]) {
 
     auto shadow_shader_program = pepng::make_shader_program(
         pepng::make_shader(shader_path / "shadow" / "vertex.glsl", GL_VERTEX_SHADER),
-        pepng::make_shader(shader_path / "shadow" / "fragment.glsl", GL_FRAGMENT_SHADER),
-        pepng::make_shader(shader_path / "shadow" / "geometry.glsl", GL_GEOMETRY_SHADER)
+        pepng::make_shader(shader_path / "shadow" / "fragment.glsl", GL_FRAGMENT_SHADER)
+        #ifndef EMSCRIPTEN
+        ,pepng::make_shader(shader_path / "shadow" / "geometry.glsl", GL_GEOMETRY_SHADER)
+        #endif
     );
 
     pepng::set_shadow_shader(shadow_shader_program);

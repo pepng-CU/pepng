@@ -1,5 +1,7 @@
 #include "fps.hpp"
 
+#include <sstream>
+
 #include "../../io/io.hpp"
 #include "../transform.hpp"
 
@@ -34,7 +36,17 @@ void FPS::update(std::shared_ptr<WithComponents> parent) {
         return;
     }
 
-    auto transform = parent->try_get_component<Transform>();
+    auto transform = parent->get_component<Transform>();
+
+    if (transform == nullptr) {
+        std::stringstream ss;
+
+        ss << *parent << " has an FPS but no Transform.";
+
+        std::cout << ss.str() << std::endl;
+
+        std::runtime_error(ss.str());
+    }
 
     auto input = Input::get();
     auto mouseDelta = glm::vec2(input->axis("mouseX"), input->axis("mouseY"));

@@ -4,6 +4,7 @@
 #include "transformer.hpp"
 #include "../renderer.hpp"
 
+
 Selector::Selector() : 
     Component("Selector"), 
     index(0), 
@@ -37,17 +38,19 @@ Selector* Selector::clone_implementation() {
 }
 
 void Selector::dfs_switch(std::shared_ptr<Object> object, int& index) {
-    try {
-        object->try_get_component<Transformer>()->set_active(index == this->index);
-    } catch(...) {}
+    auto transformer = object->get_component<Transformer>();
 
-    try {
-        auto renderer = object->try_get_component<Renderer>();
+    if (transformer) {
+        transformer->set_active(index == this->index);
+    }
 
+    auto renderer = object->get_component<Renderer>();
+
+    if (renderer) {
         renderer->render_mode = this->render_mode;
         renderer->receive_shadow = this->receive_shadow;
         renderer->display_texture = this->display_texture;
-    } catch(...) {}
+    }
 
     for(auto child : object->children) {
         dfs_switch(child, ++index);
@@ -72,17 +75,21 @@ void Selector::bfs_switch(std::shared_ptr<Object> object) {
                 nextQueue.push(child);
             }
             
-            try {
-                object->try_get_component<Transformer>()->set_active(index++ == this->index);
-            } catch(...) {}
+            auto transformer = object->get_component<Transformer>();
 
-            try {
-                auto renderer = object->try_get_component<Renderer>();
+            if (transformer) {
+                transformer->set_active(index == this->index);
+            }
 
+            index++;
+
+            auto renderer = object->get_component<Renderer>();
+
+            if (renderer) {
                 renderer->render_mode = this->render_mode;
                 renderer->receive_shadow = this->receive_shadow;
                 renderer->display_texture = this->display_texture;
-            } catch(...) {}
+            }
         }
 
         if(nextQueue.empty()) break;
@@ -90,6 +97,12 @@ void Selector::bfs_switch(std::shared_ptr<Object> object) {
         currentQueue = nextQueue;
         nextQueue = std::queue<std::shared_ptr<Object>>();
     }
+}
+
+void Selector::init(std::shared_ptr<WithComponents> parent) {
+    #ifdef EMSCRIPTEN
+        this->receive_shadow = false;
+    #endif
 }
 
 void Selector::update(std::shared_ptr<WithComponents> parent) {

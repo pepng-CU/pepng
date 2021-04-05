@@ -47,14 +47,14 @@ void Renderer::render(std::shared_ptr<WithComponents> parent, GLuint shaderProgr
 
     glBindTexture(GL_TEXTURE_2D, this->material->texture->gl_index());
 
-    std::shared_ptr<Transform> transform;
+    std::shared_ptr<Transform> transform = parent->get_component<Transform>();
 
-    try {
-        transform = parent->try_get_component<Transform>();
-    } catch(...) {
+    if (transform == nullptr) {
         std::stringstream ss;
 
         ss << *parent << " has no transform." << std::endl;
+
+        std::cout << ss.str() << std::endl;
 
         throw std::runtime_error(ss.str());
     }
@@ -117,6 +117,8 @@ void Renderer::render(std::shared_ptr<WithComponents> parent) {
     glUseProgram(shaderProgram);
 
     if(Camera::current_camera == nullptr) {
+        std::cout << "No current camera set." << std::endl;
+
         throw std::runtime_error("No current camera set.");
     }
 

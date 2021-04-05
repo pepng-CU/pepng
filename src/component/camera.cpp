@@ -48,12 +48,14 @@ void Camera::render(GLuint shaderProgram) {
     // TODO: Should we throw if there is no parent?
     if(this->__parent == nullptr) return;
 
-    auto transform = this->__parent->try_get_component<Transform>();
+    auto transform = this->__parent->get_component<Transform>();
 
     if(transform == nullptr) {
         std::stringstream ss;
 
         ss << *this->__parent << " is being rendered without a transform.";
+
+        std::cout << ss.str() << std::endl;
 
         throw std::runtime_error(ss.str());
     }

@@ -55,6 +55,8 @@ namespace pepng {
             std::stringstream ss;
             ss << "ERROR::PROGRAM::LINKING_FAILED" << std::endl << infoLog << std::endl;
 
+            std::cout << ss.str() << std::endl;
+
             throw std::runtime_error(ss.str());
         }
 

@@ -34,12 +34,14 @@ std::shared_ptr<Object> Object::attach_child(std::shared_ptr<Object> object) {
 void Object::update() {
     WithComponents::update_components();
 
-    auto transform = this->try_get_component<Transform>();
+    auto transform = this->get_component<Transform>();
 
     if(transform == nullptr) {
         std::stringstream ss;
 
         ss << *this << " has no transform.";
+
+        std::cout << ss.str() << std::endl;
 
         throw std::runtime_error(ss.str());
     }
@@ -51,7 +53,7 @@ void Object::update() {
             continue;
         }
 
-        if(auto childTransform = child->try_get_component<Transform>()) {
+        if(auto childTransform = child->get_component<Transform>()) {
             childTransform->parent_matrix = glm::mat4(parent_matrix);
         }
 

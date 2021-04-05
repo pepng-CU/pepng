@@ -1,5 +1,7 @@
 #include "transformer.hpp"
 
+#include <sstream>
+
 #include "../../io/io.hpp"
 #include "../transform.hpp"
 
@@ -36,7 +38,17 @@ void Transformer::update(std::shared_ptr<WithComponents> parent) {
         return;
     }
 
-    auto transform = parent->try_get_component<Transform>();
+    auto transform = parent->get_component<Transform>();
+
+    if (transform == nullptr) {
+        std::stringstream ss;
+
+        ss << *parent << " has a Transformer but not Transform.";
+
+        std::cout << ss.str() << std::endl;
+
+        throw std::runtime_error(ss.str());
+    }
 
     auto input = Input::get();
 

@@ -30,7 +30,6 @@ if(NOT ${THIRDPARTY}_POPULATED)
         ${${THIRDPARTY}_BINARY_DIR}
         EXCLUDE_FROM_ALL
     )
-
 endif()
 
 set(BUILD_STATIC_LIBS OFF)

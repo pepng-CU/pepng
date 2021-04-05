@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  pepng-emscripten:
+    container_name: pepng-emscripten
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/src

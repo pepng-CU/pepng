@@ -40,6 +40,8 @@ class Selector : public Component {
          */
         static std::shared_ptr<Selector> make_selector();
 
+        virtual void init(std::shared_ptr<WithComponents> parent) override;
+
         virtual void update(std::shared_ptr<WithComponents> parent) override;
 
         #if IMGUI

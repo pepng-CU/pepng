@@ -50,6 +50,8 @@ std::shared_ptr<Texture> Texture::make_texture(const std::filesystem::path& file
     texture->__image = stbi_load(filePathString.c_str(), &texture->__width, &texture->__height, &numComponents, STBI_rgb_alpha);
 
     if (texture->__image == nullptr){
+        std::cout << "Cannot load texture: " << filePath.string() << std::endl;
+        
         throw std::runtime_error("Cannot load texture: " + filePath.string());
     }
 

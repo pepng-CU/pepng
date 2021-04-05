@@ -12,6 +12,8 @@ void pepng::obj_load_model(std::filesystem::path path, std::function<void(std::s
     std::ifstream in(path);
 
     if(!in.is_open()) {
+        std::cout << "Unable to open obj file." << std::endl;
+
         throw std::runtime_error("Unable to open obj file.");
     }
 
@@ -149,15 +151,17 @@ std::shared_ptr<Texture> loadTexture(std::filesystem::path path) {
     return pepng::make_texture(path);
 }
 
-std::map<std::string, std::future<std::shared_ptr<Texture>>> pepng::collada_load_textures(
+std::map<std::string, std::shared_ptr<Texture>> pepng::collada_load_textures(
     tinyxml2::XMLElement* libraryImages, 
     std::filesystem::path path
 ) {
-    std::map<std::string, std::future<std::shared_ptr<Texture>>> textures;
+    #ifdef EMSCRIPTEN
+        std::map<std::string, std::shared_ptr<Texture>> textures;
+    #else
+        std::map<std::string, std::future<std::shared_ptr<Texture>>> textures;
+    #endif
 
-    if(libraryImages == nullptr) {
-        return textures;
-    }
+    if(libraryImages == nullptr) return std::map<std::string, std::shared_ptr<Texture>>();
 
     auto texture = libraryImages->FirstChildElement("image");
 
@@ -170,27 +174,35 @@ std::map<std::string, std::future<std::shared_ptr<Texture>>> pepng::collada_load
             texturePath = path.parent_path() / texturePath;
         }
 
-        textures[textureId] = std::async(loadTexture, texturePath);
-
-        #if DEBUG_MODEL
-            std::cout << "Loaded texture: " << textureId << std::endl;
+        #ifdef EMSCRIPTEN
+            textures[textureId] = loadTexture(texturePath);
+        #else
+            textures[textureId] = std::async(loadTexture, texturePath);
         #endif
 
         texture = texture->NextSiblingElement("image");
     }
 
-    return textures;
+    #ifdef EMSCRIPTEN
+        return textures;
+    #else
+        std::map<std::string, std::shared_ptr<Texture>> new_textures;
+
+        for(auto it = textures.begin(); it != textures.end(); it++) {
+            new_textures[it->first] = it->second.get();
+        }
+
+        return new_textures;
+    #endif
 }
 
 std::map<std::string, std::shared_ptr<Texture>> pepng::collada_load_effects(
     tinyxml2::XMLElement* libraryEffects, 
-    std::map<std::string, std::future<std::shared_ptr<Texture>>>& textures
+    std::map<std::string, std::shared_ptr<Texture>>& textures
 ) {
     std::map<std::string, std::shared_ptr<Texture>> effects;
 
-    if(libraryEffects == nullptr) {
-        return effects;
-    }
+    if(libraryEffects == nullptr) return effects;
 
     auto effect = libraryEffects->FirstChildElement("effect");
 
@@ -220,7 +232,7 @@ std::map<std::string, std::shared_ptr<Texture>> pepng::collada_load_effects(
                     throw std::runtime_error(ss.str());
                 }
 
-                effects[effectId] = textures[textureId].get();
+                effects[effectId] = textures[textureId];
 
                 effectLoaded = true;
 
@@ -250,9 +262,7 @@ std::map<std::string, std::shared_ptr<Material>> pepng::collada_load_materials(
 ) {
     std::map<std::string, std::shared_ptr<Material>> materials;
 
-    if(libraryMaterials == nullptr) {
-        return materials;
-    }
+    if(libraryMaterials == nullptr) return materials;
 
     auto material = libraryMaterials->FirstChildElement("material");
 
@@ -267,6 +277,8 @@ std::map<std::string, std::shared_ptr<Material>> pepng::collada_load_materials(
         auto texture = effects[effectId];
 
         if (texture == nullptr) {
+            std::cout << "Could not find effect " << effectId << std::endl;
+
             throw std::runtime_error("Could not find effect " + effectId);
         }
 
@@ -287,9 +299,7 @@ std::map<std::string, std::shared_ptr<Camera>> pepng::collada_load_cameras(
 ) {
     std::map<std::string, std::shared_ptr<Camera>> cameras;
 
-    if(libraryCameras == nullptr) {
-        return cameras;
-    }
+    if(libraryCameras == nullptr) return cameras;
 
     auto camera = libraryCameras->FirstChildElement("camera");
 
@@ -331,9 +341,7 @@ std::map<std::string, std::shared_ptr<Model>> pepng::collada_load_geometries(
 ) {
     std::map<std::string, std::shared_ptr<Model>> geometries;
 
-    if(libraryGeometries == nullptr) {
-        return geometries;
-    }
+    if(libraryGeometries == nullptr) return geometries;
 
     auto geometry = libraryGeometries->FirstChildElement("geometry");
 
@@ -363,6 +371,8 @@ std::map<std::string, std::shared_ptr<Model>> pepng::collada_load_geometries(
                     << floatArrayTag->FindAttribute("count")->IntValue()
                     << " but got "
                     << floatArray.size();
+
+                std::cout << ss.str() << std::endl;
 
                 throw std::runtime_error(ss.str());
             }
@@ -506,6 +516,8 @@ std::shared_ptr<Object> collada_load_object_data(
             auto transformArray = utils::split_float(matrix->GetText());
 
             if(transformArray.size() != 16) {
+                std::cout << "Expected mat4x4 but got array of size " << transformArray.size() << std::endl;
+
                 throw std::runtime_error("Expected mat4x4 but got array of size " + transformArray.size());
             }
 
@@ -562,6 +574,8 @@ std::shared_ptr<Object> collada_load_object_data(
             auto material = materials[materialId];
 
             if (material == nullptr) {
+                std::cout << "Could not find material " << materialId << std::endl;
+
                 throw std::runtime_error("Could not find material " + materialId);
             }
 
@@ -641,15 +655,26 @@ void pepng::collada_load(
 
     tinyxml2::XMLDocument doc;
 
-    doc.LoadFile(path.string().c_str());
+    auto state = doc.LoadFile(path.string().c_str());
+
+    if (state != tinyxml2::XML_SUCCESS) {
+        std::stringstream ss;
+
+        ss << "TinyXML2 Failed to Load With Error: " << state << std::endl;
+
+        std::cout << ss.str() << std::endl;
+
+        throw new std::runtime_error(ss.str());
+    }
 
     const clock_t beginTime = clock();
 
     auto root = doc.RootElement();
 
-    auto futureCameras = std::async(collada_load_cameras, root->FirstChildElement("library_cameras"));
-
-    auto futureGeometries = std::async(collada_load_geometries, root->FirstChildElement("library_geometries"));
+    #ifndef EMSCRIPTEN
+        auto futureCameras = std::async(collada_load_cameras, root->FirstChildElement("library_cameras"));
+        auto futureGeometries = std::async(collada_load_geometries, root->FirstChildElement("library_geometries"));
+    #endif
 
     auto textures = collada_load_textures(root->FirstChildElement("library_images"), path);
 
@@ -657,9 +682,13 @@ void pepng::collada_load(
 
     auto materials = collada_load_materials(root->FirstChildElement("library_materials"), effects);
 
-    auto cameras = futureCameras.get();
-
-    auto geometries = futureGeometries.get();
+    #ifdef EMSCRIPTEN
+        auto cameras = collada_load_cameras(root->FirstChildElement("library_cameras"));
+        auto geometries = collada_load_geometries(root->FirstChildElement("library_geometries"));
+    #else
+        auto cameras = futureCameras.get();
+        auto geometries = futureGeometries.get();
+    #endif
 
     auto scenes = collada_load_scenes(root->FirstChildElement("library_visual_scenes"), geometries, cameras, materials);
 

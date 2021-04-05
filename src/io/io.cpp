@@ -1,5 +1,7 @@
 #include "io.hpp"
 
+#include <iostream>
+
 DeviceUnit::DeviceUnit(std::string name, float strength) : __name(name), _value(0.0f), _device(nullptr), _strength(strength) {}
 
 float DeviceUnit::value() {

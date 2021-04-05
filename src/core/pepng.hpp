@@ -10,6 +10,12 @@
 #include <time.h>
 #include <sstream>
 
+#ifdef EMSCRIPTEN
+    #include <emscripten.h>
+    #include <emscripten/emscripten.h>
+    #define GLFW_INCLUDE_ES3
+#endif
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 

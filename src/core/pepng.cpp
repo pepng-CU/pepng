@@ -5,8 +5,12 @@
 #include "../../src/gl/texture.hpp"
 #include "../util/load.hpp"
 
+#ifndef GL_NUM_SHADING_LANGUAGE_VERSIONS
+#define GL_NUM_SHADING_LANGUAGE_VERSIONS 0x82E9
+#endif
+
 namespace pepng {
-    static GLFWwindow *WINDOW;
+    static GLFWwindow *WINDOW = 0;
     static std::shared_ptr<Input> INPUT;
     static std::vector<std::shared_ptr<Object>> WORLD;
     static std::shared_ptr<Object> CURRENT_IMGUI_OBJECT;
@@ -52,6 +56,7 @@ void pepng::set_shadow_shader(GLuint shader_program) {
 
 void pepng::set_missing_texture(const std::filesystem::path& filePath) {
     static auto missing_texture = pepng::make_texture(filePath);
+
     missing_texture->delayed_init();
 }
 
@@ -81,10 +86,15 @@ namespace pepng {
     void imgui_init() {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        ImGuiIO& io = ImGui::GetIO();
         ImGui::StyleColorsDark();
-        ImGui_ImplGlfw_InitForOpenGL(pepng::WINDOW, true);
-        ImGui_ImplOpenGL3_Init((char*)glGetString(GL_NUM_SHADING_LANGUAGE_VERSIONS));
+        ImGui_ImplGlfw_InitForOpenGL(pepng::window(), false);
+        ImGui_ImplOpenGL3_Init();
+
+        glfwSetMouseButtonCallback(pepng::window(), ImGui_ImplGlfw_MouseButtonCallback);
+        glfwSetScrollCallback(pepng::window(), ImGui_ImplGlfw_ScrollCallback);
+        glfwSetKeyCallback(pepng::window(), ImGui_ImplGlfw_KeyCallback);
+        glfwSetCharCallback(pepng::window(), ImGui_ImplGlfw_CharCallback);
     }
 
     void object_hierarchy(std::shared_ptr<Object> object) {
@@ -198,8 +208,8 @@ bool pepng::init(const char *title, float width, float height) {
     return true;
 }
 
-int pepng::update() {
-    while(!glfwWindowShouldClose(WINDOW)) {
+namespace pepng {
+    void do_frame() {
         /**
          * Update
          */
@@ -226,7 +236,7 @@ int pepng::update() {
          * Render
          */
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
+        
         for(auto camera : Camera::cameras) {
             if(camera->active()) {
                 camera->viewport->render(glm::vec2(WINDOW_X, WINDOW_Y));
@@ -254,6 +264,16 @@ int pepng::update() {
         glfwSwapBuffers(pepng::window());
         glfwPollEvents();
     }
+}
+
+int pepng::update() {
+    #ifdef EMSCRIPTEN
+        emscripten_set_main_loop(pepng::do_frame, 0, 1);
+    #else
+        while(!glfwWindowShouldClose(WINDOW)) {
+            pepng::do_frame();
+        }
+    #endif
 
     glfwTerminate();
 

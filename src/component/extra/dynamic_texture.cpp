@@ -45,6 +45,8 @@ void DynamicTexture::update(std::shared_ptr<WithComponents> parent) {
     try {
         renderer = parent->try_get_component<Renderer>();
     } catch(...) {
+        std::cout << "DynamicTexture requires a Renderer component." << std::endl;
+        
         throw std::runtime_error("DynamicTexture requires a Renderer component.");
     }
 

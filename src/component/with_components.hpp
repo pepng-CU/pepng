@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <iostream>
+#include <sstream>
 
 #include "component.hpp"
 #include "../ui/with_imgui.hpp"
@@ -65,7 +66,15 @@ class WithComponents :
         std::shared_ptr<T> try_get_component() {
             auto component = this->get_component<T>();
 
-            if (!component) throw std::runtime_error("Could not find Component.");
+            if (!component) { 
+                std::stringstream ss;
+
+                ss << *this << " could not find a component." << std::endl;
+
+                std::cout << ss.str() << std::endl;
+
+                throw std::runtime_error(ss.str());
+            }
 
             return component;
         }

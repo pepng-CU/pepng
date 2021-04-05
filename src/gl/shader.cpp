@@ -2,6 +2,8 @@
 
 const std::string pepng::load_shader_file(std::filesystem::path filepath) {
     if(!std::filesystem::exists(filepath)) {
+        std::cout << "Could not find shader: " << filepath.string() << std::endl;
+
         throw std::runtime_error("Could not find shader: " + filepath.string());
     }
 
@@ -30,8 +32,11 @@ GLuint pepng::compile_shader(const std::string shaderSource, GLenum shaderType) 
         
         std::stringstream ss;
 
-        ss << "ERROR::SHADER::COMPILATION_FAILED" << std::endl << infoLog << std::endl;
+        ss << "ERROR::SHADER::" << shaderType << "::COMPILATION_FAILED" << std::endl << infoLog << std::endl;
+        ss << std::endl << shaderSource << std::endl;
+
         std::cout << ss.str() << std::endl;
+
         throw std::runtime_error(ss.str());
     }
 

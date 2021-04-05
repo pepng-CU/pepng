@@ -17,12 +17,6 @@ stdenv.mkDerivation {
         libcxx
         libGL
         driversi686Linux.mesa
-        SDL2
-        SDL2_image
-        glew
-        glm
-        glfw
         freetype
-        freeglut
     ];
 }

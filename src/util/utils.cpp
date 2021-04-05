@@ -1,5 +1,7 @@
 #include "utils.hpp"
 
+#include <iostream>
+
 std::vector<std::string> utils::split(const std::string& line, const std::string& delim) {
     std::vector<std::string> result;
 
@@ -45,17 +47,27 @@ std::vector<float> utils::split_float(const std::string& line, const std::string
 }
 
 std::filesystem::path pepng::get_folder_path(std::filesystem::path folderName) {
-    auto finalPath = std::filesystem::current_path();
+    #ifdef EMSCRIPTEN
+        return folderName;
+    #else
+        auto finalPath = std::filesystem::current_path();
 
-    int depth = 0;
+        int depth = 0;
 
-    while (!std::filesystem::exists(finalPath / folderName)) {
-        if(depth++ > 10) {
-            throw std::runtime_error("Unable to load directory: " + folderName.string());
+        while (!std::filesystem::exists(finalPath / folderName)) {
+            if(depth++ > 10) {
+                std::stringstream ss;
+
+                ss << "Unable to load directory: " << folderName.string() << std::endl;
+
+                std::cout << ss.str() << std::endl;
+
+                throw std::runtime_error(ss.str());
+            }
+
+            finalPath = finalPath.parent_path();
         }
 
-        finalPath = finalPath.parent_path();
-    }
-
-    return finalPath / folderName;
+        return finalPath / folderName;
+    #endif
 }

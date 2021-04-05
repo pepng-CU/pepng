@@ -1,9 +1,7 @@
 #pragma once
 
 #include <filesystem>
-#include <functional>
 #include <memory>
-#include <thread>
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -11,7 +9,12 @@
 #include <sstream>
 #include <string>
 #include <map>
+#include <functional>
+
+#ifndef EMSCRIPTEN
+#include <thread>
 #include <future>
+#endif
 
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -55,7 +58,7 @@ namespace pepng {
     /**
      * Loads all textures (with their tag) from COLLADA file.
      */
-    std::map<std::string, std::future<std::shared_ptr<Texture>>> collada_load_textures(
+    std::map<std::string, std::shared_ptr<Texture>> collada_load_textures(
         tinyxml2::XMLElement* libraryImages, 
         std::filesystem::path path
     );
@@ -65,7 +68,7 @@ namespace pepng {
      */
     std::map<std::string, std::shared_ptr<Texture>> collada_load_effects(
         tinyxml2::XMLElement* libraryEffects, 
-        std::map<std::string, std::future<std::shared_ptr<Texture>>>& textures
+        std::map<std::string, std::shared_ptr<Texture>>& textures
     );
 
     /**
@@ -140,7 +143,13 @@ namespace pepng {
         if(path.extension() == ".obj") {
             pepng::obj_load_model(path, function);
         } else {
-            throw std::runtime_error("Cannot load " + path.extension().string() + " model type.");
+            std::stringstream ss;
+
+            ss << "Cannot load " << path.extension().string() << " model type.";
+
+            std::cout << ss.str() << std::endl;
+
+            throw std::runtime_error(ss.str());
         }
     }
 
@@ -157,25 +166,15 @@ namespace pepng {
             obj_load(path, function, transform);
         } else if(path.extension() == ".dae") {
             collada_load(path, function, transform);
+        } else {
+            std::stringstream ss;
+
+            ss << "Unknown file extension: " << path.extension() << std::endl;
+
+            std::cout << ss.str() << std::endl;
+
+            throw std::runtime_error(ss.str());
         }
-    }
-
-    /**
-     * Generic load class.
-     */
-    template <typename T, typename... Args>
-    void load_file(
-        std::filesystem::path path, 
-        std::function<void(std::shared_ptr<T>)> function, 
-        Args... args
-    ) {
-        if(!std::filesystem::exists(path)) {
-            throw std::runtime_error("Could not find file: " + path.string());
-        }
-
-        std::thread thread(load_file_thread<T, Args...>, path, function, args...);
-
-        thread.detach();
     }
 
     /**
@@ -188,11 +187,43 @@ namespace pepng {
         Args... args
     ) {
         if(!std::filesystem::exists(path)) {
-            throw std::runtime_error("Could not find file: " + path.string());
+            std::stringstream ss;
+
+            ss << "Could not find file: " << path.string() << std::endl;
+
+            std::cout << ss.str() << std::endl;
+            
+            throw std::runtime_error(ss.str());
         }
 
-        std::thread thread(load_file_thread<T, Args...>, path, function, args...);
+        load_file_thread<T, Args...>(path, function, args...);
+    }
 
-        thread.join();
+    /**
+     * Generic load class.
+     */
+    template <typename T, typename... Args>
+    void load_file(
+        std::filesystem::path path, 
+        std::function<void(std::shared_ptr<T>)> function, 
+        Args... args
+    ) {
+        #ifdef EMSCRIPTEN
+            load_file_sync<T, Args...>(path, function, args...);
+        #else
+            if(!std::filesystem::exists(path)) {
+                std::stringstream ss;
+
+                ss << "Could not find file: " << path.string() << std::endl;
+
+                std::cout << ss.str() << std::endl;
+                
+                throw std::runtime_error(ss.str());
+            }
+
+            std::thread thread(load_file_thread<T, Args...>, path, function, args...);
+
+            thread.detach();
+        #endif
     }
 }  

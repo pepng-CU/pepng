@@ -43,3 +43,5 @@ bin
 lib
 _deps
 models/*
+shaders
+textures
