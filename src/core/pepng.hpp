@@ -41,7 +41,7 @@ namespace pepng {
      * 
      * @return Exit code.
      */
-    int update(std::function<void()> do_frame = nullptr);
+    int update(void (*do_frame)() = nullptr);
 
     /**
      * Sets the object shader.

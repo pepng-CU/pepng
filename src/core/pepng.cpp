@@ -262,18 +262,18 @@ namespace pepng {
     }
 }
 
-int pepng::update(std::function<void()> do_frame) {
+int pepng::update(void (*do_frame)()) {
     glClearColor(BACKGROUND_COLOR.x, BACKGROUND_COLOR.y, BACKGROUND_COLOR.z, 1.0f);
 
     if (do_frame == nullptr) {
-        do_frame = std::function(pepng::do_frame);
+        do_frame = pepng::do_frame;
     }
 
     #ifdef EMSCRIPTEN
         emscripten_set_main_loop(do_frame, 0, 1);
     #else
         while(!glfwWindowShouldClose(WINDOW)) {
-            do_frame();
+            (*do_frame)();
         }
     #endif
 
