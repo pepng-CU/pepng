@@ -13,7 +13,7 @@ if(NOT EMSCRIPTEN)
         PUBLIC ${thirdparty-glew_SOURCE_DIR}/include
     )
 
-    target_link_libraries(${PROJECT_NAME} glew_s)
+    target_link_libraries(${PROJECT_NAME} OpenGL::GL glew_s)
 endif()
 
 target_link_libraries(${PROJECT_NAME} glm tinyxml2 glfw)

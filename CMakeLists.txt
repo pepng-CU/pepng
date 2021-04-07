@@ -9,8 +9,8 @@ set (CMAKE_CXX_STANDARD 20)
 ###########
 
 option(DEBUG_MODEL "Enables logging when loading model(s)." OFF)
-option(EXTRA_OBJECTS "Includes objects in extra folder." ON)
-option(EXTRA_COMPONENTS "Includes components in extra folder." ON)
+option(EXTRA_OBJECTS "Includes objects in extra folder." OFF)
+option(EXTRA_COMPONENTS "Includes components in extra folder." OFF)
 option(IMGUI "Enables IMGUI." ON)
 
 #########
