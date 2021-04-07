@@ -29,7 +29,7 @@
 #include "../object/object.hpp"
 #include "../object/camera.hpp"
 
-namespace pepng {
+namespace pepng::extra {
     /**
      * Load from thread.
      */
@@ -123,16 +123,6 @@ namespace pepng {
     );
 
     /**
-     * Sets object shader for future loads.
-     */
-    void load_set_object_shader(GLuint shader);
-
-    /**
-     * Sets shadow shader for future loads.
-     */
-    void load_set_shadow_shader(GLuint shader);
-
-    /**
      * Thread loader for Model.
      */
     template <>
@@ -141,7 +131,7 @@ namespace pepng {
         std::function<void(std::shared_ptr<Model>)> function
     ) {
         if(path.extension() == ".obj") {
-            pepng::obj_load_model(path, function);
+            obj_load_model(path, function);
         } else {
             std::stringstream ss;
 
@@ -198,7 +188,9 @@ namespace pepng {
 
         load_file_thread<T, Args...>(path, function, args...);
     }
+}
 
+namespace pepng {
     /**
      * Generic load class.
      */
@@ -209,7 +201,7 @@ namespace pepng {
         Args... args
     ) {
         #ifdef EMSCRIPTEN
-            load_file_sync<T, Args...>(path, function, args...);
+            pepng::extra::load_file_sync<T, Args...>(path, function, args...);
         #else
             if(!std::filesystem::exists(path)) {
                 std::stringstream ss;
@@ -221,9 +213,19 @@ namespace pepng {
                 throw std::runtime_error(ss.str());
             }
 
-            std::thread thread(load_file_thread<T, Args...>, path, function, args...);
+            std::thread thread(pepng::extra::load_file_thread<T, Args...>, path, function, args...);
 
             thread.detach();
         #endif
     }
+
+    /**
+     * Sets object shader for future loads.
+     */
+    void load_set_object_shader(GLuint shader);
+
+    /**
+     * Sets shadow shader for future loads.
+     */
+    void load_set_shadow_shader(GLuint shader);
 }  

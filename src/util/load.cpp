@@ -8,7 +8,7 @@ namespace pepng {
 void pepng::load_set_object_shader(GLuint shader) { pepng::OBJECT_SHADER = shader; }
 void pepng::load_set_shadow_shader(GLuint shader) { pepng::SHADOW_SHADER = shader; }
 
-void pepng::obj_load_model(std::filesystem::path path, std::function<void(std::shared_ptr<Model>)> function) {
+void pepng::extra::obj_load_model(std::filesystem::path path, std::function<void(std::shared_ptr<Model>)> function) {
     std::ifstream in(path);
 
     if(!in.is_open()) {
@@ -112,7 +112,7 @@ void pepng::obj_load_model(std::filesystem::path path, std::function<void(std::s
     in.close();
 }
 
-void pepng::obj_load(
+void pepng::extra::obj_load(
     std::filesystem::path path, 
     std::function<void(std::shared_ptr<Object>)> function, 
     std::shared_ptr<Transform> transform
@@ -151,7 +151,7 @@ std::shared_ptr<Texture> loadTexture(std::filesystem::path path) {
     return pepng::make_texture(path);
 }
 
-std::map<std::string, std::shared_ptr<Texture>> pepng::collada_load_textures(
+std::map<std::string, std::shared_ptr<Texture>> pepng::extra::collada_load_textures(
     tinyxml2::XMLElement* libraryImages, 
     std::filesystem::path path
 ) {
@@ -196,7 +196,7 @@ std::map<std::string, std::shared_ptr<Texture>> pepng::collada_load_textures(
     #endif
 }
 
-std::map<std::string, std::shared_ptr<Texture>> pepng::collada_load_effects(
+std::map<std::string, std::shared_ptr<Texture>> pepng::extra::collada_load_effects(
     tinyxml2::XMLElement* libraryEffects, 
     std::map<std::string, std::shared_ptr<Texture>>& textures
 ) {
@@ -256,7 +256,7 @@ std::map<std::string, std::shared_ptr<Texture>> pepng::collada_load_effects(
     return effects;
 }
 
-std::map<std::string, std::shared_ptr<Material>> pepng::collada_load_materials(
+std::map<std::string, std::shared_ptr<Material>> pepng::extra::collada_load_materials(
     tinyxml2::XMLElement* libraryMaterials, 
     std::map<std::string, std::shared_ptr<Texture>>& effects
 ) {
@@ -294,7 +294,7 @@ std::map<std::string, std::shared_ptr<Material>> pepng::collada_load_materials(
     return materials;
 }
 
-std::map<std::string, std::shared_ptr<Camera>> pepng::collada_load_cameras(
+std::map<std::string, std::shared_ptr<Camera>> pepng::extra::collada_load_cameras(
     tinyxml2::XMLElement* libraryCameras
 ) {
     std::map<std::string, std::shared_ptr<Camera>> cameras;
@@ -336,7 +336,7 @@ std::map<std::string, std::shared_ptr<Camera>> pepng::collada_load_cameras(
     return cameras;
 }
 
-std::map<std::string, std::shared_ptr<Model>> pepng::collada_load_geometries(
+std::map<std::string, std::shared_ptr<Model>> pepng::extra::collada_load_geometries(
     tinyxml2::XMLElement* libraryGeometries
 ) {
     std::map<std::string, std::shared_ptr<Model>> geometries;
@@ -589,12 +589,12 @@ std::shared_ptr<Object> collada_load_object_data(
         std::cout << "Loaded object: " << objectName << std::endl;
     #endif
 
-    object->children = pepng::collada_load_objects(node, geometries, cameras, materials);
+    object->children = pepng::extra::collada_load_objects(node, geometries, cameras, materials);
 
     return object;
 }
 
-std::vector<std::shared_ptr<Object>> pepng::collada_load_objects(
+std::vector<std::shared_ptr<Object>> pepng::extra::collada_load_objects(
     tinyxml2::XMLElement* node, 
     std::map<std::string, std::shared_ptr<Model>>& geometries, 
     std::map<std::string, std::shared_ptr<Camera>>& cameras,
@@ -613,7 +613,7 @@ std::vector<std::shared_ptr<Object>> pepng::collada_load_objects(
     return objects;
 }
 
-std::map<std::string, std::shared_ptr<Object>> pepng::collada_load_scenes(
+std::map<std::string, std::shared_ptr<Object>> pepng::extra::collada_load_scenes(
     tinyxml2::XMLElement* libraryScenes, 
     std::map<std::string, std::shared_ptr<Model>>& geometries, 
     std::map<std::string, std::shared_ptr<Camera>>& cameras,
@@ -644,7 +644,7 @@ std::map<std::string, std::shared_ptr<Object>> pepng::collada_load_scenes(
     return scenes;
 }
 
-void pepng::collada_load(
+void pepng::extra::collada_load(
     std::filesystem::path path, 
     std::function<void(std::shared_ptr<Object>)> function, 
     std::shared_ptr<Transform> transform
