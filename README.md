@@ -4,55 +4,13 @@
 
 ## Overview
 
-| Student ID | First Name | Last Name |
-| ---        | ---        | ---       |
-| 40071895   | Rhys       | Rosenberg |
-| 40075912   | Arman      | Jahanpour |
-| 40129457   | Alexandre  | Lavoie    |
-| 40131102   | Antoine    | Poulin    |
-
-Group 9
-
 PEPNG (pronounced "pep-engine") is a basic OpenGL/C++ game engine created for COMP 371 at Concordia University. The current project both defines and implements the engine - the long term goal is to make a standalone source/editor. The engine currently supports basic rendering, synchronous I/O, and texture/model loading. Additional debug utilities were created to make on the fly modifications of the scene.
 
 ## Getting Started
 
-This build procedure was tested on Windows 10 and NixOS. These steps should work for other Linux distros + OS, but they are not tested.
+This repository is the core library for PEPNG. You must include in another project to get started. You can find a simple implementation in the [template](https://github.com/pepng-CU/pepng-template).
 
-You will need a C++ compiler for your target operating system (`gcc`, `clang`, `msvc`, etc). Additionally, you will need the `cmake` utility. You should be able to build the whole project with dependencies using the basic `cmake` build command:
-
-```bash
-mkdir build
-cd build
-cmake ..
-make
-```
-
-The built project should be found as `/bin/main`.
-
-## Controls
-
-PA1 requires the controls to be clearly identified in the README, therefore the following is a list of controls. These are subject to change, you can refer to the `main.cpp` for the hardcoded list of inputs. The system was designed to allow dynamic mapping of keys (and even multiple keys mapped to the same lable).
-
-```
-Mouse (Camera controls)
-- Scroll: Zooms the camera
-- Middle button hold: 2D pan the camera
-- Right button hold: 2D rotate the camera
-
-Keyboard (World controls)
-- WASD: Relative forward/right move the selected object.
-- QECV: Relative skew the selected object.
-- Arrows: Relative yaw/pitch rotate the selected object.
-- UJ: Relative scale of selected object.
-- 0: Selects the top-level scene/"world" object.
-- 1-9: Selects children of the scene objects in order of instantiation.
-- T: Applies GL_TRIANGLES render to all objects in scene.
-- L: Applies GL_LINES render to all objects in scene.
-- P: Applies GL_POINTS render to all objects in scene.
-- B: Toggle Shadows.
-- X: Toggle Textures.
-```
+There is additional information about PEPNG in the [wiki](https://github.com/pepng-CU/pepng/wiki).
 
 ## Features
 
@@ -137,93 +95,3 @@ Uses a `Transform`, `Model`, and `Material` to display geometry using OpenGL. Th
 #### Camera
 
 A viewport for OpenGL. It may be weird that the camera is not itself an object, but this intentional. This allows other components to affect the camera - allowing to change properties dynamically.
-
-## Sample
-
-Following is a pseudocode of how a simple game can be made in PEPNG:
-
-```c++
-void main() {
-    /**
-     * GLFW
-     */
-    // Insert GLFW window/config initialization here. 
-
-    /**
-     * ImGui
-     */
-    // Insert ImGui initialization here.
-
-    /**
-     * Textures
-     */
-    auto texturePath = pepng::getFolderPath("textures");
-    static auto texture = pepng::makeTexture(texturePath / "texture.jpg");
-
-    /**
-     * Shaders
-     */
-    auto shaderpath = pepng::getFolderPath("shaders");
-    static auto shaderProgram = pepng::makeShaderProgram(
-        pepng::makeShader(shaderpath / "vertex.glsl", GL_VERTEX_SHADER),
-        pepng::makeShader(shaderpath / "fragment.glsl", GL_FRAGMENT_SHADER)
-    );
-
-    /**
-     * Scenes (Objects, Cameras, etc)
-     */
-    auto modelPath = pepng::getFolderPath("models");
-    static std::vector<std::shared_ptr<Object>> world;
-
-    // Will load a whole scene definition (cameras, objects, etc).
-    pepng::load(
-        modelPath / "model.dae", 
-        std::function([](std::shared_ptr<Object> object) {
-            world.push_back(object);
-        }),
-        shaderProgram,
-        pepng::makeTransform()
-    );
-
-    /**
-     * Inputs
-     */
-    auto input = pepng::makeInput(glfwWindow);
-    auto keyboard = pepng::makeDevice(DeviceType::KEYBOARD)
-        ->attachUnit(pepng::makeButton("vertical", GLFW_KEY_W))
-        ->attachUnit(pepng::makeButton("vertical", GLFW_KEY_S, -1.0f))
-        ->attachUnit(pepng::makeButton("horizontal", GLFW_KEY_A))
-        ->attachUnit(pepng::makeButton("horizontal", GLFW_KEY_D, -1.0f));
-    
-    input->attachDevice(keyboard);
-
-    while(gameRunning) {
-        /**
-         * Updating scene
-         */
-        for(auto object : world) {
-            object->update();
-        }
-
-        /**
-         * Rendering scene
-         */
-        for(auto camera : Camera::cameras) {
-            if(camera->isActive) {
-                camera->viewport->render(windowDimension);
-
-                Camera::currentCamera = camera;
-
-                camera->projection->setAspect(windowDimension.x / windowDimension.y);
-
-                for(auto object : world) {
-                    object->render();
-                }
-            }
-        }
-
-        // Insert ImGui Menu.
-        // Insert GLFW Render.
-    }
-}   
-```
