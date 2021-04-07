@@ -20,9 +20,7 @@ target_link_libraries(${PROJECT_NAME} glm tinyxml2 glfw)
 
 if(IMGUI)
     target_link_libraries(${PROJECT_NAME} imgui)
-endif()
 
-if(IMGUI)
     target_compile_definitions(${PROJECT_NAME} PUBLIC IMGUI)
 endif()
 
