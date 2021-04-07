@@ -13,16 +13,6 @@ option(EXTRA_OBJECTS "Includes objects in extra folder." ON)
 option(EXTRA_COMPONENTS "Includes components in extra folder." ON)
 option(IMGUI "Enables IMGUI." ON)
 
-#################
-# Configuration #
-#################
-
-# Build tinyxml as static instead of shared.
-set(BUILD_SHARED_LIBS OFF)
-
-# Prevents tinyxml tests.
-set(BUILD_TESTS OFF)
-
 #########
 # CMake #
 #########
@@ -75,3 +65,13 @@ endif()
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/tinyxml2)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+#################
+# Configuration #
+#################
+
+# Build tinyxml as static instead of shared.
+set(BUILD_SHARED_LIBS OFF)
+
+# Prevents tinyxml tests.
+set(BUILD_TESTS OFF)
