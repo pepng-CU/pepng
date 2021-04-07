@@ -134,7 +134,7 @@ void Renderer::render(std::shared_ptr<WithComponents> parent) {
     this->render(parent, shaderProgram);
 }
 
-#if IMGUI
+#ifdef IMGUI
 void Renderer::imgui() {
     Component::imgui();
 

@@ -43,7 +43,7 @@ std::ostream& operator<<(std::ostream& os, const WithComponents& component) {
     return component.operator_ostream(os);
 }
 
-#if IMGUI
+#ifdef IMGUI
 void WithComponents::imgui() {
     for(auto component : this->get_components()) {
         if(ImGui::CollapsingHeader(component->name().c_str())) {

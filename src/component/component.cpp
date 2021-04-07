@@ -20,7 +20,7 @@ std::ostream& operator<<(std::ostream& os, const Component& component) {
     return component.operator_ostream(os);
 }
 
-#if IMGUI
+#ifdef IMGUI
 void Component::imgui() {
     ImGui::Checkbox("Active", &this->_is_active);
 }

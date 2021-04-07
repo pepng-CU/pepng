@@ -24,7 +24,7 @@ class Light : public Component, public DelayedInit {
         void render(GLuint shaderProgram);
         virtual void init(std::shared_ptr<WithComponents> parent) override;
 
-        #if IMGUI
+        #ifdef IMGUI
         virtual void imgui() override;
         #endif
 

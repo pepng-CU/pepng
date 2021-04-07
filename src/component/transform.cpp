@@ -230,7 +230,7 @@ namespace pepng {
     }
 }
 
-#if IMGUI
+#ifdef IMGUI
 void Transform::imgui() {
     glm::vec3 rotation = glm::degrees(this->euler());
 

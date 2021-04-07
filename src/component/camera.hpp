@@ -13,7 +13,7 @@
  * Viewport used for glViewport (which uses relative position instead of absolute).
  */
 class Viewport
-    #if IMGUI
+    #ifdef IMGUI
     : public WithImGui 
     #endif
 {
@@ -48,7 +48,7 @@ class Viewport
          */
         bool render(glm::vec2 windowDimension);
 
-        #if IMGUI
+        #ifdef IMGUI
         virtual void imgui() override;
         #endif
 
@@ -67,7 +67,7 @@ class Viewport
  * Abstract projection definition.
  */
 class Projection 
-    #if IMGUI
+    #ifdef IMGUI
     : public WithImGui 
     #endif
 {
@@ -112,7 +112,7 @@ class Perspective : public Projection {
 
         virtual glm::mat4 matrix() override;
 
-        #if IMGUI
+        #ifdef IMGUI
         virtual void imgui() override;
         #endif
 
@@ -168,7 +168,7 @@ class Camera : public Component {
 
         virtual void init(std::shared_ptr<WithComponents> parent) override;
 
-        #if IMGUI
+        #ifdef IMGUI
         virtual void imgui() override;
         #endif
         

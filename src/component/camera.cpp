@@ -158,7 +158,7 @@ glm::mat4 Perspective::matrix() {
     return glm::perspective(this->__fovy, this->_aspect, this->__near, this->__far);
 }
 
-#if IMGUI
+#ifdef IMGUI
 void Camera::imgui() {
     Component::imgui();
 

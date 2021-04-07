@@ -49,7 +49,7 @@ class DynamicTexture : public Component {
         
         virtual DynamicTexture* clone_implementation() override;
 
-        #if IMGUI
+        #ifdef IMGUI
         virtual void imgui() override;
         #endif
     private:

@@ -246,7 +246,7 @@ std::map<std::string, std::shared_ptr<Texture>> pepng::collada_load_effects(
             effects[effectId] = pepng::make_texture();
         }
 
-        #if DEBUG_MODEL
+        #ifdef DEBUG_MODEL
             std::cout << "Loaded effect: " << effectId << std::endl;
         #endif
 
@@ -284,7 +284,7 @@ std::map<std::string, std::shared_ptr<Material>> pepng::collada_load_materials(
 
         materials[materialId] = pepng::make_material(OBJECT_SHADER, texture);
 
-        #if DEBUG_MODEL
+        #ifdef DEBUG_MODEL
             std::cout << "Loaded material: " << materialId << std::endl;
         #endif
 
@@ -326,7 +326,7 @@ std::map<std::string, std::shared_ptr<Camera>> pepng::collada_load_cameras(
 
         cameras[cameraId] = cameraComponent;
 
-        #if DEBUG_MODEL
+        #ifdef DEBUG_MODEL
             std::cout << "Loaded camera: " << cameraId << std::endl;
         #endif
 
@@ -447,7 +447,7 @@ std::map<std::string, std::shared_ptr<Model>> pepng::collada_load_geometries(
 
         geometries[geometryId] = model;
 
-        #if DEBUG_MODEL
+        #ifdef DEBUG_MODEL
             std::cout << "Loaded geometry: " << geometryId << std::endl;
         #endif
 
@@ -585,7 +585,7 @@ std::shared_ptr<Object> collada_load_object_data(
         }
     }
 
-    #if DEBUG_MODEL
+    #ifdef DEBUG_MODEL
         std::cout << "Loaded object: " << objectName << std::endl;
     #endif
 
@@ -634,7 +634,7 @@ std::map<std::string, std::shared_ptr<Object>> pepng::collada_load_scenes(
 
         scenes[sceneName] = sceneObj;
 
-        #if DEBUG_MODEL
+        #ifdef DEBUG_MODEL
             std::cout << "Loaded scene: " << sceneName << std::endl;
         #endif
 
@@ -649,7 +649,7 @@ void pepng::collada_load(
     std::function<void(std::shared_ptr<Object>)> function, 
     std::shared_ptr<Transform> transform
 ) {
-    #if DEBUG_MODEL
+    #ifdef DEBUG_MODEL
         std::cout << "Loading COLLADA: " << path << std::endl;
     #endif
 
@@ -696,7 +696,7 @@ void pepng::collada_load(
         function(scene.second);
     }
 
-    #if DEBUG_MODEL
+    #ifdef DEBUG_MODEL
         std::cout << "Loaded COLLADA: " << path << std::endl;
     #endif
 }

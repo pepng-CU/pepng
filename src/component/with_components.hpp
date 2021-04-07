@@ -12,7 +12,7 @@
  * Interface to hold Components.
  */
 class WithComponents : 
-    #if IMGUI
+    #ifdef IMGUI
     public WithImGui, 
     #endif
     public std::enable_shared_from_this<WithComponents> 
@@ -37,7 +37,7 @@ class WithComponents :
 
         friend std::ostream& operator<<(std::ostream& os, const WithComponents& component);
 
-        #if IMGUI
+        #ifdef IMGUI
         virtual void imgui();
         #endif
 

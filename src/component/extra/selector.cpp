@@ -152,7 +152,7 @@ void Selector::update(std::shared_ptr<WithComponents> parent) {
     }
 }
 
-#if IMGUI
+#ifdef IMGUI
 void Selector::imgui() {
     Component::imgui();
 

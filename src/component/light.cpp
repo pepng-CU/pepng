@@ -187,7 +187,7 @@ namespace pepng {
     }
 }
 
-#if IMGUI
+#ifdef IMGUI
 void Light::imgui() {
     Component::imgui();
 

@@ -46,7 +46,7 @@ class Renderer : public Component {
 
         virtual Renderer* clone_implementation() override;
 
-        #if IMGUI
+        #ifdef IMGUI
         virtual void imgui() override;
         #endif
     private:

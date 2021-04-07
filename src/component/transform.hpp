@@ -99,7 +99,7 @@ class Transform : public Component {
 
         friend std::ostream& operator<<(std::ostream& os, const Transform& transform);
 
-        #if IMGUI
+        #ifdef IMGUI
         virtual void imgui() override;
         #endif
     protected:

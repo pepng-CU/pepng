@@ -54,7 +54,7 @@ class Object : public WithComponents, public Cloneable<Object> {
 
         friend std::ostream& operator<<(std::ostream& os, const Object& object);
 
-        #if IMGUI
+        #ifdef IMGUI
         virtual void imgui();
         #endif
 

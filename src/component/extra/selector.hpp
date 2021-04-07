@@ -44,7 +44,7 @@ class Selector : public Component {
 
         virtual void update(std::shared_ptr<WithComponents> parent) override;
 
-        #if IMGUI
+        #ifdef IMGUI
         virtual void imgui() override;
         #endif
 

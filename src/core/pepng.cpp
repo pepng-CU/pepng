@@ -81,7 +81,7 @@ void pepng::instantiate(std::shared_ptr<Object> object) {
     WORLD.push_back(object);
 }
 
-#if IMGUI
+#ifdef IMGUI
 namespace pepng {
     void imgui_init() {
         IMGUI_CHECKVERSION();
@@ -187,7 +187,7 @@ bool pepng::init(const char *title, float width, float height) {
     /**
      * ImGui
      */
-    #if IMGUI
+    #ifdef IMGUI
     pepng::imgui_init();
     #endif
 
@@ -254,7 +254,7 @@ namespace pepng {
         /**
          * ImGui
          */
-        #if IMGUI
+        #ifdef IMGUI
         pepng::imgui_render();
         #endif
 

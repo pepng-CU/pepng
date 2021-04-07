@@ -19,7 +19,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#if IMGUI
+#ifdef IMGUI
     #include <imgui.h>
     #include <imgui_impl_opengl3.h>
     #include <imgui_impl_glfw.h>

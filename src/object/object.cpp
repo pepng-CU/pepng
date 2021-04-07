@@ -111,7 +111,7 @@ namespace pepng {
     }
 }
 
-#if IMGUI
+#ifdef IMGUI
 void Object::imgui() {
     ImGui::LabelText("Name", this->name.c_str());
 

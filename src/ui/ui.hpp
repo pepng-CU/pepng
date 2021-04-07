@@ -3,6 +3,6 @@
 /**
  * The modules for UI. 
  */
-#if IMGUI
+#ifdef IMGUI
 #include "with_imgui.hpp"
 #endif

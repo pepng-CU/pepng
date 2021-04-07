@@ -9,7 +9,7 @@
 #include <glm/glm.hpp>
 #include <GL/glew.h>
 
-#if IMGUI
+#ifdef IMGUI
 #include <imgui.h>
 #include "../ui/with_imgui.hpp"
 #endif
@@ -22,7 +22,7 @@ class WithComponents;
  * Abstract Component definition that is binded to an object/component holder.
  */
 class Component : 
-    #if IMGUI
+    #ifdef IMGUI
     public WithImGui, 
     #endif
     public Cloneable<Component> 
@@ -56,7 +56,7 @@ class Component :
 
         virtual void update(std::shared_ptr<WithComponents> parent) {};
 
-        #if IMGUI
+        #ifdef IMGUI
         virtual void imgui() override;
         #endif
 

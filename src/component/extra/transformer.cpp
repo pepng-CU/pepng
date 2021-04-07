@@ -84,7 +84,7 @@ void Transformer::update(std::shared_ptr<WithComponents> parent) {
     }
 }
 
-#if IMGUI
+#ifdef IMGUI
 void Transformer::imgui() {
     Component::imgui();
     
