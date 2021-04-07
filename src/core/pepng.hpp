@@ -37,9 +37,11 @@ namespace pepng {
     /**
      * Renders and update pepng until program close/failure.
      * 
+     * Calls pepng::do_frame if no update method is provided.
+     * 
      * @return Exit code.
      */
-    int update();
+    int update(std::function<void()> do_frame = nullptr);
 
     /**
      * Sets the object shader.
@@ -50,6 +52,11 @@ namespace pepng {
      * Sets the shadow shader.
      */
     void set_shadow_shader(GLuint shaderProgram);
+
+    /**
+     * Sets the background color. Needs to be called before the update.
+     */
+    void set_background_color(glm::vec3 color);
 
     /**
      * Imports image file and sets missing texture.
@@ -79,6 +86,11 @@ namespace pepng {
     GLFWwindow *window();
 
     /**
+     * Accessor for world.
+     */
+    std::vector<std::shared_ptr<Object>> world();
+
+    /**
      * Accessor for input.
      */
     std::shared_ptr<Input> input();
@@ -92,4 +104,31 @@ namespace pepng {
      * Accessor for windowY.
      */
     float windowY();
+
+    namespace extra {
+        /**
+         * Method called in frame loop for updating objects.
+         */
+        void update_objects();
+
+        /**
+         * Method called in frame loop for rendering shadows.
+         */
+        void render_shadows();
+
+        /**
+         * Method called in frame loop for rendering objects.
+         */
+        void render_objects();
+
+        /**
+         * Method called in frame loop for rendering IMGUI.
+         */
+        void render_imgui();
+
+        /**
+         * Method called in frame loop for updating GLFW.
+         */
+        void update_glfw();
+    }
 }

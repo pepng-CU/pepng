@@ -5,34 +5,24 @@
 #include "../../src/gl/texture.hpp"
 #include "../util/load.hpp"
 
-#ifndef GL_NUM_SHADING_LANGUAGE_VERSIONS
-#define GL_NUM_SHADING_LANGUAGE_VERSIONS 0x82E9
-#endif
-
 namespace pepng {
     static GLFWwindow *WINDOW = 0;
     static std::shared_ptr<Input> INPUT;
     static std::vector<std::shared_ptr<Object>> WORLD;
     static std::shared_ptr<Object> CURRENT_IMGUI_OBJECT;
+    static glm::vec3 BACKGROUND_COLOR;
 
     static float WINDOW_X;
     static float WINDOW_Y;
 
     GLFWwindow *window() { return WINDOW; }
 
-    /**
-     * Accessor for input.
-     */
     std::shared_ptr<Input> input() { return INPUT; }
 
-    /**
-     * Accessor for windowX.
-     */
+    std::vector<std::shared_ptr<Object>> world() { return WORLD; }
+
     float windowX() { return WINDOW_X; }
 
-    /**
-     * Accessor for windowY.
-     */
     float windowY() { return WINDOW_Y; }
 }
 
@@ -40,6 +30,8 @@ void windowSizeCallback(GLFWwindow *window, int width, int height) {
     pepng::WINDOW_X = width;
     pepng::WINDOW_Y = height;
 }
+
+void pepng::set_background_color(glm::vec3 color) { BACKGROUND_COLOR = color; }
 
 void pepng::set_object_shader(GLuint shader_program) {
     glUseProgram(shader_program);
@@ -199,7 +191,6 @@ bool pepng::init(const char *title, float width, float height) {
     /**
      * OpenGL
      */
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
@@ -208,70 +199,81 @@ bool pepng::init(const char *title, float width, float height) {
     return true;
 }
 
-namespace pepng {
-    void do_frame() {
-        /**
-         * Update
-         */
-        for(auto object : WORLD) {
-            object->update();
-        }
-
-        /**
-         * Shadow
-         */
-        for(auto light : Light::lights) {
-            if(light->active()) {
-                light->init_fbo();
-
-                for(auto object : WORLD) {
-                    object->render(light->shader_program);
-                }
-
-                light->update_fbo();
-            }
-        }
-
-        /**
-         * Render
-         */
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-        
-        for(auto camera : Camera::cameras) {
-            if(camera->active()) {
-                camera->viewport->render(glm::vec2(WINDOW_X, WINDOW_Y));
-
-                Camera::current_camera = camera;
-
-                camera->projection->set_aspect(WINDOW_X / WINDOW_Y);
-
-                for(auto object : WORLD) {
-                    object->render();
-                }
-            }
-        }
-
-        /**
-         * ImGui
-         */
-        #ifdef IMGUI
-        pepng::imgui_render();
-        #endif
-
-        /**
-         * GLFW events.
-         */
-        glfwSwapBuffers(pepng::window());
-        glfwPollEvents();
+void pepng::extra::update_objects() {
+    for(auto object : WORLD) {
+        object->update();
     }
 }
 
-int pepng::update() {
+void pepng::extra::render_shadows() {
+    for(auto light : Light::lights) {
+        if(light->active()) {
+            light->init_fbo();
+
+            for(auto object : WORLD) {
+                object->render(light->shader_program);
+            }
+
+            light->update_fbo();
+        }
+    }
+}
+
+void pepng::extra::render_objects() {
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    
+    for(auto camera : Camera::cameras) {
+        if(camera->active()) {
+            camera->viewport->render(glm::vec2(WINDOW_X, WINDOW_Y));
+
+            Camera::current_camera = camera;
+
+            camera->projection->set_aspect(WINDOW_X / WINDOW_Y);
+
+            for(auto object : WORLD) {
+                object->render();
+            }
+        }
+    }
+}
+
+void pepng::extra::render_imgui() {
+    #ifdef IMGUI
+    pepng::imgui_render();
+    #endif
+}
+
+void pepng::extra::update_glfw() {
+    glfwSwapBuffers(pepng::window());
+    glfwPollEvents();
+}
+
+namespace pepng {
+    void do_frame() {
+        pepng::extra::update_objects();
+
+        pepng::extra::render_shadows();
+
+        pepng::extra::render_objects();
+
+        pepng::extra::render_imgui();
+
+        pepng::extra::update_glfw();
+    }
+}
+
+int pepng::update(std::function<void()> do_frame) {
+    glClearColor(BACKGROUND_COLOR.x, BACKGROUND_COLOR.y, BACKGROUND_COLOR.z, 1.0f);
+
+    if (do_frame == nullptr) {
+        do_frame = std::function(pepng::do_frame);
+    }
+
     #ifdef EMSCRIPTEN
-        emscripten_set_main_loop(pepng::do_frame, 0, 1);
+        emscripten_set_main_loop(do_frame, 0, 1);
     #else
         while(!glfwWindowShouldClose(WINDOW)) {
-            pepng::do_frame();
+            do_frame();
         }
     #endif
 
