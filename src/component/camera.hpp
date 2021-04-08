@@ -175,15 +175,15 @@ class Camera : public Component {
     protected:
         virtual Camera* clone_implementation() override;
 
+        Camera(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection);
+        Camera(const Camera& camera);
+
     private:
         /**
          * Pointer to the parent component of the camera.
          * We store this because camera rendering doesn't fall in the update/rendering stage.
          */
         std::shared_ptr<WithComponents> __parent;
-
-        Camera(std::shared_ptr<Viewport> viewport, std::shared_ptr<Projection> projection);
-        Camera(const Camera& camera);
 };
 
 namespace pepng {

@@ -30,9 +30,10 @@ class Material : public Cloneable<Material> {
     protected:
         virtual Material* clone_implementation() override;
 
-    private:
         Material(GLuint shaderProgram, std::shared_ptr<Texture> texture);
         Material(const Material& material);
+
+    private:
 
         /**
          * The OpenGL shaderProgram used.

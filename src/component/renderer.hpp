@@ -49,7 +49,8 @@ class Renderer : public Component {
         #ifdef IMGUI
         virtual void imgui() override;
         #endif
-    private:
+    
+    protected:
         Renderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum render_mode);
         Renderer(const Renderer& renderer);
 };

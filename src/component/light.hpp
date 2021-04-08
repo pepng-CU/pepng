@@ -29,10 +29,10 @@ class Light : public Component, public DelayedInit {
         #endif
 
     protected:
+        virtual Light* clone_implementation() override;
+
         Light(GLuint shaderProgram, glm::vec3 color);
         Light(const Light& light);
-
-        virtual Light* clone_implementation() override;
 
     private:
         GLuint fbo;

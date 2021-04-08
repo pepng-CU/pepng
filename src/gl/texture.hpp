@@ -44,9 +44,10 @@ class Texture : public DelayedInit {
     protected:
         virtual Texture* clone_implementation() override;
 
-    private:
         Texture();
         Texture(const Texture& texutre);
+
+    private:
 
         /**
          * The OpenGL texture index.

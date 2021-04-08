@@ -106,10 +106,10 @@ class Model : public std::enable_shared_from_this<Model>, public DelayedInit, pu
     protected:
         virtual Model* clone_implementation() override;
 
-    private:
         Model();
         Model(const Model& model);
 
+    private:
         // Keeps count of the number of faces.
         unsigned int __count;
 
