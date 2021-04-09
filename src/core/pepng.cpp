@@ -132,6 +132,16 @@ namespace pepng {
         
         ImGui::End();
 
+        ImGui::Begin("Texture");
+
+        static int index = 1;
+
+        ImGui::InputInt("Index", &index);
+
+        ImGui::Image((void*)(intptr_t)index, ImVec2(256, 256));
+
+        ImGui::End();
+
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
