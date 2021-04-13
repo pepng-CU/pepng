@@ -2,13 +2,12 @@
 
 #include "light.hpp"
 
-class PointLight : public Light {
+class Pointlight : public Light {
     public:
-        static std::shared_ptr<PointLight> make_point_light(GLuint shader_program, glm::vec3 color, float intensity);
+        static std::shared_ptr<Pointlight> make_point_light(GLuint shader_program, glm::vec3 color, float intensity);
 
         virtual void delayed_init() override;
         virtual void init_fbo() override;
-        virtual void update_fbo() override;
         virtual void render(GLuint shader_program) override;
 
         glm::mat4 matrix();
@@ -19,10 +18,10 @@ class PointLight : public Light {
         #endif
 
     protected:
-        virtual PointLight* clone_implementation() override;
+        virtual Pointlight* clone_implementation() override;
 
-        PointLight(GLuint shader_program, glm::vec3 color, float intensity);
-        PointLight(const PointLight& light);
+        Pointlight(GLuint shader_program, glm::vec3 color, float intensity);
+        Pointlight(const Pointlight& light);
 
     private:
         int __index;
@@ -30,5 +29,5 @@ class PointLight : public Light {
 };
 
 namespace pepng {
-    std::shared_ptr<PointLight> make_point_light(GLuint shader_program, glm::vec3 color, float intensity);
+    std::shared_ptr<Pointlight> make_point_light(GLuint shader_program, glm::vec3 color, float intensity);
 }

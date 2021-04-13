@@ -18,7 +18,9 @@ Spotlight::Spotlight(GLuint shader_program, float angle, glm::vec3 color, float 
     Light(shader_program, color, intensity),
     __angle(angle),
     __index(__count++)
-{}
+{
+    this->_name = "Spotlight";
+}
 
 Spotlight::Spotlight(const Spotlight& spotlight) : 
     Light(spotlight),
@@ -157,7 +159,7 @@ void Spotlight::render(GLuint shader_program) {
 
     std::stringstream shadow_texture;
 
-    shadow_texture << "u_spotlight_shadow_textures[" << this->__index << "]";
+    shadow_texture << "u_spot_shadows[" << this->__index << "]";
 
     glActiveTexture(GL_TEXTURE1 + this->_texture_index);
     glBindTexture(GL_TEXTURE_2D, this->_texture);

@@ -1,5 +1,8 @@
 #include "light.hpp"
 
+int Light::__count = 0;
+std::vector<std::shared_ptr<Light>> Light::lights;
+
 Light::Light(GLuint shader_program, glm::vec3 color, float intensity) : 
     Component("Light"),
     _shader_program(shader_program),
@@ -8,7 +11,7 @@ Light::Light(GLuint shader_program, glm::vec3 color, float intensity) :
     _intensity(intensity),
     _color(color),
     _shadows(true),
-    _texture_index(__count++)
+    _texture_index(Light::__count++)
 {}
 
 Light::Light(const Light& light) : 
@@ -19,7 +22,7 @@ Light::Light(const Light& light) :
     _intensity(light._intensity),
     _color(light._color),
     _shadows(light._shadows),
-    _texture_index(__count++)
+    _texture_index(Light::__count++)
 {}
 
 void Light::init(std::shared_ptr<WithComponents> parent) {

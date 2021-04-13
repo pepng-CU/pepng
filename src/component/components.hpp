@@ -6,6 +6,8 @@
 #include "camera.hpp"
 
 #include "light.hpp"
+#include "pointlight.hpp"
+#include "spotlight.hpp"
 #include "renderer.hpp"
 #include "transform.hpp"
 #include "with_components.hpp"

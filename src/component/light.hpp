@@ -42,5 +42,5 @@ class Light : public Component, public DelayedInit {
         glm::vec3 _color;
     
     private:
-        int __count;
+        static int __count;
 };

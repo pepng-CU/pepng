@@ -42,6 +42,7 @@ class Renderer : public Component {
         static std::shared_ptr<Renderer> make_renderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum render_mode);
 
         void render(std::shared_ptr<WithComponents> object, GLuint shaderProgram);
+        virtual void init(std::shared_ptr<WithComponents> object) override;
         virtual void render(std::shared_ptr<WithComponents> object) override;
 
         virtual Renderer* clone_implementation() override;
@@ -53,6 +54,9 @@ class Renderer : public Component {
     protected:
         Renderer(std::shared_ptr<Model> model, std::shared_ptr<Material> material, GLenum render_mode);
         Renderer(const Renderer& renderer);
+
+    private:
+        std::shared_ptr<Transform> __transform;
 };
 
 namespace pepng {

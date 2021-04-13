@@ -4,35 +4,35 @@
  * STATICS
  */
 
-int PointLight::__count = 0;
+int Pointlight::__count = 0;
 
-PointLight::PointLight(GLuint shader_program, glm::vec3 color, float intensity) : 
+Pointlight::Pointlight(GLuint shader_program, glm::vec3 color, float intensity) : 
     Light(shader_program, color, intensity)
 {
-    this->_name = "PointLight";
+    this->_name = "Pointlight";
 }
 
-PointLight::PointLight(const PointLight& light) : 
+Pointlight::Pointlight(const Pointlight& light) : 
     Light(light)
 {}
 
-PointLight* PointLight::clone_implementation() {
-    return new PointLight(*this);
+Pointlight* Pointlight::clone_implementation() {
+    return new Pointlight(*this);
 }
 
-std::shared_ptr<PointLight> PointLight::make_point_light(GLuint shader_program, glm::vec3 color, float intensity) {
-    std::shared_ptr<PointLight> light(new PointLight(shader_program, color, intensity));
+std::shared_ptr<Pointlight> Pointlight::make_point_light(GLuint shader_program, glm::vec3 color, float intensity) {
+    std::shared_ptr<Pointlight> light(new Pointlight(shader_program, color, intensity));
 
     Light::lights.push_back(light);
 
     return light;
 }
 
-std::shared_ptr<PointLight> pepng::make_point_light(GLuint shader_program, glm::vec3 color, float intensity) {
-    return PointLight::make_point_light(shader_program, color, intensity);
+std::shared_ptr<Pointlight> pepng::make_point_light(GLuint shader_program, glm::vec3 color, float intensity) {
+    return Pointlight::make_point_light(shader_program, color, intensity);
 }
 
-void PointLight::delayed_init() {
+void Pointlight::delayed_init() {
     if(this->_is_init) return;
     
     this->_is_init = true;
@@ -87,7 +87,7 @@ void PointLight::delayed_init() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void PointLight::init_fbo() {
+void Pointlight::init_fbo() {
     this->delayed_init();
 
     glViewport(0, 0, 1024, 1024);
@@ -134,15 +134,15 @@ void PointLight::init_fbo() {
     );
 }
 
-glm::mat4 PointLight::projection() {
+glm::mat4 Pointlight::projection() {
     return glm::perspective(glm::radians(90.0f), 1.0f, this->_near, this->_far); 
 }
 
-glm::mat4 PointLight::matrix() {
+glm::mat4 Pointlight::matrix() {
     return this->projection() * this->_transform->view_matrix();
 }
 
-void PointLight::render(GLuint shader_program) {
+void Pointlight::render(GLuint shader_program) {
     std::stringstream ss;
 
     ss << "u_pointlights[" << this->__index << "]";
@@ -156,16 +156,17 @@ void PointLight::render(GLuint shader_program) {
 
     if(!this->_is_active) return;
 
-    std::stringstream shadow_texture;
-
-    shadow_texture << "u_point_shadow_textures[" << this->__index << "]";
-
     glActiveTexture(GL_TEXTURE1 + this->_texture_index);
     glBindTexture(GL_TEXTURE_CUBE_MAP, this->_texture);
 
-    auto shadow_texture_location = glGetUniformLocation(shader_program, shadow_texture.str().c_str());
+    std::stringstream shadow_texture;
 
-    glUniform1i(shadow_texture_location, 1 + this->_texture_index);
+    shadow_texture << "u_point_shadows[" << this->__index << "]";
+
+    glUniform1i(
+        glGetUniformLocation(shader_program, shadow_texture.str().c_str()), 
+        1 + this->_texture_index
+    );
 
     auto light_position = this->_transform->position;
     auto light_direction = -this->_transform->forward();
@@ -197,3 +198,9 @@ void PointLight::render(GLuint shader_program) {
         this->_shadows
     );
 }
+
+#ifdef IMGUI
+void Pointlight::imgui() {
+    Light::imgui();
+}
+#endif

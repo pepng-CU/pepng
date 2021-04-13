@@ -36,6 +36,20 @@ Renderer* Renderer::clone_implementation() {
     return new Renderer(*this);
 }
 
+void Renderer::init(std::shared_ptr<WithComponents> parent) {
+    this->__transform = parent->get_component<Transform>();
+
+    if (this->__transform == nullptr) {
+        std::stringstream ss;
+
+        ss << *parent << " has no transform." << std::endl;
+
+        std::cout << ss.str() << std::endl;
+
+        throw std::runtime_error(ss.str());
+    }
+}
+
 void Renderer::render(std::shared_ptr<WithComponents> parent, GLuint shaderProgram) {
     if(!this->model->is_init()) this->model->delayed_init();
 
@@ -47,24 +61,12 @@ void Renderer::render(std::shared_ptr<WithComponents> parent, GLuint shaderProgr
 
     glBindTexture(GL_TEXTURE_2D, this->material->texture->gl_index());
 
-    std::shared_ptr<Transform> transform = parent->get_component<Transform>();
-
-    if (transform == nullptr) {
-        std::stringstream ss;
-
-        ss << *parent << " has no transform." << std::endl;
-
-        std::cout << ss.str() << std::endl;
-
-        throw std::runtime_error(ss.str());
-    }
-    
     GLuint uWorld = glGetUniformLocation(shaderProgram, "u_world");
 
     if (uWorld >= 0) {
-        auto worldMatrix = transform->parent_matrix
+        auto worldMatrix = this->__transform->parent_matrix
             * glm::translate(glm::mat4(1.0f), this->model->offset())
-            * transform->world_matrix()
+            * this->__transform->world_matrix()
             * glm::translate(glm::mat4(1.0f), -this->model->offset());
 
         glUniformMatrix4fv(
