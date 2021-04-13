@@ -31,7 +31,7 @@ class Component :
         /**
          * Accessor for the component name.
          */
-        inline std::string name() { return this->__name; }
+        inline std::string name() { return this->_name; }
 
         /**
          * Accessor for component active state.
@@ -70,11 +70,10 @@ class Component :
          */
         bool _is_active;
 
-    private:
         /**
          * Name of the component (the child class will define this in the constructor).
          */
-        std::string __name;
+        std::string _name;
 };
 
 std::ostream& operator<<(std::ostream& os, const Component& component);

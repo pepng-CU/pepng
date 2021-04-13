@@ -124,11 +124,8 @@ void Renderer::render(std::shared_ptr<WithComponents> parent) {
 
     Camera::current_camera->render(shaderProgram);
 
-    /**
-     * TODO: This is a hacky way to select the current light.
-     */
-    if(Light::lights.size() > 0) {
-        Light::lights.at(0)->render(shaderProgram);
+    for(auto light : Light::lights) {
+        light->render(shaderProgram);
     }
 
     this->render(parent, shaderProgram);

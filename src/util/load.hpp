@@ -25,6 +25,8 @@
 #include "utils.hpp"
 #include "../component/camera.hpp"
 #include "../gl/model.hpp"
+#include "../component/pointlight.hpp"
+#include "../component/spotlight.hpp"
 #include "../component/transform.hpp"
 #include "../object/object.hpp"
 #include "../object/camera.hpp"

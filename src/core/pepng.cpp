@@ -221,7 +221,7 @@ void pepng::extra::render_shadows() {
             light->init_fbo();
 
             for(auto object : WORLD) {
-                object->render(light->shader_program);
+                object->render(light->shader_program());
             }
 
             light->update_fbo();

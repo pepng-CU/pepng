@@ -1,17 +1,17 @@
 #include "component.hpp"
 
 Component::Component(std::string name) : 
-    __name(name),
+    _name(name),
     _is_active(true)
 {}
 
 Component::Component(const Component& component) : 
-    __name(component.__name),
+    _name(component._name),
     _is_active(component._is_active)
 {}
 
 std::ostream& Component::operator_ostream(std::ostream& os) const {
-    os << "Component { " << this->__name << " }";
+    os << "Component { " << this->_name << " }";
 
     return os;
 }

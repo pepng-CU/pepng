@@ -12,16 +12,14 @@
 
 class Light : public Component, public DelayedInit {
     public:
-        GLuint shader_program;
-
-        static std::shared_ptr<Light> make_light(GLuint shaderProgram, glm::vec3 color);
         static std::vector<std::shared_ptr<Light>> lights;
-        virtual void delayed_init() override;
-        void init_fbo();
-        void update_fbo();
-        glm::mat4 matrix();
-        glm::mat4 projection();
-        void render(GLuint shaderProgram);
+
+        virtual void init_fbo() = 0;
+        virtual void update_fbo();
+        virtual void render(GLuint shaderProgram) = 0;
+
+        inline GLuint shader_program() { return _shader_program; }
+
         virtual void init(std::shared_ptr<WithComponents> parent) override;
 
         #ifdef IMGUI
@@ -29,22 +27,20 @@ class Light : public Component, public DelayedInit {
         #endif
 
     protected:
-        virtual Light* clone_implementation() override;
-
-        Light(GLuint shaderProgram, glm::vec3 color);
+        Light(GLuint shader_program, glm::vec3 color, float intensity);
         Light(const Light& light);
 
+        std::shared_ptr<Transform> _transform;
+        GLuint _texture;
+        int _texture_index;
+        GLuint _fbo;
+        GLuint _shader_program;
+        bool _shadows;
+        float _near;
+        float _far;
+        float _intensity;
+        glm::vec3 _color;
+    
     private:
-        GLuint fbo;
-        GLuint texture;
-        float near;
-        float far;
-        float texture_dimension;
-        float intensity;
-        glm::vec3 color;
-        std::shared_ptr<Transform> transform;
+        int __count;
 };
-
-namespace pepng {
-    std::shared_ptr<Light> make_light(GLuint shaderProgram, glm::vec3 color);
-}

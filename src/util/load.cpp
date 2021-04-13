@@ -558,7 +558,7 @@ std::shared_ptr<Object> collada_load_object_data(
 
     if(auto iLight = node->FirstChildElement("instance_light")) {
         // TODO: Import actual light values instead of default.
-        object->attach_component(pepng::make_light(pepng::SHADOW_SHADER, glm::vec3(1.0f)));
+        object->attach_component(pepng::make_point_light(pepng::SHADOW_SHADER, glm::vec3(1.0f), 1000.0f));
     }
 
     if(auto iGeometry = node->FirstChildElement("instance_geometry")) {
