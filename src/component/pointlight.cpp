@@ -79,11 +79,13 @@ void Pointlight::delayed_init() {
     glBindFramebuffer(GL_FRAMEBUFFER, this->_fbo);
 
     #ifdef EMSCRIPTEN
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, this->_texture, 0);
+    for(int i = 0; i < 6; i++) {
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, this->_texture, 0);
+    }
     #else
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->_texture, 0);
     #endif
-
+    
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -156,7 +158,7 @@ void Pointlight::render(GLuint shader_program) {
 
     if(!this->_is_active) return;
 
-    glActiveTexture(GL_TEXTURE1 + this->_texture_index);
+    glActiveTexture(GL_TEXTURE2 + this->_texture_index);
     glBindTexture(GL_TEXTURE_CUBE_MAP, this->_texture);
 
     std::stringstream shadow_texture;
@@ -165,7 +167,7 @@ void Pointlight::render(GLuint shader_program) {
 
     glUniform1i(
         glGetUniformLocation(shader_program, shadow_texture.str().c_str()), 
-        1 + this->_texture_index
+        2 + this->_texture_index
     );
 
     auto light_position = this->_transform->position;

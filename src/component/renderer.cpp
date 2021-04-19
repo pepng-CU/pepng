@@ -57,9 +57,14 @@ void Renderer::render(std::shared_ptr<WithComponents> parent, GLuint shaderProgr
 
     glUseProgram(shaderProgram);
     
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE1);
 
     glBindTexture(GL_TEXTURE_2D, this->material->texture->gl_index());
+
+    glUniform1i(
+        glGetUniformLocation(shaderProgram, "u_texture"), 
+        1
+    );
 
     GLuint uWorld = glGetUniformLocation(shaderProgram, "u_world");
 
